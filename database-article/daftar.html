@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StejProject Tutorials and activity</title>
+  <link rel="shortcut icon" href="https://stejproject.github.io/favicon-128.ico">
+  <meta name="robots" content="follow, index"/>
+  <meta name="description" content="StejProject Tutorials and activity. Programming, How-To? and more content."/>
+<style>
+.searchweb {
+  text-align: center;
+  position: relative;
+}
+#myInput {
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 0px 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 30px;
+  text-align: center;
+  border-radius: 0.3em;
+  caret-color: red;
+}
+
+#myUL {
+  list-style-type: none;
+  padding: 0px 0px 10rem 0px;
+}
+
+#myUL li .judpos {
+  border: 1px solid transparent;
+  margin-top: 15px; /* Prevent double borders */
+  background-color: transparent;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px;
+  border-radius: 0.375rem;
+  font-weight: bold;
+  display: grid;
+}
+
+#myUL li .judpos:hover:not(.header) {
+  background-color: yellow;
+  color: black;
+}
+  
+.vid-0 {
+  max-width: 550px; box-shadow: 6px 6px 10px hsl(206.5, 0%, 75%); margin: 2rem auto; border-radius: 0.375rem;; position: static;
+}
+.vid-1 {
+  position: relative; padding-bottom: 56.15%; height: 0; overflow: hidden; border-radius: 0.375rem;;
+}
+audio, canvas, embed, iframe, img, object, svg, video {
+    vertical-align: middle;
+}
+.w-full {
+    width: 100%;
+}
+footer {
+    background: #dcdcdc;
+    margin-top: 40px;
+    padding: 25px;
+    border-radius: 0rem 0rem 0.375rem 0.375rem;
+    display: block;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    border: 1px solid #bbb;
+}
+</style>
+  </head>
+<body>
+<div class="searchweb">
+  <h3 style="display: block; background-color: #3e0d78; color: yellow; padding: 12px; border-radius: 0.375rem 0.375rem 0px 0px; font-family: Arial; font-weight: bold; top: 0;">Daftar Pencarian</h3>
+
+<ul id="myUL">
+<li>
+  <a class="judpos" href="https://stejproject.github.io/posts/youtube-post.html">Youtube Project dan Tutorial</a>
+</li>
+<li>
+  <a class="judpos" href="https://stejproject.github.io/posts/link-post.html">Daftar Link</a>
+</li>
+<li>
+ <a class="judpos" href="https://stejproject.github.io/posts/postingan-post.html">Postingan</a>
+</li>
+</ul>
+
+<script>
+function myFunction() {
+    var input, filter, ul, li, a, i, txtValue;
+    input = document.getElementById("myInput");
+    filter = input.value.toUpperCase();
+    ul = document.getElementById("myUL");
+    li = ul.getElementsByTagName("li");
+    for (i = 0; i < li.length; i++) {
+        a = li[i].getElementsByTagName("a")[0];
+        txtValue = a.textContent || a.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+    }
+}
+</script>
+</div>
+<footer>
+  <input type="text" id="myInput" onkeyup="myFunction()"  title="Type in a name" placeholder="Search List Activity and Projects">
+
+<div style="margin-bottom: 20px; float: left;">
+<button onclick="location.reload();" style="display: flex; align-items: center; background-color: transparent; border: transparent; margin-left: -6px;">RELOAD PAGE</button>
+</div>
+  
+<div style="float: right;margin: -32px auto;"><p>&copy; 2022.</p>
+  <a rel="noopener noreferrer" href="https://stejproject.github.io/" target="_top" style="display: contents; color: black;">Stej Project</a>
+</div>
+</footer>
+</body>
+</html>
+

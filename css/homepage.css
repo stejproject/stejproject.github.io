@@ -1,0 +1,255 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	height: 100%;
+	background: #fff;
+  font-family: Arial;
+}
+
+@media only screen and (max-width: 600px) {
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	height: 100%;
+	background: #fff;
+  font-family: Arial;
+}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  background: #3F0073;
+  position:-webkit-sticky;
+  position:sticky;
+  top: 0px;
+  float: initial;
+  width: 100%;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+  color: #FFD000;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #f0f0f0;
+  color: #000;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ffffff;
+  color: #000;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+}
+
+header {
+	background: #3F0073;
+	/* fallback for old browsers */
+	background: -webkit-linear-gradient(to top , #3F0073, #3A6CA0);
+	/* Chrome 10-25, Safari 5.1-6 */
+	background: linear-gradient(to top , #3F0073, #3A6CA0);
+	/*W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+	text-align: center;
+}
+	
+.pencari {
+    margin: 10px 0;
+}
+
+#myUL {
+  list-style-type: none;
+  padding: 0px;
+  margin-bottom: 10px;
+  border-top: 1px solid #bbb;
+  height: 5rem;
+  overflow-y: scroll;
+}
+	
+}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  background: #3F0073;
+  position:-webkit-sticky;
+  position: sticky;
+  top: 0px;
+  display: flex;
+  justify-content: center;
+ align-items: center;
+  width: 100%;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+  color: #FFD000;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #f0f0f0;
+  color: #000;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ffffff;
+  color: #000;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+}
+
+header {
+	background: #3F0073;
+	/* fallback for old browsers */
+	background: -webkit-linear-gradient(to top , #3F0073, #3A6CA0);
+	/* Chrome 10-25, Safari 5.1-6 */
+	background: linear-gradient(to top , #3F0073, #3A6CA0);
+	/*W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+	padding: 20px;
+	height: 45px;
+	display: grid;
+	justify-content: center;
+}
+
+.judul {
+	height: 8px;
+	color: #ffffff;
+	padding-top: 0px;
+}
+
+.about {
+	margin: 10px 0;
+	width: 100%;
+}
+
+.project {
+	background-color: #112A46;
+	color: white;
+	width: 50%;
+}
+
+.information {
+	background-color: #FFE042;
+	color: #000B6F;
+	width: 50%;
+}
+
+.home {
+  padding: 10px;  
+  display: block;
+}
+
+article {
+	width: 100%;
+	display: inline-block;
+	margin-bottom: 100px;
+}
+
+.halaman {
+	display: inline-block; 
+	height: auto; 
+	width: 100%; 
+	margin-bottom: 100px;
+}
+
+footer {
+    text-align: center;
+    background: #dcdcdc;
+    padding: 25px;
+    border-radius: 0rem 0rem 0.375rem 0.375rem;
+    display: block;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    border: 1px solid #bbb;
+}
+
+.searchweb {
+  text-align: center;
+  justify-items: center;
+  display: grid;
+}
+
+#myInput {
+  font-size: 16px;
+  padding: 10px 36px;
+  border: 1px solid #bbb;
+  margin-bottom: 8px;
+  text-align: center;
+  border-radius: 2.375rem;
+  caret-color: black;
+  box-shadow: 0px 0px 10px hsl(0deg 0% 75%);
+}
+
+#myUL {
+  list-style-type: none;
+  padding: 0px;
+  margin-bottom: 10px;
+  height: 40vh;
+  overflow-y: scroll;
+  overflow-anchor: none;
+  text-decoration: none;
+}
+
+#myUL li .judpos {
+  border: 1px solid #bbb;
+  margin: 10px; /* Prevent double borders */
+  background-color: transparent;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px;
+  border-radius: 0.375rem;
+  font-weight: bold;
+  display: grid;
+}
+
+#myUL li .judpos:hover:not(.header) {
+  background-color: yellow;
+  color: black;
+  box-shadow: 0px 0px 10px hsl(0deg 0% 75%);
+}
+	
+audio, canvas, embed, iframe, img, object, svg, video {
+    vertical-align: middle;
+}
+.w-full {
+    width: 100%;
+}
+.pencari {
+    margin: 10px 0;
+}
