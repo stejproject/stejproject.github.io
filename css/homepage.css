@@ -39,7 +39,6 @@ body {
   border: none;
   outline: none;
   cursor: pointer;
-  padding: 14px 16px;
   transition: 0.3s;
   font-size: 17px;
   color: #FFD000;
@@ -108,7 +107,7 @@ header {
   border: none;
   outline: none;
   cursor: pointer;
-  padding: 14px 16px;
+  padding: 12px 14px;
   transition: 0.3s;
   font-size: 17px;
   color: #FFD000;
