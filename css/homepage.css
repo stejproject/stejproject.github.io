@@ -165,8 +165,9 @@ header {
 
 .information {
 	background-color: #FFE042;
-	color: #000B6F;
+	color: #112A46;
 	width: 50%;
+	border: 1px solid #FFE042;
 }
 
 .home {
