@@ -160,6 +160,7 @@ header {
 	background-color: #112A46;
 	color: white;
 	width: 50%;
+	border: 1px solid #112A46;
 }
 
 .information {
