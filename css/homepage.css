@@ -227,6 +227,10 @@ footer {
   text-decoration: none;
 }
 
+#myUL::-webkit-scrollbar {
+  width: 0px;
+}
+
 #myUL li .judpos {
   border: 1px solid #bbb;
   margin: 10px; /* Prevent double borders */
