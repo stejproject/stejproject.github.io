@@ -225,16 +225,21 @@ footer {
   overflow-y: scroll;
   overflow-anchor: none;
   text-decoration: none;
-  -ms-overflow-style: none;  /* IE dan Edge */
-  scrollbar-width: none;  /* Firefox */
 }
 
-* Sembunyikan scrollbar dari Chrome, Safari dan Opera */
 #myUL::-webkit-scrollbar {
-  display: none;
+	width: 6px;
+	background-color: #F5F5F5;
 }
 
-/* Sembunyikan scrollbar untuk IE, Edge dan Firefox sudah ditambah di #myUL*/
+#myUL::-webkit-scrollbar-thumb {
+	background-color: #000000;
+}
+
+#myUL::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	background-color: #F5F5F5;
+}
 
 #myUL li .judpos {
   border: 1px solid #bbb;
