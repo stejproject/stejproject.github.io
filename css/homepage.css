@@ -101,7 +101,7 @@ header {
 }
 
 /* Style the buttons inside the tab */
-.tab button:focus {
+.tab button {
   background-color: inherit;
   float: left;
   border: none;
@@ -206,7 +206,7 @@ footer {
   display: grid;
 }
 
-#myInput {
+#myInput:focus {
   font-size: 16px;
   padding: 10px 36px;
   border: 1px solid #bbb;
