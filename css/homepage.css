@@ -227,20 +227,19 @@ footer {
   text-decoration: none;
 }
 
-#myUL::-webkit-scrollbar-track
-{
-	background-color:transparent;
+.hidden-scrollbar {
+  background-color:black;
+  border:2px solid #666;
+  color:white;  
+  overflow:hidden;
+  text-align:justify;    
 }
 
-#myUL::-webkit-scrollbar
-{
-	width: 0px;
-	background-color: transparent;
-}
-
-#myUL::-webkit-scrollbar-thumb
-{
-	background-color: transparent;
+.hidden-scrollbar .inner {
+  height:200px;
+  overflow:auto;
+  margin:15px -300px 15px 15px;
+  padding-right:300px;
 }
 
 #myUL li .judpos {
