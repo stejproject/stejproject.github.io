@@ -225,20 +225,21 @@ footer {
   overflow-y: scroll;
   overflow-anchor: none;
   text-decoration: none;
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
 }
 
 #myUL::-webkit-scrollbar {
-	width: 6px;
-	background-color: #F5F5F5;
+	width: 0px;
+	background-color: transparent;
 }
 
 #myUL::-webkit-scrollbar-thumb {
-	background-color: #000000;
+	background-color: transparent;
 }
 
 #myUL::-webkit-scrollbar-track {
-	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-	background-color: #F5F5F5;
+	background-color: transparent;
 }
 
 #myUL li .judpos {
