@@ -225,22 +225,16 @@ footer {
   overflow-y: scroll;
   overflow-anchor: none;
   text-decoration: none;
+  -ms-overflow-style: none;  /* IE dan Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
-.hidden-scrollbar {
-  background-color:black;
-  border:2px solid #666;
-  color:white;  
-  overflow:hidden;
-  text-align:justify;    
+* Sembunyikan scrollbar dari Chrome, Safari dan Opera */
+#myUL::-webkit-scrollbar {
+  display: none;
 }
 
-.hidden-scrollbar .inner {
-  height:200px;
-  overflow:auto;
-  margin:15px -300px 15px 15px;
-  padding-right:300px;
-}
+/* Sembunyikan scrollbar untuk IE, Edge dan Firefox sudah ditambah di #myUL*/
 
 #myUL li .judpos {
   border: 1px solid #bbb;
