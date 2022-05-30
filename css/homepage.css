@@ -206,6 +206,16 @@ footer {
   display: grid;
 }
 
+#myInput {
+  font-size: 16px;
+  padding: 10px 36px;
+  border: 1px solid #bbb;
+  margin-bottom: 8px;
+  text-align: center;
+  border-radius: 2.375rem;
+  caret-color: black;
+}
+
 #myInput:focus {
   font-size: 16px;
   padding: 10px 36px;
