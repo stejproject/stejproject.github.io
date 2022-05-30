@@ -79,21 +79,7 @@
   </table>
 </div>
 
-<script async>
-function openOPT(evt, cityName) {
-  var i, tabcontent, tablinks;
-  tabcontent = document.getElementsByClassName("tabcontent");
-  for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = "none";
-  }
-  tablinks = document.getElementsByClassName("tablinks");
-  for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(" active", "");
-  }
-  document.getElementById(cityName).style.display = "block";
-  evt.currentTarget.className += " active";
-}
-</script>
+<script src="js/navbar" async></script>
 </article> 
 	<footer>
 		<p>&copy; <span id="yearcopy"></span> <a rel="copyright" href="https://stejproject.github.io/">Stej Project</a>.</p>
@@ -102,7 +88,39 @@ function openOPT(evt, cityName) {
                 document.getElementById("yearcopy").innerHTML = d.getFullYear();
                 </script>
 	</footer>
-	<script src="js/anti.js" async></script>
-	<script src="js/anti1.js" async></script>
+<script async>
+document.onkeydown = function(e) {
+if(event.keyCode == 123) {
+return false;
+}
+if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)){
+return false;
+}
+if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)){
+return false;
+}
+if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)){
+return false;
+}
+}
+</script>
+<script async>
+var isNS = (navigator.appName == &quot;Netscape&quot;) ? 1 : 0;
+if(navigator.appName == &quot;Netscape&quot;) document.captureEvents(Event.MOUSEDOWN||Event.MOUSEUP);
+function mischandler(){
+return false;
+}
+function mousehandler(e){
+var myevent = (isNS) ? e : event;
+var eventbutton = (isNS) ? myevent.which : myevent.button;
+(eventbutton==2)||(eventbutton==3)) {
+ alert("copyThieft");
+ return false;
+ }
+}
+document.oncontextmenu = mischandler;
+document.onmousedown = mousehandler;
+document.onmouseup = mousehandler;
+</script>
 </body>
 </html>
