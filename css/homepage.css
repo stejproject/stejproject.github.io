@@ -101,7 +101,7 @@ header {
 }
 
 /* Style the buttons inside the tab */
-.tab button {
+.tab button:focus {
   background-color: inherit;
   float: left;
   border: none;
