@@ -188,13 +188,11 @@ article {
 footer {
     text-align: center;
     padding: 25px;
-    border-radius: 0rem 0rem 0.375rem 0.375rem;
     display: block;
     position: fixed;
     bottom: 0;
     right: 0;
     left: 0;
-    border: 1px solid #bbb;
 }
 
 .searchweb {
