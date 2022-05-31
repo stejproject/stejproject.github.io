@@ -137,7 +137,7 @@ header {
 	background: linear-gradient(to top , #3F0073, #3A6CA0);
 	/*W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 	padding: 20px;
-	height: 45px;
+	height: 20px;
 	display: grid;
 	justify-content: center;
 }
