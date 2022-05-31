@@ -5,8 +5,7 @@
 
 body {
 	height: 100%;
-	background: #fff;
-  font-family: Arial;
+        font-family: Arial;
 }
 
 @media only screen and (max-width: 600px) {
@@ -17,8 +16,7 @@ body {
 
 body {
 	height: 100%;
-	background: #fff;
-  font-family: Arial;
+        font-family: Arial;
 }
 
 /* Style the tab */
@@ -189,7 +187,6 @@ article {
 
 footer {
     text-align: center;
-    background: #dcdcdc;
     padding: 25px;
     border-radius: 0rem 0rem 0.375rem 0.375rem;
     display: block;
