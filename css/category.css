@@ -213,7 +213,7 @@ body {
   background: #e4eef8;
   border-bottom: 1px solid;
   padding-top: 1px;
-  position: fixed;
+  position: absolute;
   margin: -45px 0 0 25%;
   -ms-overflow-style: none; 
   scrollbar-width: none; 
