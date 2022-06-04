@@ -11,18 +11,177 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine">
 <link rel="shortcut icon" href="https://stejproject.github.io/favicon-128.ico">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
+  <style>
+content {
+  padding: 25px;
+  background-color: white;
+  color: black;
+  font-size: 25px;
+}
+
+.darkmode{
+  background-color: #202020;
+     background-size: cover;
+     background-attachment: scroll;
+     background-repeat: repeat;
+  color: #fff;
+}
+
+.darkmode .dropdown-content{
+  background-color: #202020;
+     background-size: cover;
+     background-attachment: scroll;
+     background-repeat: repeat;
+  color: #fff;
+}
+
+.darkmode a{
+  background-color: #202020;
+     background-size: cover;
+     background-attachment: scroll;
+     background-repeat: repeat;
+  color: #fff;
+}
+
+.darkmode a:hover{
+  background-color: #fff;
+     background-size: cover;
+     background-attachment: scroll;
+     background-repeat: repeat;
+  color: #202020;
+}
+
+.darkmode .row{
+  background-color: #034fa7;
+     background-size: cover;
+     background-attachment: scroll;
+     background-repeat: repeat;
+  color: #fff;
+}
+
+.darkmode h1 h2 h3 h4 h5 h6 p{
+  color: #fff;
+}
+
+.darkmode .left{
+  background-color: #202020;
+     background-size: cover;
+     background-attachment: scroll;
+     background-repeat: repeat;
+  color: #fff;
+}
+
+.darkmode .icon-more{
+  background-color: transparent;
+  background-size: cover;
+  background-attachment: scroll;
+  background-repeat: repeat;
+  color: yellow;
+}
+
+.darkmode .icon-more:hover, .icon-more:active {
+    background-color: #3e0d78;
+}
+
+</style>
+<style>
+* {box-sizing: border-box}
+body {font-family: Verdana, sans-serif; margin:0}
+.mySlides {display: none}
+img {vertical-align: middle;}
+
+/* Slideshow container */
+.slideshow-container {
+  max-width: 500px;
+  margin: auto;
+  width: 50%;
+  height: 50%;
+}
+
+.slideshow-container:hover {
+  max-width: 500px;
+  margin: auto;
+  opacity: 0.5;
+}
+
+/* Next & previous buttons */
+.prev, .next {
+  cursor: pointer;
+  position: fixed;
+  top: 50%;
+  width: auto;
+  padding: 10px;
+  margin-top: -22px;
+  color: goldenrod;
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.5s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+}
+
+/* Position the "next button" to the right */
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* Position the "pref button" to the left */
+.prev {
+  left: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover, .next:hover {
+  background-color: rgba(0,0,0,0.8);
+}
+
+/* The dots/bullets/indicators */
+.dot {
+  cursor: pointer;
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+
+.active, .dot:hover {
+  background-color: #717171;
+}
+
+/* Fading animation */
+.fade {
+  animation-name: fade;
+  animation-duration: 0.5s;
+}
+
+@keyframes fade {
+  from {opacity: .4} 
+  to {opacity: 1}
+}
+
+/* On smaller screens, decrease text size */
+@media only screen and (max-width: 300px) {
+  .prev, .next,.text {font-size: 11px}
+}
+</style>
+   
 </head>
 <body>
 <div class="refresh" onclick="location.reload();" title="Refresh"></div>
 <div class="row">
-    <button onclick="myFunction()" class="dropbtn" title="Start">  <picture><source srcset="/favicon-128.png" type="image/png"><img src="/favicon-128.ico" loading=lazy alt="Stej-Logo" loading=lazy style="height: 25px; width:25px; margin: 0 43%;" loading=lazy></picture> </button>
+    <button onclick="myFunction()" class="dropbtn" title="Start">  <picture><source srcset="/favicon-128.png" type="image/png"><img src="/favicon-128.ico" alt="Stej-Logo" loading=lazy style="height: 25px; width:25px;"></picture> </button>
       <div id="myDropdown" class="dropdown-content">
         <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()" autocomplete="off">
         <a href="https://stejproject.github.io/posts/youtube/youtube-post.html" target="qwd" rel="noopener noreferrer">Tutorial, tips dan trik Youtube</a>
         <a href="https://stejproject.github.io/posts/category/link-post.html" target="qwd" rel="noopener noreferrer">Link Berguna</a>
         <a href="https://stejproject.github.io/posts/category/wiki-post.html" target="qwd" rel="noopener noreferrer">My Ensi</a>
         <a href="https://icons.getbootstrap.com/" target="_blank" rel="noopener noreferrer">Bootstrap Icon</a>
-        
       </div>
     </div>
 </div>
@@ -134,169 +293,9 @@
 
 </div>
 <br>
-
 <script src="js/slider.js" async></script>
-<style>
-* {box-sizing: border-box}
-body {font-family: Verdana, sans-serif; margin:0}
-.mySlides {display: none}
-img {vertical-align: middle;}
-
-/* Slideshow container */
-.slideshow-container {
-  max-width: 500px;
-  margin: auto;
-  width: 50%;
-  height: 50%;
-}
-
-.slideshow-container:hover {
-  max-width: 500px;
-  margin: auto;
-  opacity: 0.5;
-}
-
-/* Next & previous buttons */
-.prev, .next {
-  cursor: pointer;
-  position: fixed;
-  top: 50%;
-  width: auto;
-  padding: 10px;
-  margin-top: -22px;
-  color: goldenrod;
-  font-weight: bold;
-  font-size: 18px;
-  transition: 0.5s ease;
-  border-radius: 0 3px 3px 0;
-  user-select: none;
-}
-
-/* Position the "next button" to the right */
-.next {
-  right: 0;
-  border-radius: 3px 0 0 3px;
-}
-
-/* Position the "pref button" to the left */
-.prev {
-  left: 0;
-  border-radius: 3px 0 0 3px;
-}
-
-/* On hover, add a black background color with a little bit see-through */
-.prev:hover, .next:hover {
-  background-color: rgba(0,0,0,0.8);
-}
-
-/* The dots/bullets/indicators */
-.dot {
-  cursor: pointer;
-  height: 15px;
-  width: 15px;
-  margin: 0 2px;
-  background-color: #bbb;
-  border-radius: 50%;
-  display: inline-block;
-  transition: background-color 0.6s ease;
-}
-
-.active, .dot:hover {
-  background-color: #717171;
-}
-
-/* Fading animation */
-.fade {
-  animation-name: fade;
-  animation-duration: 0.5s;
-}
-
-@keyframes fade {
-  from {opacity: .4} 
-  to {opacity: 1}
-}
-
-/* On smaller screens, decrease text size */
-@media only screen and (max-width: 300px) {
-  .prev, .next,.text {font-size: 11px}
-}
-</style>
-  </div>
 </div>
 <script src="js/start.js" async></script>
-<style>
-content {
-  padding: 25px;
-  background-color: white;
-  color: black;
-  font-size: 25px;
-}
-
-.darkmode{
-  background-color: #202020;
-     background-size: cover;
-     background-attachment: scroll;
-     background-repeat: repeat;
-  color: #fff;
-}
-
-.darkmode .dropdown-content{
-  background-color: #202020;
-     background-size: cover;
-     background-attachment: scroll;
-     background-repeat: repeat;
-  color: #fff;
-}
-
-.darkmode a{
-  background-color: #202020;
-     background-size: cover;
-     background-attachment: scroll;
-     background-repeat: repeat;
-  color: #fff;
-}
-
-.darkmode a:hover{
-  background-color: #fff;
-     background-size: cover;
-     background-attachment: scroll;
-     background-repeat: repeat;
-  color: #202020;
-}
-
-.darkmode .row{
-  background-color: #034fa7;
-     background-size: cover;
-     background-attachment: scroll;
-     background-repeat: repeat;
-  color: #fff;
-}
-
-.darkmode h1 h2 h3 h4 h5 h6 p{
-  color: #fff;
-}
-
-.darkmode .left{
-  background-color: #202020;
-     background-size: cover;
-     background-attachment: scroll;
-     background-repeat: repeat;
-  color: #fff;
-}
-
-.darkmode .icon-more{
-  background-color: transparent;
-  background-size: cover;
-  background-attachment: scroll;
-  background-repeat: repeat;
-  color: yellow;
-}
-
-.darkmode .icon-more:hover, .icon-more:active {
-    background-color: #3e0d78;
-}
-
-</style>
 <script>
 function darkFunction() {
    var element = document.documentElement
