@@ -61,7 +61,7 @@ body {
 }
 
 .dropbtn {
-    background-color: #e4eef8;
+    background-color: transparent;
     color: white;
     padding: 12px;
     font-size: 18px;
@@ -72,10 +72,13 @@ body {
     width: 45px;
     margin-left: 100%;
     transform: translateX(-60px);
+    opacity: 0.8;
+    transition: 0.5s ease;
 }
  
-.dropbtn:hover, .dropbtn:focus {
-    background-color: #f0ffff;
+.dropbtn:hover {
+    background-color: #3e0d78;
+    opacity: 1.5;
 }
  
 #myInput {
@@ -157,11 +160,12 @@ body {
 }
 
 .parallax {
-  /* The image used */
-  background-image: url('https://media.giphy.com/media/xThuWu82QD3pj4wvEQ/giphy.gif');
+  /*background image*/
+  background-image: url();
 
   /* Full height */
   height: 500px; 
+  display: inline-block;
 
   /* Create the parallax scrolling effect */
   background-attachment: fixed;
@@ -249,4 +253,32 @@ embed, iframe{
     height: 70%;
      background: white;
       border: 1px solid transparent;
+}
+
+
+.desktop{
+  overflow-x: scroll;
+  width: 50%;
+  height: 45px;
+  background: transparent;
+  padding-top: 1px;
+  position: absolute;
+  margin: auto;
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
+}
+
+.desktop::-webkit-scrollbar {
+  height: 1px;
+  background-color: transparent;
+}
+
+.desktop::-webkit-scrollbar-thumb {
+  height: 1px;
+  background-color: transparent;
+}
+
+.desktop::-webkit-scrollbar-track {
+  height: 1px;
+  background-color: transparent;
 }
