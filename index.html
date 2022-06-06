@@ -80,8 +80,16 @@ content {
   color: yellow;
 }
 
-.darkmode .icon-more:hover, .icon-more:active {
+.darkmode .icon-more:hover{
     background-color: #3e0d78;
+}
+
+.darkmode .dropbtn:hover{
+    background-color: #3e0d78;
+}
+
+.darkmode .dropbtn{
+    background-color: transparent;
 }
 
 </style>
@@ -102,7 +110,10 @@ img {vertical-align: middle;}
 .slideshow-container:hover {
   max-width: 500px;
   margin: auto;
-  opacity: 0.5;
+}
+
+.slideshow-container:active {
+   opacity: 0.5;
 }
 
 /* Next & previous buttons */
@@ -112,7 +123,6 @@ img {vertical-align: middle;}
   top: 50%;
   width: auto;
   padding: 10px;
-  margin-top: -22px;
   color: goldenrod;
   font-weight: bold;
   font-size: 18px;
@@ -141,13 +151,15 @@ img {vertical-align: middle;}
 /* The dots/bullets/indicators */
 .dot {
   cursor: pointer;
-  height: 15px;
-  width: 15px;
+  height: 40px;
   margin: 0 2px;
-  background-color: #bbb;
+  background-color: #3e0d78;
+  color: yellow;
   border-radius: 50%;
   display: inline-block;
   transition: background-color 0.6s ease;
+  padding: 12px;
+  font-size: 18px;
 }
 
 .active, .dot:hover {
@@ -170,12 +182,30 @@ img {vertical-align: middle;}
   .prev, .next,.text {font-size: 11px}
 }
 </style>
+<style>
+.textin{
+  font-family: 'Tangerine';
+  font-size: 60px; 
+  margin: 4em auto 5em; 
+  align-content: center; 
+  display: flex; 
+  text-align: left;
+  border-bottom: 1px solid;
+}
+
+@media screen and (max-width: 768px) {
+  .textin {
+    margin: 3em auto 5em; 
+  }
+}
+
+</style>
    
 </head>
 <body>
 <div class="refresh" onclick="location.reload();" title="Refresh"></div>
 <div class="row">
-    <button onclick="myFunction()" class="dropbtn" title="Start">  <picture><source srcset="/favicon-128.png" type="image/png"><img src="/favicon-128.ico" alt="Stej-Logo" loading=lazy style="height: 25px; width:25px;"></picture> </button>
+    <button onclick="myFunction()" class="dropbtn" title="Start">  <picture><source srcset="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png" type="image/png"><img src="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png" alt="Stej-Logo" loading=lazy style="margin: auto; display: block; height: 25px;"></picture> </button>
       <div id="myDropdown" class="dropdown-content">
         <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()" autocomplete="off">
         <a href="https://stejproject.github.io/posts/youtube/youtube-post.html" target="qwd" rel="noopener noreferrer">Tutorial, tips dan trik Youtube</a>
@@ -189,13 +219,64 @@ img {vertical-align: middle;}
     <button class="icon-more" onclick="darkFunction()" title="Dark Mode"><i class="bi bi-moon"></i></button>
 </div>
 <div class="taskbar">
-  <div style="text-align:center">
-  <span class="dot des-icon" onclick="currentSlide(1)"></span> 
-  <span class="dot des-icon" onclick="currentSlide(2)"></span>
-  <span class="dot des-icon" onclick="currentSlide(3)"></span>
-  <span class="dot des-icon" onclick="currentSlide(4)"></span>
-  </div>
-  <div class="des-icon">
+<div style="text-align: center;">
+  <button class="dot des-icon" onclick="currentSlide(1)" title="Home"><i class="bi bi-house"></i></button> 
+  <button class="dot des-icon" onclick="currentSlide(2)" title="Information"><i class="bi bi-info-circle"></i></button>
+  <button class="dot des-icon" onclick="currentSlide(3)" title="Project"><i class="bi bi-card-list"></i></button>
+  <button class="dot des-icon" onclick="currentSlide(4)" title="Contact"><i class="bi bi-telephone-fill"></i></button>
+</div>
+</div>
+<script src="js/taskbar.js" async></script>
+
+  <div class="right">
+    
+    <div class="slideshow-container">
+
+<div class="mySlides fade">
+  <picture>
+   <source srcset="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png" type="image/png">
+   <img src="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png" loading=lazy alt="Stej-Logo" style="height: auto; width: auto; margin: 10em auto; display: block;">
+  </picture>
+</div>
+
+<div class="mySlides fade">
+  <h1 class="textin">Stej Project (Alpha v0.0.3)</h1>
+    <h3 style="font-family: 'Tangerine'; font-size: 40px;">About</h3>
+  <table class="about">
+    <tr>
+      <td class="project"><h3>This Project</h3></td>
+    </tr>
+    <tr>
+      <td class="project"><p>Mesin Pencari yang dihosting menggunakkan <a href="https://pages.github.com/" style="display: contents; color: #606060;" target="q">Github Pages</a>. Dengan dibuatnya web ini, admin sebenarnya hanya membagikan informasi yang bermanfaat. Dan admin adalah orang yang selalu sharing dan belajar dalam dunia IT. 
+       Sekedar informasi, kata Stej Project merupakan kata singkatan dari <i>" simple trusted elegant and jenius "</i> dan diakhiri dengan kata project. Yang berarti situs ini dikhususkan untuk situs yang sederhana, terpecaya, elegan, dan jenius. Terima kasih telah membaca.</p></td>
+    </tr>
+  </table> 
+<h3 style="font-family: 'Tangerine'; font-size: 40px;">Policies</h3>
+  <table class="about">
+    <tr>
+      <td class="information"><h4>Terms and Conditions</h4></td>
+    </tr>
+    <tr>
+         <td class="information">
+        <p>
+          Anda diperbolehkan menyalin postingan web, 
+          membuka dan menyebarkan hasil proyek, dengan ketentuan harus menyisipkan catatan kaki dengan format seperti ini, contoh:
+          <i style="background: white; color: black;">Orang /lembaga yang membuat/ memosting, “JUDUL POSTINGAN”, nama situs, tanggal bulan tahun postingan. (Diakses dari halaman /Link pada tanggal bulan dan tahun diakses.)</i> 
+          sebagai bentuk penghormatan atau penghargaan pada orang yang telah memosting sesuatu.
+          Saat meninggalkan web ini menuju situs-situs eksternal yang admin rekomendasikan, 
+          maka ketentuan-ketentuan situs yang anda kunjungi akan berlaku. 
+          Syarat dan ketentuan situs stej project tidak berlaku selama anda mengunjungi situs web diluar web stej project. 
+          Terima kasih telah membaca.
+        </p>
+   </td>
+    </tr>
+  </table>
+</div>
+
+
+<div class="mySlides fade">
+  <div class="desktop">
+   <div class="des-icon">
   <button class="icon-taskbar" title="List Project"><i class="bi bi-card-list"></i></button>
   <div class="panel">
   <div class="left">
@@ -236,58 +317,10 @@ img {vertical-align: middle;}
   </div>
   </div>
 </div>
-<script src="js/taskbar.js" async></script>
-
-  <div class="right">
-
-    <div class="slideshow-container">
-
-<div class="mySlides fade">
-  <picture>
-   <source srcset="/favicon-128.png" type="image/png">
-   <img src="/favicon-128.png" loading=lazy alt="Stej-Logo" style="height: auto; width: auto; margin: 10em auto; display: block;">
-  </picture>
 </div>
 
 <div class="mySlides fade">
-  <h1 style="font-family: 'Tangerine'; font-size: 60px; margin: 130px 0; align-content: center; display: flex; text-align: left;">Stej Project (Alpha v0.0.2)</h1>
-</div>
 
-<div class="mySlides fade">
-  <div class="parallax"></div>
-</div>
-
-<div class="mySlides fade">
-  <h3>About</h3>
-  <table class="about">
-    <tr>
-      <td class="project"><h3>This Project</h3></td>
-    </tr>
-    <tr>
-      <td class="project"><p>Mesin Pencari yang dihosting menggunakkan <a href="https://pages.github.com/" style="display: contents; color: #606060;" target="q">Github Pages</a>. Dengan dibuatnya web ini, admin sebenarnya hanya membagikan informasi yang bermanfaat. Dan admin adalah orang yang selalu sharing dan belajar dalam dunia IT. 
-       Sekedar informasi, kata Stej Project merupakan kata singkatan dari <i>" simple trusted elegant and jenius "</i> dan diakhiri dengan kata project. Yang berarti situs ini dikhususkan untuk situs yang sederhana, terpecaya, elegan, dan jenius. Terima kasih telah membaca.</p></td>
-    </tr>
-  </table> 
-<h3>Policies</h3>
-  <table class="about">
-    <tr>
-      <td class="information"><h4>Terms and Conditions</h4></td>
-    </tr>
-    <tr>
-         <td class="information">
-        <p>
-          Anda diperbolehkan menyalin postingan web, 
-          membuka dan menyebarkan hasil proyek, dengan ketentuan harus menyisipkan catatan kaki dengan format seperti ini, contoh:
-          <i style="background: white; color: black;">Orang /lembaga yang membuat/ memosting, “JUDUL POSTINGAN”, nama situs, tanggal bulan tahun postingan. (Diakses dari halaman /Link pada tanggal bulan dan tahun diakses.)</i> 
-          sebagai bentuk penghormatan atau penghargaan pada orang yang telah memosting sesuatu.
-          Saat meninggalkan web ini menuju situs-situs eksternal yang admin rekomendasikan, 
-          maka ketentuan-ketentuan situs yang anda kunjungi akan berlaku. 
-          Syarat dan ketentuan situs stej project tidak berlaku selama anda mengunjungi situs web diluar web stej project. 
-          Terima kasih telah membaca.
-        </p>
-   </td>
-    </tr>
-  </table>
 </div>
 
 <a class="prev" onclick="plusSlides(-1)">❮</a>
