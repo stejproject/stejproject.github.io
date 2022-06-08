@@ -186,7 +186,7 @@ body {
   transition: 0.4s;
   cursor: pointer;
   height: 40px;
-  margin: 0 0 0 5px;
+  margin: 5px 0 5px;
 }
 
 .icon-more {
