@@ -14,19 +14,6 @@ body {
   margin-top: 0px;
 }
 
-.refresh{
-  width: 40px;
-  height: 45px;
-  background: #e4ffff;
-  visibility: visible;
-  display: inline-block;
-  position: fixed;
-}
-
-.refresh:hover{
-  opacity: 0.5;
-}
-
 @media screen and (max-width: 600px) {
   /* For Handphone devices */
   .row {
@@ -74,7 +61,6 @@ body {
     width: 45px;
     margin-left: 100%;
     transform: translateX(-50px);
-    opacity: 0.8;
     transition: 0.5s ease;
 }
  
@@ -204,7 +190,7 @@ body {
   transition: 0.4s;
   cursor: pointer;
   height: 45px;
-  margin: 0 0 0 50px;
+  margin: 0 0 0 2px;
 }
 
 .icon-more:hover, .icon-more:active {
