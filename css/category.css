@@ -205,7 +205,7 @@ body {
 }
 
 .icon-more:hover, .icon-more:active {
-    box-shadow: #3e0d78;
+    box-shadow: inset 0px 0px 30px 0px #3e0d78;
     color: #e4eef8;
 }
 
