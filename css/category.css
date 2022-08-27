@@ -22,15 +22,12 @@ body {
    .icon-more:hover, .icon-more:active{
     color: #e4eef8;
    }
-   .textin {
-    margin: 5cm auto 9cm;
-   }
 }
 
 .textin{
   font-family: 'Tangerine';
   font-size: 60px; 
-  margin: 7cm auto 9cm;
+  margin: 10ch auto 12ch;
   align-content: center; 
   display: grid; 
   text-align: center;
