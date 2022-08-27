@@ -75,8 +75,8 @@ body {
 }
  
 .dropbtn:hover {
-    background-color: #3e0d78;
-    opacity: 1.5;
+    background-color: transparent;
+    box-shadow: 0px 0px 50px 50px #3d0d789c;
 }
  
 #myInput {
