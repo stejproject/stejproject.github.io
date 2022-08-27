@@ -20,15 +20,7 @@ content {
   font-size: 25px;
 }
 
-.darkmode{
-  background-color: #202020;
-  background-size: cover;
-  background-attachment: scroll;
-  background-repeat: repeat;
-  color: #fff;
-}
-
-.darkmode .dropdown-content, .darkmode a, .darkmode .left{
+.darkmode, .darkmode .dropdown-content, .darkmode a, .darkmode .left{
   background-color: #202020;
   background-size: cover;
   background-attachment: scroll;
@@ -42,6 +34,20 @@ content {
   background-attachment: scroll;
   background-repeat: repeat;
   color: #202020;
+}
+
+.darkmode .dot{
+  cursor: pointer;
+  height: 40px;
+  margin: 0 2px;
+  background-color: transparent;
+  color: yellow;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+  padding: 12px;
+  font-size: 18px;
+  border: transparent;
 }
 
 .darkmode .prev:hover, .darkmode .next:hover {
