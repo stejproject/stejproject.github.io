@@ -14,8 +14,8 @@ body {
   margin-top: 0px;
 }
 
+/* For Handphone devices */
 @media screen and (max-width: 600px) {
-  /* For Handphone devices */
   .row {
      display: grid;
    }
@@ -23,14 +23,14 @@ body {
     color: #e4eef8;
    }
    .textin {
-    margin: 26vw auto 26vw; 
-  }
+    margin: 5cm auto 9cm;
+   }
 }
 
 .textin{
   font-family: 'Tangerine';
   font-size: 60px; 
-  margin: 20vw auto 26vw; 
+  margin: 7cm auto 9cm;
   align-content: center; 
   display: grid; 
   text-align: center;
