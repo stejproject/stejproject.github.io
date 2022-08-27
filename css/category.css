@@ -19,9 +19,6 @@ body {
   .row {
      display: grid;
    }
-   .icon-more:hover, .icon-more:active{
-    color: #e4eef8;
-   }
 }
 
 .textin{
