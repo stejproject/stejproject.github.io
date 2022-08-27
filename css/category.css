@@ -27,6 +27,16 @@ body {
   }
 }
 
+.textin{
+  font-family: 'Tangerine';
+  font-size: 60px; 
+  margin: 20vw auto 26vw; 
+  align-content: center; 
+  display: grid; 
+  text-align: center;
+  border-bottom: 1px solid;
+}
+
 /* Left column (menu) */
 .left {
   padding: 8px 0;
