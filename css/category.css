@@ -21,7 +21,10 @@ body {
    }
    .icon-more:hover, .icon-more:active{
     color: #e4eef8;
-}
+   }
+   .textin {
+    margin: 26vw auto 26vw; 
+  }
 }
 
 /* Left column (menu) */
