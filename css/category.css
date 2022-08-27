@@ -205,15 +205,14 @@ body {
 }
 
 .icon-more:hover, .icon-more:active {
-    background-color: #3e0d78;
-    color: #fff;
+    background-color: #3d0d7885;
+    color: #e4eef8;
 }
 
 .taskbar{
   overflow-x: scroll;
   width: 50%;
   height: 45px;
-  background: #e4eef8;
   border-bottom: 1px solid;
   padding-top: 1px;
   position: absolute;
