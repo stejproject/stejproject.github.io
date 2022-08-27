@@ -4,8 +4,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#e4eef8">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#034fa7">
+  <meta name="theme-color" content="#e4eef8">
   <link rel="preload" type="text/css" href="css/category.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="css/category.css"></noscript>
   <title>Stej Project</title>
@@ -62,7 +61,7 @@ content {
   color: #e3e3e4;
 }
 
-.darkmode .prev:hover, .darkmode .next:hover {
+.darkmode .prev:active, .darkmode .next:active {
   background-color: #fff;
   box-shadow: 0 0 10px 10px #fff
 }
@@ -164,8 +163,8 @@ img {vertical-align: middle;}
   border-radius: 0 40px 40px 0;
 }
 
-/* On hover, add a black background color with a little bit see-through */
-.prev:hover, .next:hover {
+/* On active, add a black background color with a little bit see-through */
+.prev:active, .next:active {
   background-color: rgba(0,0,0,0.8);
   box-shadow: 0 0 10px 10px rgb(0,0,0,0.8);
 }
