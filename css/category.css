@@ -28,10 +28,13 @@ body {
 }
 
 @media screen and (max-width: 600px) {
-  /* Create a column layout with Flexbox */
+  /* For Handphone devices */
   .row {
      display: grid;
    }
+   .icon-more:hover, .icon-more:active{
+    color: #e4eef8;
+}
 }
 
 /* Left column (menu) */
