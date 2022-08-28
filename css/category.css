@@ -184,6 +184,26 @@ body {
   margin: 5px 0 5px;
 }
 
+.icon-taskbar-button {
+  border: 1px solid #3e0d78;
+  padding: 10px;
+  background: #3e0d78;
+  text-decoration: none;
+  font-size: 18px;
+  border-radius: 2.375rem;
+  font-weight: bold;
+  color: yellow;
+  transition: 0.4s;
+  cursor: pointer;
+  height: 40px;
+  margin: 5px 0 5px;
+}
+
+.icon-taskbar-button:active {
+  background-color: #3e0d789e;
+  color: #e3e3e4;
+}
+
 .icon-more {
   border: 1px solid transparent;
   padding: 12px;
