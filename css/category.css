@@ -276,7 +276,6 @@ embed, iframe{
   height: 45px;
   background: transparent;
   padding-top: 1px;
-  position: absolute;
   margin: auto;
   -ms-overflow-style: none; 
   scrollbar-width: none;
