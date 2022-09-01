@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+body{
+    overflow: hidden;
+}
+.main_wrapper{
+    position: absolute;
+    right: 40px;
+    bottom: 20px;
+    animation: toast_animation 2s ease forwards;
+}
+@keyframes toast_animation {
+    0% {
+        transform: translateX(100%);
+    }
+    40% {
+        transform: translateX(-10%);
+    }
+    80%, 100%{
+        transform: translateX(20px);
+    }
+}
+
+.main_wrapper.hide {
+    animation: hide_toast_animation 1s ease forwards;
+}
+
+@keyframes hide_toast_animation {
+    0% {
+        transform: translateX(20px);
+    }
+    40% {
+        transform: translateX(-10%);
+    }
+    80%, 100% {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(100%);
+    }
+}
+.main_wrapper .toast_cls{
+    background: #fff;
+    padding: 20px 15px 20px 20px;
+    border-radius: 10px;
+    border-left: 5px solid #afcc2e;
+    box-shadow: 10px 9px 15px -10px rgba(0,0,0,0.15);
+    max-width: 430px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.main_wrapper .toast_cls.offline{
+    border-color: #ccc;
+}
+.toast_cls .content{
+    display: flex;
+    align-items: center;
+}
+.content .icon{
+    font-size: 25px;
+    color: #fff;
+    height: 50px;
+    width: 50px;
+    text-align: center;
+    line-height: 50px;
+    border-radius: 50%;
+    background: #2ecc71;
+}
+.toast_cls.offline .content .icon{
+    background: #ccc;
+}
+.content .details{
+    margin-left: 15px;
+}
+.details span{
+    font-size: 20px;
+    font-weight: 500;
+}
+.details p{
+    color: #878787;
+}
+.toast_cls .close-icon{
+    color: #878787;
+    font-size: 20px;
+    cursor: pointer;
+    height: 25px;
+    width: 25px;
+    text-align: center;
+    line-height: 25px;
+    border-radius: 50%;
+    background: #f2f2f2;
+    transition: all 0.3s ease;
+}
+.close-icon:hover{
+    background: #efefef;
+}
