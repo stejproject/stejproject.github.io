@@ -280,6 +280,7 @@ embed, iframe{
   margin: auto;
   -ms-overflow-style: none; 
   scrollbar-width: none;
+  text-align: center;
 }
 
 .desktop::-webkit-scrollbar {
