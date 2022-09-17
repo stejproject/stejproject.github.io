@@ -1,404 +1,488 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#e4eef8">
-  <link rel="preload" type="text/css" href="css/category.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="css/category.css"></noscript>
+  <link rel="preload" type="text/css" href="css/category.css" as="style"
+    onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="css/category.css">
+  </noscript>
   <title>Stej Project</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine">
   <link rel="shortcut icon" href="https://stejproject.github.io/favicon-128.ico">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+    integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+    crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-content {
-  padding: 25px;
-  background-color: white;
-  color: black;
-  font-size: 25px;
-}
+  <style>
+    content {
+      padding: 25px;
+      background-color: white;
+      color: black;
+      font-size: 25px;
+    }
 
-.darkmode, .darkmode .dropdown-content, .darkmode a, .darkmode .left{
-  background-color: #202020;
-  background-size: cover;
-  background-attachment: scroll;
-  background-repeat: repeat;
-  color: #fff;
-}
+    .darkmode,
+    .darkmode .dropdown-content,
+    .darkmode a,
+    .darkmode .left {
+      background-color: #202020;
+      background-size: cover;
+      background-attachment: scroll;
+      background-repeat: repeat;
+      color: #fff;
+    }
 
-.darkmode a:hover{
-  background-color: #fff;
-  background-size: cover;
-  background-attachment: scroll;
-  background-repeat: repeat;
-  color: #202020;
-}
+    .darkmode a:hover {
+      background-color: #fff;
+      background-size: cover;
+      background-attachment: scroll;
+      background-repeat: repeat;
+      color: #202020;
+    }
 
-.darkmode .icon-more:active {
-    box-shadow: inset 0px 0px 30px 0px #3e0d78;
-    color: #fff;
-}
+    .darkmode .icon-more:active {
+      box-shadow: inset 0px 0px 30px 0px #3e0d78;
+      color: #fff;
+    }
 
-.darkmode .icon-taskbar-button {
-  border: 1px solid #3e0d78;
-  padding: 10px;
-  background: #3e0d78;
-  text-decoration: none;
-  font-size: 18px;
-  border-radius: 2.375rem;
-  font-weight: bold;
-  color: yellow;
-  transition: 0.4s;
-  cursor: pointer;
-  height: 40px;
-  margin: 5px 0 5px;
-}
+    .darkmode .icon-taskbar-button {
+      border: 1px solid #3e0d78;
+      padding: 10px;
+      background: #3e0d78;
+      text-decoration: none;
+      font-size: 18px;
+      border-radius: 2.375rem;
+      font-weight: bold;
+      color: yellow;
+      transition: 0.4s;
+      cursor: pointer;
+      height: 40px;
+      margin: 5px 0 5px;
+    }
 
-.darkmode .icon-taskbar-button:active {
-  background-color: #3e0d789e;
-  color: #e3e3e4;
-}
+    .darkmode .icon-taskbar-button:active {
+      background-color: #3e0d789e;
+      color: #e3e3e4;
+    }
 
-.darkmode .dot{
-  cursor: pointer;
-  height: 40px;
-  margin: 0 2px;
-  background-color: transparent;
-  color: yellow;
-  border-radius: 50%;
-  display: inline-block;
-  transition: background-color 0.6s ease;
-  padding: 12px;
-  font-size: 18px;
-  border: transparent;
-}
+    .darkmode .dot {
+      cursor: pointer;
+      height: 40px;
+      margin: 0 2px;
+      background-color: transparent;
+      color: yellow;
+      border-radius: 50%;
+      display: inline-block;
+      transition: background-color 0.6s ease;
+      padding: 12px;
+      font-size: 18px;
+      border: transparent;
+    }
 
-.darkmode .active, .darkmode .dot:hover{
-  background-color: #3e0d789e;
-  color: #e3e3e4;
-}
+    .darkmode .active,
+    .darkmode .dot:hover {
+      background-color: #3e0d789e;
+      color: #e3e3e4;
+    }
 
-.darkmode .prev:active, .darkmode .next:active {
-  background-color: #fff;
-  box-shadow: 0 0 10px 10px #fff
-}
-  
-.darkmode .gbawah{
-  background: white;
-  color: black;
-}
-  
-.gbawah{
-  background: black;
-  color: white;
-}
+    .darkmode .prev:active,
+    .darkmode .next:active {
+      background-color: #fff;
+      box-shadow: 0 0 10px 10px #fff
+    }
 
-.darkmode .row{
-  background-color: #034fa7;
-  background-size: cover;
-  background-attachment: scroll;
-  background-repeat: repeat;
-  color: #fff;
-}
+    .darkmode .gbawah {
+      background: white;
+      color: black;
+    }
 
-.darkmode h1 h2 h3 h4 h5 h6 p{
-  color: #fff;
-}
+    .gbawah {
+      background: black;
+      color: white;
+    }
 
-.darkmode .icon-more{
-  background-color: transparent;
-  background-size: cover;
-  background-attachment: scroll;
-  background-repeat: repeat;
-  color: yellow;
-}
+    .darkmode .row {
+      background-color: #034fa7;
+      background-size: cover;
+      background-attachment: scroll;
+      background-repeat: repeat;
+      color: #fff;
+    }
 
-.darkmode .disqus-contact{
-  background-color: #202020;
-  background-size: cover;
-  background-attachment: scroll;
-  background-repeat: repeat;
-  color: #fff;
-}
+    .darkmode h1 h2 h3 h4 h5 h6 p {
+      color: #fff;
+    }
 
-.darkmode .dropbtn:active{
-    background-color: transparent;
-    box-shadow: 0px 0px 50px 50px #f4f7c6d4;
-}
+    .darkmode .icon-more {
+      background-color: transparent;
+      background-size: cover;
+      background-attachment: scroll;
+      background-repeat: repeat;
+      color: yellow;
+    }
 
-.darkmode .dropbtn{
-    background-color: transparent;
-}
+    .darkmode .disqus-contact {
+      background-color: #202020;
+      background-size: cover;
+      background-attachment: scroll;
+      background-repeat: repeat;
+      color: #fff;
+    }
 
-</style>
-<style>
-* {box-sizing: border-box}
-body {font-family: Verdana, sans-serif; margin:0}
-.mySlides {display: none}
-img {vertical-align: middle;}
+    .darkmode .dropbtn:active {
+      background-color: transparent;
+      box-shadow: 0px 0px 50px 50px #f4f7c6d4;
+    }
 
-/* Slideshow container */
-.slideshow-container {
-  max-width: 500px;
-  margin: auto;
-  width: 50%;
-  height: 50%;
-}
+    .darkmode .dropbtn {
+      background-color: transparent;
+    }
+  </style>
+  <style>
+    * {
+      box-sizing: border-box
+    }
 
-.slideshow-container:hover {
-  max-width: 500px;
-  margin: auto;
-}
+    body {
+      font-family: Verdana, sans-serif;
+      margin: 0
+    }
 
-.slideshow-container:active {
-  opacity: 0.5;
-}
+    .mySlides {
+      display: none
+    }
 
-/* Next & previous buttons */
-.prev, .next {
-  cursor: pointer;
-  position: fixed;
-  top: 50%;
-  width: auto;
-  padding: 10px;
-  color: goldenrod;
-  font-weight: bold;
-  font-size: 18px;
-  transition: 0.5s ease;
-  user-select: none;
-}
+    img {
+      vertical-align: middle;
+    }
 
-/* Position the "next button" to the right */
-.next {
-  right: 0;
-  border-radius: 40px 0 0 40px;
-}
+    /* Slideshow container */
+    .slideshow-container {
+      max-width: 500px;
+      margin: auto;
+      width: 50%;
+      height: 50%;
+    }
 
-/* Position the "pref button" to the left */
-.prev {
-  left: 0;
-  border-radius: 0 40px 40px 0;
-}
+    .slideshow-container:hover {
+      max-width: 500px;
+      margin: auto;
+    }
 
-/* On active, add a black background color with a little bit see-through */
-.prev:active, .next:active {
-  background-color: rgba(0,0,0,0.8);
-  box-shadow: 0 0 10px 10px rgb(0,0,0,0.8);
-}
+    .slideshow-container:active {
+      opacity: 0.5;
+    }
 
-/* The dots/bullets/indicators */
-.dot {
-  cursor: pointer;
-  height: 40px;
-  margin: 0 2px;
-  background-color: transparent;
-  color: royalblue;
-  border-radius: 50%;
-  display: inline-block;
-  transition: background-color 0.6s ease;
-  padding: 12px;
-  font-size: 18px;
-  border: transparent;
-}
+    /* Next & previous buttons */
+    .prev,
+    .next {
+      cursor: pointer;
+      position: fixed;
+      top: 50%;
+      width: auto;
+      padding: 10px;
+      color: goldenrod;
+      font-weight: bold;
+      font-size: 18px;
+      transition: 0.5s ease;
+      user-select: none;
+    }
 
-.active, .dot:hover {
-  background-color: #3e0d789e;
-  color: #e3e3e4;
-}
+    /* Position the "next button" to the right */
+    .next {
+      right: 0;
+      border-radius: 40px 0 0 40px;
+    }
 
-/* Fading animation */
-.fade {
-  animation-name: fade;
-  animation-duration: 0.5s;
-}
+    /* Position the "pref button" to the left */
+    .prev {
+      left: 0;
+      border-radius: 0 40px 40px 0;
+    }
 
-@keyframes fade {
-  from {opacity: .4} 
-  to {opacity: 1}
-}
+    /* On active, add a black background color with a little bit see-through */
+    .prev:active,
+    .next:active {
+      background-color: rgba(0, 0, 0, 0.8);
+      box-shadow: 0 0 10px 10px rgb(0, 0, 0, 0.8);
+    }
 
-/* On smaller screens, decrease text size */
-@media only screen and (max-width: 300px) {
-  .prev, .next,.text {font-size: 11px}
-}
-</style>
+    /* The dots/bullets/indicators */
+    .dot {
+      cursor: pointer;
+      height: 40px;
+      margin: 0 2px;
+      background-color: transparent;
+      color: royalblue;
+      border-radius: 50%;
+      display: inline-block;
+      transition: background-color 0.6s ease;
+      padding: 12px;
+      font-size: 18px;
+      border: transparent;
+    }
+
+    .active,
+    .dot:hover {
+      background-color: #3e0d789e;
+      color: #e3e3e4;
+    }
+
+    /* Fading animation */
+    .fade {
+      animation-name: fade;
+      animation-duration: 0.5s;
+    }
+
+    @keyframes fade {
+      from {
+        opacity: .4
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    /* On smaller screens, decrease text size */
+    @media only screen and (max-width: 300px) {
+
+      .prev,
+      .next,
+      .text {
+        font-size: 11px
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div class="row">
-    <button onclick="myFunction()" class="dropbtn" title="Start">  <picture><source srcset="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png" type="image/png"><img src="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png" alt="Stej-Logo" loading=lazy style="margin: auto; display: block; height: 25px;"></picture> </button>
-      <div id="myDropdown" class="dropdown-content">
-        <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()" autocomplete="off">
-        <a href="https://stejproject.github.io/posts/youtube/youtube-post.html" target="qwd" rel="noopener noreferrer">Tutorial, tips dan trik Youtube</a>
-        <a href="https://stejproject.github.io/posts/category/link-post.html" target="qwd" rel="noopener noreferrer">Link Berguna</a>
-        <a href="https://stejproject.github.io/posts/category/wiki-post.html" target="qwd" rel="noopener noreferrer">My Ensi</a>
-        <a href="taskbar/project.html" target="lmp" rel="noopener noreferrer">List My Project</a>
-        <a href="https://stejproject.github.io/search.github.io/" target="lmp" rel="noopener noreferrer">My Search Engine</a>
-        <a href="https://icons.getbootstrap.com/" target="_blank" rel="noopener noreferrer">Bootstrap Icon</a>
-        <a href="http://www.inmensia.com/files/solitaire1.0.html" target="_blank" rel="noopener noreferrer">Solitaire</a>
-        <a href="http://www.inmensia.com/files/minesweeper1.0.html" target="_blank" rel="noopener noreferrer">minesweeper</a>
-        <a href="https://www.revolvermaps.com/?target=gallery" target="_blank" rel="noopener noreferrer">https://www.revolvermaps.com/?target=gallery</a>
-        <a href="https://ahmadalkholy.github.io/Javascript-Chess-Game/chess.html" target="_blank" rel="noopener noreferrer">AhmadAlkholy /Javascript-Chess-Game</a>
-        <a href="https://www.flaticon.com/" target="_blank" rel="noopener noreferrer">www.flaticon.com</a>
-        <a href="https://id.wikihow.com/Membuat-Kebijakan-Privasi-Situs" target="_blank" rel="noopener noreferrer">Membuat Kebijakkan Privasi Situs</a>
-        <a href="https://www.youtube.com/watch?v=9k2TbDn34L0s" target="_blank" rel="noopener noreferrer">10 Tips Membuat Web Portfolio untuk Desainer | Mas KukuhAldy | Youtube</a>
-        <a href="https://www.youtube.com/watch?v=yXtrlIJzo-A" target="_blank" rel="noopener noreferrer">ChatBot using Javascript API | javascript simple AI chatbot | Virtual Art | Youtube</a>
-        <a href="https://strayst.carrd.co/" target="_blank" rel="noopener noreferrer">https://strayst.carrd.co/</a>
-      </div>
-</div>
-<script src="js/search.js" async></script>
-<div class="more">
+  <div class="row">
+    <button onclick="myFunction()" class="dropbtn" title="Start">
+      <picture>
+        <source srcset="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png"
+          type="image/png"><img
+          src="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png" alt="Stej-Logo"
+          loading=lazy style="margin: auto; display: block; height: 25px;">
+      </picture>
+    </button>
+    <div id="myDropdown" class="dropdown-content">
+      <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()" autocomplete="off">
+      <a href="https://stejproject.github.io/posts/youtube/youtube-post.html" target="qwd"
+        rel="noopener noreferrer">Tutorial, tips dan trik Youtube</a>
+      <a href="https://stejproject.github.io/posts/category/link-post.html" target="qwd" rel="noopener noreferrer">Link
+        Berguna</a>
+      <a href="https://stejproject.github.io/posts/category/wiki-post.html" target="qwd" rel="noopener noreferrer">My
+        Ensi</a>
+      <a href="taskbar/project.html" target="lmp" rel="noopener noreferrer">List My Project</a>
+      <a href="https://stejproject.github.io/search.github.io/" target="lmp" rel="noopener noreferrer">My Search
+        Engine</a>
+      <a href="https://icons.getbootstrap.com/" target="_blank" rel="noopener noreferrer">Bootstrap Icon</a>
+      <a href="http://www.inmensia.com/files/solitaire1.0.html" target="_blank" rel="noopener noreferrer">Solitaire</a>
+      <a href="http://www.inmensia.com/files/minesweeper1.0.html" target="_blank"
+        rel="noopener noreferrer">minesweeper</a>
+      <a href="https://www.revolvermaps.com/?target=gallery" target="_blank"
+        rel="noopener noreferrer">https://www.revolvermaps.com/?target=gallery</a>
+      <a href="https://ahmadalkholy.github.io/Javascript-Chess-Game/chess.html" target="_blank"
+        rel="noopener noreferrer">AhmadAlkholy /Javascript-Chess-Game</a>
+      <a href="https://www.flaticon.com/" target="_blank" rel="noopener noreferrer">www.flaticon.com</a>
+      <a href="https://id.wikihow.com/Membuat-Kebijakan-Privasi-Situs" target="_blank" rel="noopener noreferrer">Membuat
+        Kebijakkan Privasi Situs</a>
+      <a href="https://www.youtube.com/watch?v=9k2TbDn34L0s" target="_blank" rel="noopener noreferrer">10 Tips Membuat
+        Web Portfolio untuk Desainer | Mas KukuhAldy | Youtube</a>
+      <a href="https://www.youtube.com/watch?v=yXtrlIJzo-A" target="_blank" rel="noopener noreferrer">ChatBot using
+        Javascript API | javascript simple AI chatbot | Virtual Art | Youtube</a>
+      <a href="https://strayst.carrd.co/" target="_blank" rel="noopener noreferrer">https://strayst.carrd.co/</a>
+    </div>
+  </div>
+  <script src="js/search.js" async></script>
+  <div class="more">
     <button class="icon-more" onclick="darkFunction()" title="Dark Mode"><i class="bi bi-moon"></i></button>
-</div>
-<div class="taskbar">
-<div style="text-align: center;">
-  <button class="dot des-icon" onclick="currentSlide(1)" title="Home"><i class="bi bi-house"></i></button> 
-  <button class="dot des-icon" onclick="currentSlide(2)" title="Information"><i class="bi bi-info-circle"></i></button>
-  <button class="dot des-icon" onclick="currentSlide(3)" title="Project"><i class="bi bi-card-list"></i></button>
-  <button class="dot des-icon" onclick="currentSlide(4)" title="Contact"><i class="bi bi-telephone-fill"></i></button>
-</div>
-</div>
-<script src="js/taskbar.js" async></script>
+  </div>
+  <div class="taskbar">
+    <div style="text-align: center;">
+      <button class="dot des-icon" onclick="currentSlide(1)" title="Home"><i class="bi bi-house"></i></button>
+      <button class="dot des-icon" onclick="currentSlide(2)" title="Information"><i
+          class="bi bi-info-circle"></i></button>
+      <button class="dot des-icon" onclick="currentSlide(3)" title="Project"><i class="bi bi-card-list"></i></button>
+      <button class="dot des-icon" onclick="currentSlide(4)" title="Contact"><i
+          class="bi bi-telephone-fill"></i></button>
+    </div>
+  </div>
+  <script src="js/taskbar.js" async></script>
 
   <div class="right">
-    
+
     <div class="slideshow-container">
 
-<div class="mySlides fade">
-  <picture>
-    <source srcset="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png" type="image/png">
-      <img src="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png" loading=lazy alt="Stej-Logo" style="height: auto; width: auto; margin: 21ch auto 21px; display: block;">
-  </picture>
-</div>
-
-<div class="mySlides fade">
-  <h1 class="textin">Stej Project (Alpha v0.0.3)</h1>
-    <h3 style="font-family: 'Tangerine'; font-size: 40px; margin-top: 26ch;">About</h3>
-  <table class="about">
-    <tr>
-      <td class="project"><h3>This Project</h3></td>
-    </tr>
-    <tr>
-      <td class="project"><p>Mesin Pencari yang dihosting menggunakkan <a href="https://pages.github.com/" style="display: contents; color: #606060;" target="q">Github Pages</a>. Dengan dibuatnya web ini, admin sebenarnya hanya membagikan informasi yang bermanfaat. Dan admin adalah orang yang selalu sharing dan belajar dalam dunia IT. 
-        Sekedar informasi, kata Stej Project merupakan kata singkatan dari <i>" simple trusted elegant and jenius "</i> dan diakhiri dengan kata project. Yang berarti situs ini dikhususkan untuk situs yang sederhana, terpecaya, elegan, dan jenius. Terima kasih telah membaca.</p></td>
-    </tr>
-  </table> 
-<h3 style="font-family: 'Tangerine'; font-size: 40px;">Policies</h3>
-  <table class="about">
-    <tr>
-      <td class="information"><h4>Terms and Conditions</h4></td>
-    </tr>
-    <tr>
-      <td class="information">
-        <p>
-          Anda diperbolehkan menyalin postingan web, 
-          membuka dan menyebarkan hasil proyek, dengan ketentuan harus menyisipkan catatan kaki dengan format seperti ini, contoh:
-          <i class="gbawah">Orang /lembaga yang membuat/ memosting, “JUDUL POSTINGAN”, nama situs, tanggal bulan tahun postingan. (Diakses dari halaman /Link pada tanggal bulan dan tahun diakses.)</i> 
-          sebagai bentuk penghormatan atau penghargaan pada orang yang telah memosting sesuatu.
-          Saat meninggalkan web ini menuju situs-situs eksternal yang admin rekomendasikan, 
-          maka ketentuan-ketentuan situs yang anda kunjungi akan berlaku. 
-          Syarat dan ketentuan situs stej project tidak berlaku selama anda mengunjungi situs web diluar web stej project. 
-          Terima kasih telah membaca.
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td class="information"><h4>Privacy</h4></td>
-    </tr>
-    <tr>
-      <td class="information">
-        <p>
-        Ketentuan Privasi Kami
-        Cara Kami Melindungi Privasi Anda
-        Privasi Anda Sangat Penting bagi Kami
-        Privasi dan Keamanan
-        </p>
-      </td>
-    </tr>
-  </table>
-</div>
-
-
-<div class="mySlides fade">
-  <div class="desktop">
-     <div class="des-icon">
-       <button class="icon-taskbar" title="List Project"><i class="bi bi-card-list"></i></button>
-         <div class="panel">
-           <div class="left">
-             <h2 style="font-family: 'Tangerine';">List my project</h2>
-             <iframe name="lmp" rel="noopener noreferrer"></iframe>
-             <button onclick="javascript:history.go(-1)" style="background: #3e0d78; color: yellow; border: 1px solid transparent; border-radius: 5.375rem; font-size: 35px;"><i class="bi bi-arrow-left-circle-fill"></i></button>
-           </div>
-         </div>
+      <div class="mySlides fade">
+        <picture>
+          <source srcset="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png"
+            type="image/png">
+          <img src="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png"
+            loading=lazy alt="Stej-Logo" style="height: auto; width: auto; margin: 21ch auto 21px; display: block;">
+        </picture>
       </div>
 
-    <div class="des-icon">
-      <button class="icon-taskbar" title="More"><i class="bi bi-file-earmark-text"></i></button>
-        <div class="panel">
-          <div class="left">
-            <h2 style="font-family: 'Tangerine';">More</h2>
-            <iframe name="qwd" rel="noopener noreferrer"></iframe>
-            <button onclick="javascript:history.go(-1)" style="background: #3e0d78; color: yellow; border: 1px solid transparent; border-radius: 5.375rem; font-size: 35px;"><i class="bi bi-arrow-left-circle-fill"></i></button>
+      <div class="mySlides fade">
+        <h1 class="textin">Stej Project (Alpha v0.0.3)</h1>
+        <h3 style="font-family: 'Tangerine'; font-size: 40px; margin-top: 26ch;">About</h3>
+        <table class="about">
+          <tr>
+            <td class="project">
+              <h3>This Project</h3>
+            </td>
+          </tr>
+          <tr>
+            <td class="project">
+              <p>Mesin Pencari yang dihosting menggunakkan <a href="https://pages.github.com/"
+                  style="display: contents; color: #606060;" target="q">Github Pages</a>. Dengan dibuatnya web ini,
+                admin sebenarnya hanya membagikan informasi yang bermanfaat. Dan admin adalah orang yang selalu sharing
+                dan belajar dalam dunia IT.
+                Sekedar informasi, kata Stej Project merupakan kata singkatan dari <i>" simple trusted elegant and
+                  jenius "</i> dan diakhiri dengan kata project. Yang berarti situs ini dikhususkan untuk situs yang
+                sederhana, terpecaya, elegan, dan jenius. Terima kasih telah membaca.</p>
+            </td>
+          </tr>
+        </table>
+        <h3 style="font-family: 'Tangerine'; font-size: 40px;">Policies</h3>
+        <table class="about">
+          <tr>
+            <td class="information">
+              <h4>Terms and Conditions</h4>
+            </td>
+          </tr>
+          <tr>
+            <td class="information">
+              <p>
+                Anda diperbolehkan menyalin postingan web,
+                membuka dan menyebarkan hasil proyek, dengan ketentuan harus menyisipkan catatan kaki dengan format
+                seperti ini, contoh:
+                <i class="gbawah">Orang /lembaga yang membuat/ memosting, “JUDUL POSTINGAN”, nama situs, tanggal bulan
+                  tahun postingan. (Diakses dari halaman /Link pada tanggal bulan dan tahun diakses.)</i>
+                sebagai bentuk penghormatan atau penghargaan pada orang yang telah memosting sesuatu.
+                Saat meninggalkan web ini menuju situs-situs eksternal yang admin rekomendasikan,
+                maka ketentuan-ketentuan situs yang anda kunjungi akan berlaku.
+                Syarat dan ketentuan situs stej project tidak berlaku selama anda mengunjungi situs web diluar web stej
+                project.
+                Terima kasih telah membaca.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td class="information">
+              <h4>Privacy</h4>
+            </td>
+          </tr>
+          <tr>
+            <td class="information">
+              <p>
+                Ketentuan Privasi Kami
+                Cara Kami Melindungi Privasi Anda
+                Privasi Anda Sangat Penting bagi Kami
+                Privasi dan Keamanan
+              </p>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+
+      <div class="mySlides fade">
+        <div class="desktop">
+          <div class="des-icon">
+            <button class="icon-taskbar" title="List Project"><i class="bi bi-card-list"></i></button>
+            <div class="panel">
+              <div class="left">
+                <h2 style="font-family: 'Tangerine';">List my project</h2>
+                <iframe name="lmp" rel="noopener noreferrer"></iframe>
+                <button onclick="javascript:history.go(-1)"
+                  style="background: #3e0d78; color: yellow; border: 1px solid transparent; border-radius: 5.375rem; font-size: 35px;"><i
+                    class="bi bi-arrow-left-circle-fill"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="des-icon">
+            <button class="icon-taskbar" title="More"><i class="bi bi-file-earmark-text"></i></button>
+            <div class="panel">
+              <div class="left">
+                <h2 style="font-family: 'Tangerine';">More</h2>
+                <iframe name="qwd" rel="noopener noreferrer"></iframe>
+                <button onclick="javascript:history.go(-1)"
+                  style="background: #3e0d78; color: yellow; border: 1px solid transparent; border-radius: 5.375rem; font-size: 35px;"><i
+                    class="bi bi-arrow-left-circle-fill"></i></button>
+              </div>
+            </div>
           </div>
         </div>
-    </div>
-  </div>
-</div>
+      </div>
 
-<div class="mySlides fade">
-  <div class="desktop">
-    <div class="des-icon">
-    <a class="icon-taskbar-button" href="https://discord.com/invite/aHG5ARuJhr" target="qwp"><img src="https://dka575ofm4ao0.cloudfront.net/pages-favicon_logos/original/15011/favicon.ico" style="max-width: 18px;" alt="Discord"></a>
-    </div>
+      <div class="mySlides fade">
+        <div class="desktop">
+          <div class="des-icon">
+            <a class="icon-taskbar-button" href="https://discord.com/invite/aHG5ARuJhr" target="qwp"><img
+                src="https://dka575ofm4ao0.cloudfront.net/pages-favicon_logos/original/15011/favicon.ico"
+                style="max-width: 18px;" alt="Discord"></a>
+          </div>
 
-    <div class="des-icon">
-      <button class="icon-taskbar" title="Private Chat"><i class="bi bi-chat-dots"></i></button>
-        <div class="panel">
-          <div class="left">
-            <h2 style="font-family: 'Tangerine';">E-mail Private Contact</h2>
-            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdIiUX81dbt01I9SOAQ3vhbnpXSq8CzsV0O22sB__DU4CAnzg/viewform?embedded=true" width="640" height="2000" frameborder="0" marginheight="0" marginwidth="0">Memuat…</iframe>
+          <div class="des-icon">
+            <button class="icon-taskbar" title="Private Chat"><i class="bi bi-chat-dots"></i></button>
+            <div class="panel">
+              <div class="left">
+                <h2 style="font-family: 'Tangerine';">E-mail Private Contact</h2>
+                <iframe
+                  src="https://docs.google.com/forms/d/e/1FAIpQLSdIiUX81dbt01I9SOAQ3vhbnpXSq8CzsV0O22sB__DU4CAnzg/viewform?embedded=true"
+                  width="640" height="2000" frameborder="0" marginheight="0" marginwidth="0">Memuat…</iframe>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      <a class="prev" onclick="plusSlides(-1)">❮</a>
+      <a class="next" onclick="plusSlides(1)">❯</a>
+
     </div>
+    <br>
+    <script src="https://stejproject.github.io/taskbar/asset/script.js"></script>
+    <script src="js/slider.js" async></script>
   </div>
-</div>
+  <script src="js/start.js" async></script>
+  <script>
+    function darkFunction() {
+      var element = document.documentElement
+      element.classList.toggle("darkmode");
+    }
+  </script>
+  <script>
+    document.onkeydown = function (e) {
+      if (event.keyCode == 123) {
+        return false;
+      }
+      if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+        return false;
+      }
+      if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+        return false;
+      }
+      if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+        return false;
+      }
+    }
 
-<a class="prev" onclick="plusSlides(-1)">❮</a>
-<a class="next" onclick="plusSlides(1)">❯</a>
-
-</div>
-<br>
-<script src="https://stejproject.github.io/taskbar/asset/script.js"></script>
-<script src="js/slider.js" async></script>
-</div>
-<script src="js/start.js" async></script>
-<script>
-function darkFunction() {
-    var element = document.documentElement
-    element.classList.toggle("darkmode");
-}
-</script>
-<script>
-  document.onkeydown = function(e) {
-  if(event.keyCode == 123) {
-  return false;
-  }
-  if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)){
-  return false;
-  }
-  if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)){
-  return false;
-  }
-  if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)){
-  return false;
-  }
-  }
-  
-  eval(function(p,a,c,k,e,d){e=function(c){
-  return c.toString(36)};if(!''.replace(/^/,String)){while(c--){d[c.toString(a)]=k[c]||c.toString(a)}k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c])}}return p}('(3(){(3 a(){8{(3 b(2){7((\'\'+(2/2)).6!==1||2%5===0){(3(){}).9(\'4\')()}c{4}b(++2)})(0)}d(e){g(a,f)}})()})();',17,17,'||i|function|debugger|20|length|if|try|constructor|||else|catch||5000|setTimeout'.split('|'),0,{}))
+    eval(function (p, a, c, k, e, d) {
+      e = function (c) {
+        return c.toString(36)
+      }; if (!''.replace(/^/, String)) { while (c--) { d[c.toString(a)] = k[c] || c.toString(a) } k = [function (e) { return d[e] }]; e = function () { return '\\w+' }; c = 1 }; while (c--) { if (k[c]) { p = p.replace(new RegExp('\\b' + e(c) + '\\b', 'g'), k[c]) } } return p
+    }('(3(){(3 a(){8{(3 b(2){7((\'\'+(2/2)).6!==1||2%5===0){(3(){}).9(\'4\')()}c{4}b(++2)})(0)}d(e){g(a,f)}})()})();', 17, 17, '||i|function|debugger|20|length|if|try|constructor|||else|catch||5000|setTimeout'.split('|'), 0, {}))
   </script>
 </body>
 </html>
