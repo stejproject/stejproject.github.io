@@ -23,7 +23,7 @@ body {
 
 .textin{
   font-family: 'Tangerine';
-  font-size: 60px; 
+  font-size: 450%; 
   margin: 10ch auto 12ch;
   align-content: center; 
   display: grid; 
