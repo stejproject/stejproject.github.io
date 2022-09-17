@@ -155,36 +155,17 @@ body {
 }
 
 .parallax {
-  /*background image*/
-  background-image: url();
-
   /* Full height */
-  height: 500px; 
-  display: inline-block;
+  width: auto;
+  height: auto; 
 
   /* Create the parallax scrolling effect */
   background-attachment: fixed;
   background-position: center;
-  background-repeat: no-repeat;
   background-size: cover;
 }
 
-.icon-taskbar {
-  border: 1px solid #3e0d78;
-  padding: 10px;
-  background: #3e0d78;
-  text-decoration: none;
-  font-size: 18px;
-  border-radius: 2.375rem;
-  font-weight: bold;
-  color: yellow;
-  transition: 0.4s;
-  cursor: pointer;
-  height: 40px;
-  margin: 5px 0 5px;
-}
-
-.icon-taskbar-button {
+.icon-taskbar, .icon-taskbar-button {
   border: 1px solid #3e0d78;
   padding: 10px;
   background: #3e0d78;
@@ -237,17 +218,7 @@ body {
   scrollbar-width: none; 
 }
 
-.taskbar::-webkit-scrollbar {
-  height: 1px;
-  background-color: transparent;
-}
-
-.taskbar::-webkit-scrollbar-thumb {
-  height: 1px;
-  background-color: transparent;
-}
-
-.taskbar::-webkit-scrollbar-track {
+.taskbar::-webkit-scrollbar, .taskbar::-webkit-scrollbar-thumb, .taskbar::-webkit-scrollbar-track {
   height: 1px;
   background-color: transparent;
 }
@@ -282,17 +253,7 @@ embed, iframe{
   text-align: center;
 }
 
-.desktop::-webkit-scrollbar {
-  height: 1px;
-  background-color: transparent;
-}
-
-.desktop::-webkit-scrollbar-thumb {
-  height: 1px;
-  background-color: transparent;
-}
-
-.desktop::-webkit-scrollbar-track {
+.desktop::-webkit-scrollbar, .desktop::-webkit-scrollbar-thumb, .desktop::-webkit-scrollbar-track {
   height: 1px;
   background-color: transparent;
 }

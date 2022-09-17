@@ -21,6 +21,11 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <style>
+    *, body {
+      box-sizing: border-box;
+      margin: 0;
+    }
+
     content {
       padding: 25px;
       background-color: white;
@@ -143,16 +148,6 @@
 
     .darkmode .dropbtn {
       background-color: transparent;
-    }
-  </style>
-  <style>
-    * {
-      box-sizing: border-box
-    }
-
-    body {
-      font-family: Verdana, sans-serif;
-      margin: 0
     }
 
     .mySlides {
@@ -327,7 +322,7 @@
           <source srcset="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png"
             type="image/png">
           <img src="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png"
-            loading=lazy alt="Stej-Logo" style="height: auto; width: auto; margin: 30vh auto 50%; display: block;">
+            loading=lazy alt="Stej-Logo" class="parallax" style="height: auto; width: auto; margin: 30vh auto 50%; display: block;">
         </picture>
       </div>
 
