@@ -121,11 +121,7 @@ body {
   background-color: transparent;
 }
 
-.dropdown-content::-webkit-scrollbar-thumb {
-  background-color: transparent;
-}
-
-.dropdown-content::-webkit-scrollbar-track {
+.dropdown-content::-webkit-scrollbar-thumb, .dropdown-content::-webkit-scrollbar-track {
   background-color: transparent;
 }
  
@@ -218,8 +214,12 @@ body {
   scrollbar-width: none; 
 }
 
-.taskbar::-webkit-scrollbar, .taskbar::-webkit-scrollbar-thumb, .taskbar::-webkit-scrollbar-track {
+.taskbar::-webkit-scrollbar {
   height: 1px;
+  background-color: transparent;
+}
+
+.taskbar::-webkit-scrollbar-thumb, .taskbar::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
@@ -253,7 +253,11 @@ embed, iframe{
   text-align: center;
 }
 
-.desktop::-webkit-scrollbar, .desktop::-webkit-scrollbar-thumb, .desktop::-webkit-scrollbar-track {
+.desktop::-webkit-scrollbar {
   height: 1px;
+  background-color: transparent;
+}
+
+.desktop::-webkit-scrollbar-thumb, .desktop::-webkit-scrollbar-track {
   background-color: transparent;
 }
