@@ -144,6 +144,12 @@
     .darkmode .dropbtn {
       background-color: transparent;
     }
+    </style>
+    <style>
+      *, body {
+      box-sizing: border-box;
+      margin: 0;
+    }
 
     .mySlides {
       display: none
@@ -233,11 +239,11 @@
 
     @keyframes fade {
       from {
-        background-color: #ffffffa4;
+        opacity: 0.4;
       }
 
       to {
-        background-color: #fff;
+        opacity: 1;
       }
     }
 
@@ -453,5 +459,6 @@
       element.classList.toggle("darkmode");
     }
   </script>
+
 </body>
 </html>

@@ -1,8 +1,7 @@
 /* Index Home CSS*/
 /* [* and body] */
-*, body {
+*{
   box-sizing: border-box;
-  margin: 0;
 }
 
 body {
