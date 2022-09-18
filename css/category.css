@@ -1,7 +1,12 @@
 /* Index Home CSS*/
+/* [* and body] */
 *, body {
   box-sizing: border-box;
-  font: Arial, Helvetica, sans-serif;
+  margin: 0;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 /* Create a column layout with Flexbox */
