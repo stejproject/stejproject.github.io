@@ -5,7 +5,130 @@
     box-sizing: border-box;
     font-family: sans-serif, 'Poppins';
 }
+/* darkmode */
+content {
+  padding: 25px;
+  background-color: white;
+  color: black;
+  font-size: 25px;
+}
 
+.darkmode,
+.darkmode .dropdown-content,
+.darkmode a,
+.darkmode .left {
+  background-color: #202020;
+  background-size: cover;
+  background-attachment: scroll;
+  background-repeat: repeat;
+  color: #fff;
+}
+
+.darkmode a:hover {
+  background-color: #fff;
+  background-size: cover;
+  background-attachment: scroll;
+  background-repeat: repeat;
+  color: #202020;
+}
+
+.darkmode .icon-more:active {
+  box-shadow: inset 0px 0px 30px 0px #3e0d78;
+  color: #fff;
+}
+
+.darkmode .icon-taskbar-button {
+  border: 1px solid #3e0d78;
+  padding: 10px;
+  background: #3e0d78;
+  text-decoration: none;
+  font-size: 18px;
+  border-radius: 2.375rem;
+  font-weight: bold;
+  color: yellow;
+  transition: 0.4s;
+  cursor: pointer;
+  height: 40px;
+  margin: 5px 0 5px;
+}
+
+.darkmode .icon-taskbar-button:active {
+  background-color: #3e0d789e;
+  color: #e3e3e4;
+}
+
+.darkmode .dot {
+  cursor: pointer;
+  height: 40px;
+  margin: 0 2px;
+  background-color: transparent;
+  color: yellow;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+  padding: 12px;
+  font-size: 18px;
+  border: transparent;
+}
+
+.darkmode .active,
+.darkmode .dot:hover {
+  background-color: #3e0d789e;
+  color: #e3e3e4;
+}
+
+.darkmode .prev:active,
+.darkmode .next:active {
+  background-color: #fff;
+  box-shadow: 0 0 10px 10px #fff
+}
+
+.darkmode .gbawah {
+  background: white;
+  color: black;
+}
+
+.gbawah {
+  background: black;
+  color: white;
+}
+
+.darkmode .row {
+  background-color: #034fa7;
+  background-size: cover;
+  background-attachment: scroll;
+  background-repeat: repeat;
+  color: #fff;
+}
+
+.darkmode h1 h2 h3 h4 h5 h6 p {
+  color: #fff;
+}
+
+.darkmode .icon-more {
+  background-color: transparent;
+  background-size: cover;
+  background-attachment: scroll;
+  background-repeat: repeat;
+  color: yellow;
+}
+
+.darkmode .disqus-contact {
+  background-color: #202020;
+  background-size: cover;
+  background-attachment: scroll;
+  background-repeat: repeat;
+  color: #fff;
+}
+
+.darkmode .dropbtn:active {
+  background-color: transparent;
+  box-shadow: 0px 0px 50px 50px #f4f7c6d4;
+}
+
+.darkmode .dropbtn {
+  background-color: transparent;
+}
 /* Index Home CSS*/
 /* [* and body] */
 * {
