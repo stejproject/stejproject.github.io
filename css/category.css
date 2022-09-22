@@ -33,7 +33,7 @@ body {
 
 .textin{
   font-size: 340%;
-  margin: 45% auto 12ch;
+  margin: 60% auto auto;
   align-content: center;
   display: grid;
   text-align: center;
