@@ -271,7 +271,7 @@ embed, iframe{
   background-color: transparent;
 }
 
-.project {
-  margin-top: 20px
+.project, .information,  {
+  margin-top: 20px;
   margin-bottom: 20px;
 }
