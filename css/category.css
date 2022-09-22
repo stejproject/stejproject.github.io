@@ -32,11 +32,10 @@ body {
 }
 
 .textin{
-  font-family: 'Tangerine';
-  font-size: 340%; 
+  font-size: 340%;
   margin: 45% auto 12ch;
-  align-content: center; 
-  display: grid; 
+  align-content: center;
+  display: grid;
   text-align: center;
   border-bottom: 1px solid;
 }
@@ -80,12 +79,12 @@ body {
     transform: translateX(-50px);
     transition: 0.5s ease;
 }
- 
+
 .dropbtn:active {
     background-color: transparent;
     box-shadow: 0px 0px 50px 50px #3d0d789c;
 }
- 
+
 #myInput {
     border-style: box-sizing;
     background-position: 14px 12px;
@@ -97,16 +96,16 @@ body {
     width: 100%;
     margin: 5px 0 0 0;
 }
- 
+
 #myInput:focus {
   outline: 3px solid #ddd;
 }
- 
+
 .dropdown {
     position: relative;
     display: inline-block;
 }
- 
+
 .dropdown-content {
     display: none;
     position: fixed;
@@ -122,8 +121,8 @@ body {
     border-radius: 0.375rem;
     height: 53vh;
     box-shadow: 0px 0px 10px hsl(0deg 0% 75%);
-    -ms-overflow-style: none; 
-    scrollbar-width: none; 
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .dropdown-content::-webkit-scrollbar {
@@ -134,24 +133,24 @@ body {
 .dropdown-content::-webkit-scrollbar-thumb, .dropdown-content::-webkit-scrollbar-track {
   background-color: transparent;
 }
- 
+
 .dropdown-content a {
     padding: 12px 16px;
     text-decoration: none;
     display: block;
     color: #000;
 }
- 
+
 .dropdown a:hover {
   background-color: #fff
 }
- 
+
 .show {
   display:block;
 }
 
 .active, .judpos:hover {
-  background-color: #ccc; 
+  background-color: #ccc;
 }
 
 .panel {
@@ -163,7 +162,7 @@ body {
 .parallax {
   /* Full height */
   width: auto;
-  height: auto; 
+  height: auto;
 
   /* Create the parallax scrolling effect */
   background-attachment: fixed;
@@ -220,8 +219,8 @@ body {
   padding-top: 1px;
   position: absolute;
   margin: -45px 0 0 25%;
-  -ms-overflow-style: none; 
-  scrollbar-width: none; 
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .taskbar::-webkit-scrollbar {
@@ -258,7 +257,7 @@ embed, iframe{
   background: transparent;
   padding-top: 1px;
   margin: auto;
-  -ms-overflow-style: none; 
+  -ms-overflow-style: none;
   scrollbar-width: none;
   text-align: center;
 }
