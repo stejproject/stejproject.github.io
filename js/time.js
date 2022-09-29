@@ -1,3 +1,3 @@
-const today = new Date();
-let year = today.getFullYear();
-document.getElementById('time').innerHTML=year;
+const d = new Date();
+let year = d.getFullYear();
+document.getElementById('time').innerHTML = year;
