@@ -5,4 +5,11 @@ sitemap.xml
 robots.txt
 *.woff
 *.woff2
+/.ide
+/node_modules
+.env
+.DS_Store
+Thumbs.db
+composer.phar
+.vagrant
 ------------------------------------------------------------------------------------
