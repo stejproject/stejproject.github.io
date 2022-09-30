@@ -218,6 +218,7 @@ body {
     border-bottom: 1px solid #ddd;
     width: 100%;
     margin: 5px 0 0 0;
+    display: block;
 }
 
 #myInput:focus {
