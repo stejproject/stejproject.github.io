@@ -7,12 +7,6 @@
 
 }
 /* darkmode */
-content {
-  padding: 25px;
-  color: black;
-  font-size: 25px;
-}
-
 .darkmode,
 .darkmode .dropdown-content,
 .darkmode .left {
