@@ -15,9 +15,15 @@ content {
 
 .darkmode,
 .darkmode .dropdown-content,
-.darkmode a,
 .darkmode .left {
   background-color: #202020;
+  background-size: cover;
+  background-attachment: scroll;
+  background-repeat: repeat;
+  color: #fff;
+}
+
+.darkmode a, .darkmode p {
   background-size: cover;
   background-attachment: scroll;
   background-repeat: repeat;
