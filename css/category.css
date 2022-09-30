@@ -256,8 +256,8 @@ body {
   height: 34vh;
   margin: 55px 0 0 0;
   scrollbar-color: #0dcaf0 #d8e7f3;
-  scrollbar-width: thin;
-  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .scre::-webkit-scrollbar {
