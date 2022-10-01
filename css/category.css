@@ -129,13 +129,8 @@
 .darkmode .dropbtn {
   background-color: transparent;
 }
-/* Index Home CSS*/
-/* [* and body] */
-* {
-  box-sizing: border-box;
-  margin: 0;
-}
 
+/* [body] */
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -258,12 +253,7 @@ body {
   scrollbar-width: none;
 }
 
-.scre::-webkit-scrollbar {
-  width: 5px;
-  background-color: #d8e7f3;
-}
-
-.dropdown-content::-webkit-scrollbar {
+.dropdown-content::-webkit-scrollbar, .scre::-webkit-scrollbar {
   width: 0px;
   background-color: transparent;
 }
