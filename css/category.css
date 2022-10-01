@@ -9,7 +9,7 @@
 /* darkmode */
 .darkmode,
 .darkmode .dropdown-content,
-.darkmode .left,
+.darkmode .left, .darkmode .disqus-contact,
 .darkmode iframe {
   background-color: #202020;
   background-size: cover;
@@ -111,14 +111,6 @@
   background-attachment: scroll;
   background-repeat: repeat;
   color: yellow;
-}
-
-.darkmode .disqus-contact {
-  background-color: #202020;
-  background-size: cover;
-  background-attachment: scroll;
-  background-repeat: repeat;
-  color: #fff;
 }
 
 .darkmode .dropbtn:active {
@@ -258,11 +250,6 @@ body {
   background-color: transparent;
 }
 
-.dropdown-content::-webkit-scrollbar-thumb, .dropdown-content::-webkit-scrollbar-track,
- .scre::-webkit-scrollbar-thumb, .scre::-webkit-scrollbar-track {
-  background-color: transparent;
-}
-
 .dropdown-content a {
     padding: 12px 16px;
     text-decoration: none;
@@ -395,7 +382,9 @@ embed, iframe{
   background-color: transparent;
 }
 
-.desktop::-webkit-scrollbar-thumb, .desktop::-webkit-scrollbar-track {
+.dropdown-content::-webkit-scrollbar-thumb, .dropdown-content::-webkit-scrollbar-track,
+ .scre::-webkit-scrollbar-thumb, .scre::-webkit-scrollbar-track,
+ .desktop::-webkit-scrollbar-thumb, .desktop::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
