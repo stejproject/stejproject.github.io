@@ -393,3 +393,12 @@ embed, iframe{
   margin-bottom: 20px;
   display: block;
 }
+
+.back-buttn {
+  background: #3e0d78;
+  color: yellow;
+  border: 1px solid transparent;
+  border-radius: 5.375rem;
+  font-size: 35px;
+  height: 41px;
+}
