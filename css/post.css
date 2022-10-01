@@ -50,3 +50,7 @@ audio, canvas, embed, iframe, img, object, svg, video {
   display: none;
   overflow: hidden;
 }
+
+.translat {
+  background-color: white;
+}
