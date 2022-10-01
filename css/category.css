@@ -263,20 +263,13 @@ body {
   background-color: #d8e7f3;
 }
 
-.scre::-webkit-scrollbar-thumb {
-  background-color: #0dcaf0;
-}
-
-.scre::-webkit-scrollbar-track {
-  background-color: transparent;
-}
-
 .dropdown-content::-webkit-scrollbar {
   width: 0px;
   background-color: transparent;
 }
 
-.dropdown-content::-webkit-scrollbar-thumb, .dropdown-content::-webkit-scrollbar-track {
+.dropdown-content::-webkit-scrollbar-thumb, .dropdown-content::-webkit-scrollbar-track,
+ .scre::-webkit-scrollbar-thumb, .scre::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
