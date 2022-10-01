@@ -9,7 +9,8 @@
 /* darkmode */
 .darkmode,
 .darkmode .dropdown-content,
-.darkmode .left {
+.darkmode .left,
+.darkmode iframe {
   background-color: #202020;
   background-size: cover;
   background-attachment: scroll;
