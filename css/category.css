@@ -130,7 +130,7 @@ body {
 /* Create a column layout with Flexbox */
 .row {
   display: flex;
-  background: #e4eef8;
+  background: #ddae3b;
   width: 100%;
 }
 
