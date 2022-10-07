@@ -7,10 +7,21 @@
 
 }
 
-/* [body and html width] */
-body, html {
-  width:100%;
-  height:100%;
+/* [overlay and iframes] */
+#overlay {
+  width:590px;
+  height:500px;
+  z-index: 1;
+  background-color: transparent;
+}
+
+#flosdin {
+  position: relative;
+}
+#overlay, iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 
