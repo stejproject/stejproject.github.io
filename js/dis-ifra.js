@@ -1,3 +1,4 @@
-window.frames["aiglo"].contentDocument.oncontextmenu = function(){
- return false;
-};
+window.addEventListener("contextmenu",
+  function(e){
+     e.stopPropagation()
+}, true);
