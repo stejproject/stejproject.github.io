@@ -6,10 +6,10 @@
 version: 2
 updates:
   - package-ecosystem: "composer"
-      # Files stored in repository root
-      directory: "/"
-      schedule:
-        interval: "weekly"
+    # Files stored in repository root
+    directory: "/"
+    schedule:
+      interval: "weekly"
 
   - package-ecosystem: "npm"
     # Files stored in `app` directory
