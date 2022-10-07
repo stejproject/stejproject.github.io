@@ -7,24 +7,6 @@
 
 }
 
-/* [overlay and iframes] */
-#overlay {
-  min-width: 95%;
-  height: 100%;
-  z-index: 1;
-  background-color: transparent;
-}
-
-#flosdin {
-  position: relative;
-}
-#overlay, iframe, embed {
-  position: absolute;
-  top: auto;
-  left: auto;
-}
-
-
 /* darkmode */
 .darkmode,
 .darkmode .dropdown-content,
