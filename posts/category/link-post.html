@@ -42,42 +42,50 @@
             >Website yang berguna untuk anda : Dari admin untuk Anda</a
           >
           <div class="panel">
-            <a
-              href="https://www.kashipara.com/"
-              style="
-                display: contents;
-                color: black;
-                width: 100%;
-                font-weight: normal;
-              "
-              target="q"
-            >
-              www.kashipara.com
-            </a>
-            <a
-              href="https://www.windy.com/"
-              style="
-                display: contents;
-                color: black;
-                width: 100%;
-                font-weight: normal;
-              "
-              target="q"
-            >
-              www.windy.com
-            </a>
-            <a
-              href="https://www.copyscape.com/"
-              style="
-                display: contents;
-                color: black;
-                width: 100%;
-                font-weight: normal;
-              "
-              target="q"
-            >
-              www.copyscape.com
-            </a>
+            <ol>
+              <li>
+                <a
+                  href="https://www.kashipara.com/"
+                  style="
+                    display: contents;
+                    color: black;
+                    width: 100%;
+                    font-weight: normal;
+                  "
+                  target="q"
+                >
+                  www.kashipara.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.windy.com/"
+                  style="
+                    display: contents;
+                    color: black;
+                    width: 100%;
+                    font-weight: normal;
+                  "
+                  target="q"
+                >
+                  www.windy.com
+                </a>
+              </li>
+              <li>
+              <a
+                href="https://www.copyscape.com/"
+                style="
+                  display: contents;
+                  color: black;
+                  width: 100%;
+                  font-weight: normal;
+                "
+                target="q"
+              >
+                www.copyscape.com
+              </a>
+             </li>
+             <li>
             <a
               href="https://www.checklist.design/"
               style="
@@ -90,6 +98,8 @@
             >
               www.checklist.design
             </a>
+          </li>
+          <li>
             <a
               href="https://getwaves.io/"
               style="
@@ -102,6 +112,8 @@
             >
               getwaves.io
             </a>
+          </li>
+          <li>
             <a
               href="https://neumorphism.io/"
               style="
@@ -114,6 +126,8 @@
             >
               neumorphism.io
             </a>
+          </li>
+          <li>
             <a
               href="https://uiverse.io/"
               style="
@@ -126,6 +140,8 @@
             >
               uiverse.io
             </a>
+          </li>
+          <li>
             <a
               href="http://tridiv.com/"
               style="
@@ -138,6 +154,8 @@
             >
               tridiv.com
             </a>
+          </li>
+          <li>
             <a
               href="https://urlscan.io/"
               style="
@@ -150,6 +168,8 @@
             >
               urlscan.io
             </a>
+          </li>
+          <li>
             <a
               href="http://radio.garden/"
               style="
@@ -162,6 +182,8 @@
             >
               radio.garden
             </a>
+          </li>
+          <li>
             <a
               href="https://peraturan.go.id/"
               style="
@@ -174,6 +196,8 @@
             >
               peraturan.go.id
             </a>
+          </li>
+            <li>
             <a
               href="https://pagespeed.web.dev/"
               style="
@@ -186,6 +210,8 @@
             >
               pagespeed.web.dev
             </a>
+          </li>
+            <li>
             <a
               href="https://www.shodan.io/"
               style="
@@ -198,6 +224,7 @@
             >
               www.shodan.io
             </a>
+            
             <a
               href="https://hunter.io/"
               style="
@@ -282,6 +309,8 @@
             >
               www.openstreetmap.org
             </a>
+
+            <li>
             <a
               href="https://search.google.com/test/mobile-friendly"
               style="
@@ -294,6 +323,8 @@
             >
               search.google.com/test/mobile-friendly
             </a>
+          </li>
+            <li>
             <a
               href="https://gtmetrix.com/"
               style="
@@ -306,6 +337,8 @@
             >
               gtmetrix.com
             </a>
+          </li>
+            <li>
             <a
               href="https://www.n2yo.com/"
               style="
@@ -318,6 +351,8 @@
             >
               www.n2yo.com
             </a>
+          </li>
+            <li>
             <a
               href="https://satbeams.com/"
               style="
@@ -330,6 +365,8 @@
             >
               satbeams.com
             </a>
+          </li>
+            <li>
             <a
               href="https://www.youtube.com/c/audwijaya"
               style="
@@ -342,6 +379,8 @@
             >
               www.youtube.com/c/audwijaya
             </a>
+          </li>
+            <li>
             <a
               href="https://www.webdesignmuseum.org/"
               style="
@@ -354,6 +393,8 @@
             >
               www.webdesignmuseum.org
             </a>
+          </li>
+            <li>
             <a
               href="https://squoosh.app/"
               style="
@@ -366,6 +407,8 @@
             >
               squoosh.app
             </a>
+          </li>
+            <li>
             <a
               href="https://getwaves.io/"
               style="
@@ -377,7 +420,8 @@
               target="q"
             >
               getwaves.io
-            </a>
+            </a></li>
+          </ol>
           </div>
         </li>
         <li>
@@ -522,22 +566,8 @@
         </li>
       </ul>
     </div>
-    <script>
-      var acc = document.getElementsByClassName("judpos");
-      var i;
-
-      for (i = 0; i < acc.length; i++) {
-        acc[i].addEventListener("click", function () {
-          this.classList.toggle("active");
-          var panel = this.nextElementSibling;
-          if (panel.style.display === "block") {
-            panel.style.display = "none";
-          } else {
-            panel.style.display = "block";
-          }
-        });
-      }
+    <script src="../js/judposted.js" async>
     </script>
-    <script src="js/ac.js" async></script>
+    <script src="../js/ac.js" async></script>
   </body>
 </html>
