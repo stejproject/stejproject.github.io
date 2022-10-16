@@ -296,6 +296,7 @@
   cursor: pointer;
   height: 40px;
   margin: 5px 0 5px;
+  display: inline-block;
 }
 
 .icon-taskbar-button:active {
