@@ -141,7 +141,7 @@
 
 .textin{
   font-size: 340%;
-  margin: calc(50% + 50px) auto auto;
+  margin: calc(40% + 50px) auto auto;
   align-content: center;
   display: grid;
   text-align: center;
