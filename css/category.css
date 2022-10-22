@@ -257,7 +257,7 @@
     color: navy;
 }
 
-.dropdown a:hover {
+.dropdown-content a:hover {
   background-color: #fff;
   color: black;
 }
