@@ -26,8 +26,7 @@
 
 /* darkmode */
 .darkmode,
-.darkmode .dropdown-content, .darkmode .disqus-contact,
-.darkmode iframe {
+.darkmode .dropdown-content, .darkmode .disqus-contact{
   background-color: #202020;
   background-size: cover;
   background-attachment: scroll;
@@ -37,6 +36,10 @@
 
 .darkmode a{
   color: #fff;
+}
+
+.darkmode iframe {
+  background: #d58e08;
 }
 
 .darkmode .dropdown-content a {
