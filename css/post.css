@@ -48,7 +48,8 @@ audio, canvas, embed, iframe, img, object, svg, video {
 .panel {
   padding: 0 18px;
   display: none;
-  overflow: hidden;
+  overflow-y: scroll;
+  height: 50vh;
 }
 
 .translat {
