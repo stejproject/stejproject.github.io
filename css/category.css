@@ -252,10 +252,12 @@
     padding: 12px 16px;
     text-decoration: none;
     display: block;
+    color: navy;
 }
 
 .dropdown a:hover {
-  background-color: #fff
+  background-color: #fff;
+  color: black;
 }
 
 .show {
