@@ -35,21 +35,16 @@
   color: #fff;
 }
 
-.darkmode a {
-  background-size: cover;
-  background-attachment: scroll;
-  background-repeat: repeat;
-  color: #fff;
+.darkmode .dropdown-content a {
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    color: white;
 }
 
-
-
-.darkmode a:hover {
-  background-color: #fff;
-  background-size: cover;
-  background-attachment: scroll;
-  background-repeat: repeat;
-  color: #202020;
+.darkmode .dropdown-content a:hover {
+  background-color: white;
+  color: black;
 }
 
 .darkmode .icon-more:active {
@@ -254,12 +249,12 @@
     padding: 12px 16px;
     text-decoration: none;
     display: block;
-    color: navy;
+    color: black;
 }
 
 .dropdown-content a:hover {
-  background-color: #fff;
-  color: black;
+  background-color: black;
+  color: #fff;
 }
 
 .show {
