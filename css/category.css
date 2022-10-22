@@ -35,12 +35,14 @@
   color: #fff;
 }
 
-.darkmode a, .darkmode p {
+.darkmode a {
   background-size: cover;
   background-attachment: scroll;
   background-repeat: repeat;
   color: #fff;
 }
+
+
 
 .darkmode a:hover {
   background-color: #fff;
