@@ -4,7 +4,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: sans-serif, 'Poppins', Arial, Helvetica;
-
+    text-decoration: none;
 }
 
 /* =============== */
@@ -32,6 +32,10 @@
   background-size: cover;
   background-attachment: scroll;
   background-repeat: repeat;
+  color: #fff;
+}
+
+.darkmode a{
   color: #fff;
 }
 
