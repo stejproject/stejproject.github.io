@@ -136,7 +136,7 @@ User-agent: yoozBot
 # youdao.com chinese search engine
 User-agent: YoudaoBot
 
-# Cache-Control: public, max-age=0, must-revalidate
+# Cache-Control: max-age=0, must-revalidate, no-cache
 user-agent: *
 
 # crawling rule(s) for above bots
