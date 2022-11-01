@@ -140,7 +140,7 @@ User-agent: YoudaoBot
 user-agent: *
 
 # crawling rule(s) for above bots
-Disallow: /
+allow: /
 # disallow all other bots
 User-agent: *
 Disallow: /
