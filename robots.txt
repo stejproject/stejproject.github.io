@@ -12,6 +12,7 @@
 # Last update: 2020-12-17                                                      #
 #                                                                              #
 ################################################################################
+sitemap: https://stejproject.github.io/search.github.io/
 # so.com chinese search engine
 User-agent: 360Spider
 User-agent: 360Spider-Image
@@ -134,10 +135,12 @@ User-agent: YioopBot
 User-agent: yoozBot
 # youdao.com chinese search engine
 User-agent: YoudaoBot
+
+# Cache-Control: max-age=1
+user-agent: *
+
 # crawling rule(s) for above bots
-Disallow:
+Disallow: /
 # disallow all other bots
 User-agent: *
 Disallow: /
-# Cache-Control
-Cache-Control: max-age=31536000
