@@ -1,0 +1,55 @@
+.form{
+  padding: 0ch 5%;
+  display: grid;
+  align-items: center;
+}
+.input, .textarea{
+  display: grid;
+  margin: 10px auto;
+  width: 50%;
+  padding: 10px;
+  border-radius: 2ch;
+  resize: none;
+}
+.input:focus,{
+  outline: 5px solid #fff0;
+  box-shadow: 0px 0px 10px hsl(0deg 0% 75%);
+}
+.textarea:focus{
+  outline: 5px solid #fff0;
+  box-shadow: 0px 0px 10px hsl(0deg 0% 75%);
+}
+.sub:focus{
+  outline: 5px solid #fff0;
+  box-shadow: 0px 0px 10px hsl(0deg 0% 75%);
+}
+.sub, .dang{
+  width: 15ch;
+  padding: 10px;
+  border-radius: 2ch;
+}
+.sub{
+  background: #57be39;
+  cursor: pointer;
+  color: #eaeaea;
+  font-size: 20px;
+}
+.sub:hover{
+  box-shadow: 0px 0px 10px hsl(0deg 0% 75%);
+}
+.table{
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+}
+.td{
+  float: left;
+  display: flex;
+  justify-content: center;
+  max-width: 21ch;
+  margin: 10px 5px;
+}
+
+.d-none{
+  display: none;
+}

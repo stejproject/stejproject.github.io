@@ -1,0 +1,53 @@
+.row {
+  background: linear-gradient(45deg, #cce4ec, #3c3ca8);
+}
+.con {
+  background: url(./images/logosma-sanyo-met.png) no-repeat;
+  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.2);
+  border-radius: 200px;
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
+}
+.darkmode .row,
+.darkmode .desktop {
+  background: linear-gradient(45deg, #034fa7, #cce4ec);
+}
+.desktop {
+  background: #ffffff;
+}
+.card {
+  width: 100%;
+  border: 1px solid;
+  border-radius: 5px;
+  height: 35ch;
+}
+.card-img-top {
+  width: inherit;
+  object-fit: contain;
+  padding: 10px;
+  height: 30ch;
+  max-inline-size: fit-content;
+  pointer-events: none;
+  display: inline-flex;
+  flex-direction: row;
+}
+.left1 {
+  padding: 8px 0;
+  background-color: #3f40aaeb;
+  color: deepskyblue;
+  width: auto;
+  height: auto;
+}
+.darkmode .left1 {
+  background-color: #202020eb;
+}
+.card-body {
+  padding: 10px;
+}
+.card-text {
+  font-size: 20px;
+}
+.t1 {
+  margin: 28.115vh 10px;
+  display: flex;
+}
