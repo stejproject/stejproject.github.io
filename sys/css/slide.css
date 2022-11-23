@@ -1,0 +1,123 @@
+/* sliding effects */
+
+.mySlides {
+  display: none
+}
+
+img {
+  vertical-align: middle;
+}
+
+/* Slideshow container */
+.slideshow-container {
+  max-width: 500px;
+  margin: auto;
+  width: 50%;
+  height: 50%;
+}
+
+.slideshow-container:hover {
+  max-width: 500px;
+  margin: auto;
+}
+
+.slideshow-container:active {
+  opacity: 0.5;
+}
+
+/* Next & previous buttons */
+.prev,
+.next {
+  cursor: pointer;
+  position: fixed;
+  top: 50%;
+  width: auto;
+  padding: 10px;
+  color: goldenrod;
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.5s ease;
+  user-select: none;
+}
+
+/* Position the "next button" to the right */
+.next {
+  right: 0;
+  border-radius: 40px 0 0 40px;
+}
+
+/* Position the "pref button" to the left */
+.prev {
+  left: 0;
+  border-radius: 0 40px 40px 0;
+}
+
+/* On active, add a black background color with a little bit see-through */
+.prev:active,
+.next:active {
+  background-color: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 10px 10px rgb(0, 0, 0, 0.8);
+}
+
+/* The dots/bullets/indicators */
+.dot {
+  cursor: pointer;
+  height: 40px;
+  margin: 0 2px;
+  background-color: transparent;
+  color: #7a4a60;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+  padding: 12px;
+  font-size: 18px;
+  border: transparent;
+}
+
+.active,
+.dot:hover {
+  background-color: #3e0d789e;
+  color: #e3e3e4;
+}
+
+/* Fading animation */
+.fade {
+  animation-name: fade;
+  animation-duration: 0.5s;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* On smaller screens, decrease text size */
+@media only screen and (max-width: 300px) {
+
+  .prev,
+  .next,
+  .text {
+    font-size: 11px
+  }
+}
+
+/* Create a column layout with Flexbox */
+.row {
+  display: flex;
+  background: #ddae3b;
+  width: 100%;
+}
+
+/* For Handphone devices */
+@media screen and (max-width: 600px) {
+  .row {
+     display: grid;
+   }
+}
+
+/* sliding effects */

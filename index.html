@@ -90,11 +90,8 @@
   <div class="taskbar">
     <div style="text-align: center;">
       <button class="dot des-icon" onclick="currentSlide(1)" title="Home"><i class="bi bi-house"></i></button>
-      <button class="dot des-icon" onclick="currentSlide(2)" title="Information"><i
-          class="bi bi-info-circle"></i></button>
-      <button class="dot des-icon" onclick="currentSlide(3)" title="Project"><i class="bi bi-card-list"></i></button>
-      <button class="dot des-icon" onclick="currentSlide(4)" title="Contact"><i
-          class="bi bi-telephone-fill"></i></button>
+      <button class="dot des-icon" onclick="currentSlide(2)" title="Features List"><i class="bi bi-card-list"></i></button>
+      <button class="dot des-icon" onclick="currentSlide(3)" title="Informations"><i class="bi bi-info-circle"></i></button>
     </div>
   </div>
   <script src="https://stejproject.github.io/sys/js/taskbar.js" async></script>
@@ -103,140 +100,65 @@
     <div class="slideshow-container">
       <div class="mySlides fade">
         <picture>
-          <source srcset="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png 380w, https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png 1080w" sizes="100vw" type="image/png">
-          <img src="https://raw.githubusercontent.com/stejproject/stejproject.github.io/main/favicon-128.png" loading=lazy alt="Stej-Logo" class="parallax" style="height: 50%; width: 50%; margin: 30vh auto 10%; display: block;">
+          <source srcset="./images/favicon-128.png 380w, ./images/favicon-128.png 1080w" sizes="100vw" type="image/png">
+          <img src="./images/favicon-128.png" loading=lazy alt="Stej-Logo" class="par con" style="pointer-events: none; height: 50%; width: 50%; margin: 30vh auto 10%; display: block;">
         </picture>
+        <h1 style="font-family: 'Marcellus'; font-size: calc(50px - 20px); margin: calc(0% + 50px) auto auto; align-content: center; display: grid; text-align: center;">STEJ Project</h1>
       </div>
 
-      <div class="mySlides fade">
-        <div class="textin">
-          <h2 style="font-family: 'Tangerine'; font-size: 60px;">Stej Project (2020 - <span id="time" style="font-family: 'Tangerine';"></span>)</h2>
+      <div class="mySlides fade scrollbr" style="border: 1px solid; box-shadow: rgb(136, 136, 136) 20px 20px; margin: 10px auto; overflow-y: scroll; height: 65ch;">
+        <div class="textin t1">
+          <h2 style="font-family: 'Marcellus'; font-size: 40px;">STEJ Project (2020 - <span id="time" style="font-family: 'Marcellus';"></span>)</h2>
           <script src="https://stejproject.github.io/sys/js/time.js" defer></script>
         </div>
-        <h3 style="font-family: 'Tangerine'; font-size: 40px; margin-top: 26ch;">About</h3>
-        <table class="about">
-          <tr>
-            <td class="project">
-              <h3>This Project</h3>
-            </td>
-          </tr>
-          <tr>
-            <td class="project">
-              <p>Projek ini dihosting menggunakkan </p><a href="https://pages.github.com/"
-                  style="display: contents; color: #606060;" target="_blank">Github Pages.</a><p> Dengan dibuatnya projek ini,
-                admin sebenarnya hanya membagikan informasi yang bermanfaat. Dan admin adalah orang yang suka sharing
-                dan belajar dalam dunia IT.</p>
-                <p>Sekedar informasi, kata Stej Project merupakan kata singkatan dari</p> <i>" simple trusted elegant and
-                  jenius "</i><p> dan diakhiri dengan kata project. Yang berarti situs ini dikhususkan untuk situs yang
-                sederhana, terpecaya, elegan, dan jenius. Terima kasih telah membaca.</p>
-            </td>
-          </tr>
-        </table>
-        <h3 style="font-family: 'Tangerine'; font-size: 40px;">Policies</h3>
-        <table class="about">
-          <tr>
-            <td class="information">
-              <h4>Terms and Conditions</h4>
-            </td>
-          </tr>
-          <tr>
-            <td class="information">
-              <p>
-                Anda diperbolehkan menyalin postingan web,
-                membuka dan menyebarkan hasil proyek, dengan ketentuan harus menyisipkan catatan kaki dengan format
-                seperti ini, contoh:
-                <i class="gbawah">Orang /lembaga yang membuat/ memosting, “JUDUL POSTINGAN”, nama situs, tanggal bulan
-                  tahun postingan. (Diakses dari halaman /Link pada tanggal bulan dan tahun diakses.)</i>
-                sebagai bentuk penghormatan atau penghargaan pada orang yang telah memosting sesuatu.
-                Saat meninggalkan web ini menuju situs-situs eksternal yang admin rekomendasikan,
-                maka ketentuan-ketentuan situs yang anda kunjungi akan berlaku.
-                Syarat dan ketentuan situs stej project tidak berlaku selama anda mengunjungi situs web diluar web stej
-                project.
-                Terima kasih telah membaca.
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td class="information">
-              <a href="https://stejproject.github.io/posts/postingan/pri-poli.html" style="display: contents; color: #606060;" target="q"><h4>Privacy and Rules(Link)</h4></a>
-            </td>
-          </tr>
-        </table>
-        <h3 style="font-family: 'Tangerine'; font-size: 40px;">Licenses</h3>
-        <table>
-          <tr>
-            <td class="information">
-              <h4>STEJ License</h4>
-            </td>
-          </tr>
-          <tr>
-            <td class="information">
-              <p>STEJ License adalah lisensi yang
-mengedepankan keaslian dan kreativitas
-<strong>software developer dan kreator
-( termasuk penulis, software designer, konten kreator)
-yang berminat menjadi kontributor dari pengembangan STEJ Project.</strong>
-Lisensi ini juga mematuhi kode etik yang berlaku di masyarakat.</p>
-
-<p><u>Ketentuan dalam menggunakkan lisensi ini:</u></p>
-
-<p><u>1. Kebijakkan privasi ini juga bisa digunakkan sebagai tambahan dari
-kebijakkan privasi yang telah ada di dalam produk digital.</u></p>
-
-<p><u>2. Jika produk anda didistribusikan,
-pengguna diwajibkan menggunakkan produk yang diinginkan
-sebagai bahan pembelajaran.</u></p>
-
-<p><u>3. Lisensi ini mendukung kebenaran tentang
-adanya sebuah informasi di masyarakat.</u></p>
-
-<p><u>4. Bersifat terbuka dalam mendistribusikan karya-karya maupun
-membuat karya dalam lingkup yang bermanfaat bagi kehidupan.</u></p>
-
-<p><u>5. Pembuat produk harus menjunjung prinsip STEJ
-(Simple Trusted Elegant and Jenius)</u></p>
-
-===+===+===
-<pre>
-Pemasangan lisensi ini adalah
-dengan menempelkan isi lisensi
-dan diberi nama
-dengan nama: LICENSE
-atau dengan nama: LICENSE1
-</pre>
-          </td>
-        </tr>
-      </table>
-        <h3 style="font-family: 'Tangerine'; font-size: 40px;">Admin juga mengucapkan terima kasih kepada:</h3>
-        <table>
-          <tr>
-            <td class="information">
-              <ol>
-                <li>Github</li>
-                <li>Google</li>
-                <li>Web Programming Study Roadmap</li>
-                <li>Stackoverflow</li>
-                <li>Bootstrap</li>
-                <li>Onno W. Purbo (Motivasi)</li>
-                <li>Sandika Galih (Tutorial Online)</li>
-                <li>Dea Afrizal (Tutorial Online and Forum Discussions)</li>
-                <li>https://www.privacypolicyonline.com/</li>
-                <li>dll yang tidak saya sebutkan.</li>
-              </ol>
-            </td>
-          </tr>
-        </table>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" style="rotate: 0deg;">
+         <path
+           fill="#3e0d78"
+           fill-opacity="1"
+           d="M0,96L48,90.7C96,85,192,75,288,101.3C384,
+           128,480,192,576,197.3C672,203,768,149,864,149.3C960,
+           149,1056,203,1152,224C1248,245,1344,235,1392,229.3L1440,224L1440,
+           320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+         ></path>
+       </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" style="rotate: 180deg;">
+         <path
+           fill="#3e0d78"
+           fill-opacity="1"
+           d="M0,96L48,90.7C96,85,192,75,288,101.3C384,
+           128,480,192,576,197.3C672,203,768,149,864,149.3C960,
+           149,1056,203,1152,224C1248,245,1344,235,1392,229.3L1440,224L1440,
+           320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+         ></path>
+       </svg>
+       <div class="textin t1" style="margin: 20.115vh 10px auto;">
+         <h2 style="font-family: 'Marcellus'; font-size: 40px;">List Projects</h2>
+       </div>
+       <table style="font-size: 20px; height: 42vh; padding: 30px;">
+         <tr>
+           <td>
+             <ol>
+               <li>
+                 <a href="https://stejproject.github.io/search.github.io/" target="_blank" rel="noopener noreferrer"> Search List</a>
+               </li>
+               <li>
+                 <a href="https://stejproject.github.io/textedit/" target="_blank" rel="noopener noreferrer">Text Editors</a>
+               </li>
+             </ol>
+           </td>
+         </tr>
+       </table>
       </div>
 
-        <div class="mySlides fade">
-          <div class="desktop">
+        <div class="mySlides fade" style="border: 1px solid; box-shadow: rgb(136, 136, 136) 20px 20px; margin: 10px auto;">
+          <div class="desktop" style="display: block;">
             <div class="des-icon">
               <button class="icon-taskbar" title="My Project and More">
                 <i class="bi bi-file-earmark-text"></i>
               </button>
               <div class="panel">
                 <div class="left">
-                  <h2 style="font-family: 'Tangerine';">Results STEJ Projects</h2>
+                  <h2 style="font-family: sans-serief;">Results</h2>
                   <iframe name="lmp" rel="noopener noreferrer" onhover="onhover()" onclick="onclick()" onmouseup="onmouseup()"></iframe>
 
                   <button onclick="javascript:history.go(-1)" class="back-buttn">
@@ -247,58 +169,209 @@ atau dengan nama: LICENSE1
             </div>
 
             <div class="des-icon">
-              <button class="icon-taskbar" title="Online Search Engines From Google">
-                <i class="bi bi-card-list"></i>
+              <button class="icon-taskbar" title="Peserta Kelompok">
+                <i class="bi bi-person-check-fill"></i>
               </button>
               <div class="panel">
-                <div class="left">
-                  <h2 style="font-family: 'Tangerine';">Featured products</h2>
-                  <div class="card" style="margin: auto; border: 1px solid darkgreen; border-radius: 5px; height: auto; display: inline-flex; flex-direction: row;">
-                    <embed src="https://stejproject.github.io/search.github.io/" class="card-img-top" title="https://stejproject.github.io/search.github.io/" style=" pointer-events: none;">
-                    <div class="card-body">
-                      <h5 class="card-title">STEJ Search Engines</h5>
-                      <p class="card-text">Full page Search Engines.</p>
-                      <a href="https://stejproject.github.io/search.github.io/" class="btn btn-primary" target="_blank">KUNJUNGI Gaes !!!</a>
+                <div class="left1 left">
+                  <h2 style="font-family: sans-serief;">About Admin</h2>
+                  <h3 style="font-family: 'Marcellus'; font-size: 20px;">Admin adalah orang yang terkadang membagikan pengalaman dalam belajar.</h3>
+                    <div class="pro">
+                    <div class="pro1" style="max-width:100%; text-align: center; margin:5ch auto; display: inline-flex;">
+
+                      <div class="card poSlides">
+                        <div class="card-body">
+                          <i class="card-text">
+                            Quotes:
+                            Harus bermanfaat bagi banyak orang. <br>
+                            .Da Amorem Sapientiam Producere. <br>
+                            Tebarlah kasih /cinta, Hasilkan kebijaksanaan
+                          </i>
+                        </div>
+                      </div>
+
                     </div>
+                    <script src="./sys/js/prof.js" defer></script>
                   </div>
-                  <div class="card" style="margin: auto; border: 1px solid darkgreen; border-radius: 5px; height: auto; display: inline-flex; flex-direction: row-reverse;">
-                    <embed src="https://stejproject.github.io/textedit/" class="card-img-top" title="https://stejproject.github.io/textedit/" style="pointer-events: none;">
-                  <div class="card-body">
-                    <h5 class="card-title">STEJ editor</h5>
-                    <p class="card-text">A web based single Text Editor with live preview.</p>
-                    <a href="https://stejproject.github.io/textedit/" class="btn btn-primary" target="_blank">KUNJUNGI Gaes !!!</a>
-                  </div>
-                </div>
+                 </div>
               </div>
-           </div>
+            </div>
+
+            <div class="des-icon">
+              <button class="icon-taskbar" title="Peserta Kelompok">
+                <i class="bi bi-chat-left-text"></i>
+              </button>
+              <div class="panel">
+                <div class="left1 left">
+                  <h2 style="font-family: 'sans-serief';">Admin Contact</h2>
+                  <h3 style="font-family: 'Marcellus'; font-size: 20px;">Bila ada masukkan untuk pengembangan kinerja admin.</h3>
+                    <div class="pro">
+                    <div class="pro1" style="max-width:100%; text-align: center;">
+                      <div class="my-alert w-50 mx-auto ale alert alert-dismissible fade show d-none" style="background: #2db34a; color: #fff; margin-top: 30px;" role="alert">
+                        <p><strong>Terima Kasih!</strong> Pesan ini sudah diterima.</p>
+                        <strong>! Jangan di kirim berulang ya!</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="color: #fff;"></button>
+                      </div>
+
+                      <form name="submit-to-google-sheet" class="form">
+                        <input class="input" name="nama" type="nama" placeholder="Nama" required />
+                        <input class="input" name="email" type="email" placeholder="Email" required />
+                        <textarea class="input scrollbr" name="pesan" type="pesan" placeholder="Pesan" maxlength="1024"></textarea>
+                        <table class="table">
+                          <tr>
+                            <td class="td">
+                              <button type="submit" class="sub">Send</button>
+                              <button type="submit" class="sub load d-none">Loading</button>
+                            </td>
+                          </tr>
+                        </table>
+                      </form>
+                    </div>
+                    <script src="./sys/contact/js/scr.js" defer></script>
+                  </div>
+                 </div>
+              </div>
+            </div>
+
+
+         <div class="des-icon">
+            <a class="icon-taskbar-button" href="https://discord.com/invite/aHG5ARuJhr" target="qwp" title="Discord"><img src="https://dka575ofm4ao0.cloudfront.net/pages-favicon_logos/original/15011/favicon.ico" style="max-width: 18px;" alt="Discord"></a>
          </div>
+         <div class="des-icon">
+            <a class="icon-taskbar-button" href="https://github.com/stejproject/" target="qwp" title="Our Github "><i class="bi bi-github" style="max-width: 18px;"></i></a>
+         </div>
+         <div class="des-icon">
+           <a class="icon-taskbar-button" href="https://docs.google.com/forms/d/e/1FAIpQLSdIiUX81dbt01I9SOAQ3vhbnpXSq8CzsV0O22sB__DU4CAnzg/viewform" target="qwp" title="Google Forms"><i class="bi bi-chat-dots" style="max-width: 18px;"></i></a>
+         </div>
+
        </div>
+
+       <div class="scrollbr" style="overflow-y: scroll; height: 60ch;">
+         <h3 style="font-family: 'Marcellus'; font-size: 40px;">About</.>
+           <tr>
+             <td class="project" style="font-family: 'Marcellus';">
+               <h3>This Project</h3>
+             </td>
+           </tr>
+           <tr>
+             <td class="project">
+               <p>Projek ini dihosting menggunakkan </p><a href="https://pages.github.com/"
+                   style="display: contents; color: #606060;" target="_blank">Github Pages.</a><p> Dengan dibuatnya projek ini,
+                 admin sebenarnya hanya membagikan informasi yang bermanfaat. Dan admin adalah orang yang suka sharing
+                 dan belajar dalam dunia IT.</p>
+                 <p>Sekedar informasi, kata Stej Project merupakan kata singkatan dari</p> <i>" simple trusted elegant and
+                   jenius "</i><p> dan diakhiri dengan kata project. Yang berarti situs ini dikhususkan untuk situs yang
+                 sederhana, terpecaya, elegan, dan jenius. Terima kasih telah membaca.</p>
+             </td>
+           </tr>
+         </table>
+         <h3 style="font-family: 'Marcellus'; font-size: 40px;">Policies</h3>
+         <table class="about">
+           <tr>
+             <td class="information">
+               <h4 style="font-family: 'Marcellus';">Terms and Conditions</h4>
+             </td>
+           </tr>
+           <tr>
+             <td class="information">
+               <p>
+                 Anda diperbolehkan menyalin postingan web,
+                 membuka dan menyebarkan hasil proyek, dengan ketentuan harus menyisipkan catatan kaki dengan format
+                 seperti ini, contoh:
+                 <i class="gbawah">Orang /lembaga yang membuat/ memosting, “JUDUL POSTINGAN”, nama situs, tanggal bulan
+                   tahun postingan. (Diakses dari halaman /Link pada tanggal bulan dan tahun diakses.)</i>
+                 sebagai bentuk penghormatan atau penghargaan pada orang yang telah memosting sesuatu.
+                 Saat meninggalkan web ini menuju situs-situs eksternal yang admin rekomendasikan,
+                 maka ketentuan-ketentuan situs yang anda kunjungi akan berlaku.
+                 Syarat dan ketentuan situs stej project tidak berlaku selama anda mengunjungi situs web diluar web stej
+                 project.
+                 Terima kasih telah membaca.
+               </p>
+             </td>
+           </tr>
+           <tr>
+             <td class="information">
+               <a href="./p/pri-poli.html" style="display: contents; color: #606060;" target="q"><h4>Privacy and Rules(Link)</h4></a>
+             </td>
+           </tr>
+         </table>
+         <h3 style="font-family: 'Tangerine'; font-size: 40px;">Licenses</h3>
+         <table>
+           <tr>
+             <td class="information">
+               <h4>STEJ License</h4>
+             </td>
+           </tr>
+           <tr>
+             <td class="information">
+               <p>STEJ License adalah lisensi yang
+ mengedepankan keaslian dan kreativitas
+ <strong>software developer dan kreator
+ ( termasuk penulis, software designer, konten kreator)
+ yang berminat menjadi kontributor dari pengembangan STEJ Project.</strong>
+ Lisensi ini juga mematuhi kode etik yang berlaku di masyarakat.</p>
+
+ <p><u>Ketentuan dalam menggunakkan lisensi ini:</u></p>
+
+ <p><u>1. Kebijakkan privasi ini juga bisa digunakkan sebagai tambahan dari
+ kebijakkan privasi yang telah ada di dalam produk digital.</u></p>
+
+ <p><u>2. Jika produk anda didistribusikan,
+ pengguna diwajibkan menggunakkan produk yang diinginkan
+ sebagai bahan pembelajaran.</u></p>
+
+ <p><u>3. Lisensi ini mendukung kebenaran tentang
+ adanya sebuah informasi di masyarakat.</u></p>
+
+ <p><u>4. Bersifat terbuka dalam mendistribusikan karya-karya maupun
+ membuat karya dalam lingkup yang bermanfaat bagi kehidupan.</u></p>
+
+ <p><u>5. Pembuat produk harus menjunjung prinsip STEJ
+ (Simple Trusted Elegant and Jenius)</u></p>
+
+ ===+===+===
+ <pre>
+ Pemasangan lisensi ini adalah
+ dengan menempelkan isi lisensi
+ dan diberi nama
+ dengan nama: LICENSE
+ atau dengan nama: LICENSE1
+ </pre>
+           </td>
+         </tr>
+       </table>
+       <h3 style="font-family: 'Marcellus'; font-size: 40px;">Admin mengucapkan terima kasih tuk:</h3>
+       <table style="margin-left: 20px;">
+         <tr>
+           <td class="information">
+             <ol>
+               <li>Github</li>
+               <li>Google</li>
+               <li>Web Programming Study Roadmap</li>
+               <li>Stackoverflow</li>
+               <li>Bootstrap</li>
+               <li>Onno W. Purbo (Motivasi)</li>
+               <li>Sandika Galih (Tutorial Online)</li>
+               <li>Dea Afrizal (Tutorial Online and Forum Discussions)</li>
+               <li>https://www.privacypolicyonline.com/</li>
+               <li>dan lain lain yang tidak saya sebutkan.</li>
+             </ol>
+           </td>
+         </tr>
+       </table>
      </div>
-
-        <div class="mySlides fade">
-          <div class="desktop">
-
-            <div class="des-icon">
-               <a class="icon-taskbar-button" href="https://discord.com/invite/aHG5ARuJhr" target="qwp" title="Discord"><img src="https://dka575ofm4ao0.cloudfront.net/pages-favicon_logos/original/15011/favicon.ico" style="max-width: 18px;" alt="Discord"></a>
-            </div>
-            <div class="des-icon">
-               <a class="icon-taskbar-button" href="https://github.com/stejproject/" target="qwp" title="Our Github "><i class="bi bi-github" style="max-width: 18px;"></i></a>
-            </div>
-            <div class="des-icon">
-              <a class="icon-taskbar-button" href="https://docs.google.com/forms/d/e/1FAIpQLSdIiUX81dbt01I9SOAQ3vhbnpXSq8CzsV0O22sB__DU4CAnzg/viewform" target="qwp" title="Google Forms"><i class="bi bi-chat-dots" style="max-width: 18px;"></i></a>
-            </div>
-          </div>
-        </div>
+     </div>
     </div>
 </div>
-      <a class="prev" href="#pr" onclick="plusSlides(-1)">❮</a>
-      <a class="next" href="#ne" onclick="plusSlides(1)">❯</a>
+      <a class="prev" href="#>" onclick="plusSlides(-1)">❮</a>
+      <a class="next" href="#<" onclick="plusSlides(1)">❯</a>
+
 <br>
-<script src="https://stejproject.github.io/sys/js/slider.js" async></script>
-<script src="https://stejproject.github.io/sys/js/start.js" async></script>
-<script src="https://stejproject.github.io/sys/js/drk.js" defer></script>
-<script src="https://stejproject.github.io/sys/js/ac.js" async></script>
-<script src="https://stejproject.github.io/sys/js/ifra-dis.js" async></script>
+<script src="./sys/js/slider.js" async></script>
+<script src="./sys/js/start.js" async></script>
+<script src="./sys/js/drk.js" defer></script>
+<script src="./sys/js/ac.js" async></script>
+<script src="./sys/js/ifra-dis.js" async></script>
 
 </body>
 </html>
