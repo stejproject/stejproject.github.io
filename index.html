@@ -30,6 +30,14 @@
     integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
     crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script>
+      function klik() {
+          document.getElementById("myInput").style.color = "#202020";
+      }
+      function kabur() {
+          document.getElementById("myInput").style.color = "white";
+      }
+  </script>
   <!-- === -->
 </head>
 
@@ -44,7 +52,7 @@
       </picture>
     </button>
     <div id="myDropdown" class="dropdown-content">
-      <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()" autocomplete="off">
+      <input type="text" placeholder="Search.." id="myInput" onclick="klik()" onmouseout="kabur()" onkeyup="filterFunction()" autocomplete="off">
       <div class="scre">
       <a href="https://stejproject.github.io/posts/youtube/youtube-post.html" target="lmp"
         >Tutorial, tips dan trik Youtube</a>
