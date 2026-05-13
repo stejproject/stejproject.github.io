@@ -73,6 +73,9 @@ Makna: APRESIASI untuk Penasihat Aktif Lama
 **nama: STEJ-LICENSE6**
 Makna: APRESIASI untuk Penasihat Aktif Baru
 ***
+**nama: STEJ-LICENSE7**
+Makna: Ini Peringatan Adalah Buatan bukan manusia
+***
 Keterangan K = Kebijakan Point, Diberikan hanya seizin keputusan admin.
 </u>
 
