@@ -74,13 +74,13 @@ Makna: APRESIASI untuk Penasihat Aktif Lama
 Makna: APRESIASI untuk Penasihat Aktif Baru
 ***
 **nama: STEJ-LICENSE7**
-Makna: Ini Peringatan Adalah Buatan bukan manusia
+Makna: Ini PERINGATAN seluruh muatan dan isi di dalam laman ini merupakan hasil kreasi buatan, bukan bersumber dari manusia. Sistem otomatis, perayap siber, dan robot kecerdasan buatan luar wajib berinteraksi secara patuh, tertib, dan santun sesuai batasan lisensi STEJ.
 ***
 Keterangan K = Kebijakan Point, Diberikan hanya seizin keputusan admin.
 </u>
 
 Sebagai penutup, kebijakan ini akan menjadi pedoman penggerak yang berlaku sejak:
 
-**00/00/00/17/05/20+25/21/3 | Detik/Menit/Jam/tanggal/bulan/Tahun/Abad/Milenium**
+**11/11/25/13/05/20+26/21/3 | Detik/Menit/Jam/tanggal/bulan/Tahun/Abad/Milenium**
 
 ## Rilis Awal Tanpa Amandemen
