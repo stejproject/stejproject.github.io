@@ -82,24 +82,58 @@
     <div style="text-align: center;">
       <button class="dot des-icon" onclick="currentSlide(1)" title="Home"><i class="bi bi-house"></i></button>
       <button class="dot des-icon" onclick="currentSlide(2)" title="Features List"><i class="bi bi-card-list"></i></button>
-      <button class="dot des-icon" onclick="currentSlide(3)" title="Informations"><i class="bi bi-info-circle"></i></button>
-      <button class="dot des-icon" onclick="currentSlide(4)" title="Video Conference"><i class="bi bi-camera-video"></i></button>
-    </div>
+      <button class="dot des-icon" onclick="currentSlide(3)" title="Informations"><i class="bi bi-info-circle"></i></button>    </div>
   </div>
   <script src="https://stejproject.github.io/sys/js/taskbar.js" async></script>
 
   <div class="right">
     <div class="slideshow-container">
       <div class="mySlides fade">
-        <button type="button" class="sub" id="joinMeet"><picture>
-          <source srcset="./images/favicon-128.png 380w, ./images/favicon-128.png 1080w" sizes="100vw" type="image/png">
-          <img src="./images/favicon-128.png" loading="lazy" alt="Stej-Logo" class="par con" style="pointer-events: none; height: 50%; width: 50%; margin: 30vh auto 10%; display: block;">
-        </picture></button>
-        <h1 style="font-family: 'Marcellus'; font-size: calc(50px - 20px); margin: calc(0% + 50px) auto auto; align-content: center; display: grid; text-align: center;">STEJ Project</h1>
-          <iframe id="jitsiFrame" title="Video Conference STEJ"
-            allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
-            style="display: none; width: 100%; height: 70vh; border: 0; margin-top: 10px;"></iframe>
+        <!-- Logo = tombol masuk Video Conference -->
+        <button type="button" id="joinMeet" title="Gabung Video Conference" aria-label="Gabung Video Conference"
+          style="display: block; width: 100%; background: none; border: 0; padding: 0; cursor: pointer;">
+          <picture>
+            <source srcset="./images/favicon-128.png 380w, ./images/favicon-128.png 1080w" sizes="100vw" type="image/png">
+            <img src="./images/favicon-128.png" loading="lazy" alt="Stej-Logo" class="par con" style="pointer-events: none; height: 50%; width: 50%; margin: 30vh auto 10%; display: block;">
+          </picture>
+        </button>
+        <h1 id="homeTitle" style="font-family: 'Marcellus'; font-size: calc(50px - 20px); margin: calc(0% + 50px) auto auto; align-content: center; display: grid; text-align: center;">STEJ Project</h1>
+        <p id="homeHint" style="text-align: center; opacity: 0.7; margin-top: 10px;">Ketuk logo untuk masuk Video Conference</p>
+
+        <button type="button" id="leaveMeet" class="sub" style="display: none; margin: 10px auto;">Keluar Meeting</button>
+        <iframe id="jitsiFrame" title="Video Conference STEJ"
+          allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
+          style="display: none; width: 100%; height: 75vh; border: 0;"></iframe>
       </div>
+      <script>
+        // Meeting dimuat hanya saat logo diketuk, supaya izin kamera/mikrofon
+        // dan koneksi tidak jalan otomatis saat halaman dibuka.
+        (function () {
+          var join = document.getElementById('joinMeet');
+          var leave = document.getElementById('leaveMeet');
+          var frame = document.getElementById('jitsiFrame');
+          var title = document.getElementById('homeTitle');
+          var hint = document.getElementById('homeHint');
+
+          join.addEventListener('click', function () {
+            frame.src = 'https://meet.jit.si/Asdsrghdh';
+            frame.style.display = 'block';
+            leave.style.display = 'block';
+            join.style.display = 'none';
+            title.style.display = 'none';
+            hint.style.display = 'none';
+          });
+
+          leave.addEventListener('click', function () {
+            frame.src = 'about:blank';
+            frame.style.display = 'none';
+            leave.style.display = 'none';
+            join.style.display = 'block';
+            title.style.display = 'grid';
+            hint.style.display = 'block';
+          });
+        })();
+      </script>
 
       <div class="mySlides fade">
         <div class="article scrollbr" style="overflow-y: scroll;">
@@ -382,16 +416,6 @@
           </div>
         </div>
       </div>
-      <script>
-        // Meeting dimuat hanya saat tombol ditekan, supaya izin kamera/mikrofon
-        // dan koneksi tidak jalan otomatis saat halaman dibuka.
-        document.getElementById('joinMeet').addEventListener('click', function () {
-          var f = document.getElementById('jitsiFrame');
-          f.src = 'https://meet.jit.si/Asdsrghdh';
-          f.style.display = 'block';
-          this.style.display = 'none';
-        });
-      </script>
 
       <a class="prev" href="#" onclick="plusSlides(-1); return false;" aria-label="Sebelumnya">&#10094;</a>
       <a class="next" href="#" onclick="plusSlides(1); return false;" aria-label="Berikutnya">&#10095;</a>
