@@ -83,6 +83,7 @@
       <button class="dot des-icon" onclick="currentSlide(1)" title="Home"><i class="bi bi-house"></i></button>
       <button class="dot des-icon" onclick="currentSlide(2)" title="Features List"><i class="bi bi-card-list"></i></button>
       <button class="dot des-icon" onclick="currentSlide(3)" title="Informations"><i class="bi bi-info-circle"></i></button>
+      <button class="dot des-icon" onclick="currentSlide(4)" title="Video Conference"><i class="bi bi-camera-video"></i></button>
     </div>
   </div>
   <script src="https://stejproject.github.io/sys/js/taskbar.js" async></script>
@@ -378,6 +379,28 @@
           </div>
         </div>
       </div>
+
+      <!-- SLIDE 4: VIDEO CONFERENCE (Jitsi) -->
+      <div class="mySlides fade">
+        <div class="article scrollbr" style="padding: 10px; text-align: center; overflow-y: auto;">
+          <h2 style="font-family: 'Marcellus'; font-size: 32px;">Video Conference</h2>
+          <p>Ruang: <b>Asdsrghdh</b></p>
+          <button type="button" class="sub" id="joinMeet">Gabung Meeting</button>
+          <iframe id="jitsiFrame" title="Video Conference STEJ"
+            allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
+            style="display: none; width: 100%; height: 70vh; border: 0; margin-top: 10px;"></iframe>
+        </div>
+      </div>
+      <script>
+        // Meeting dimuat hanya saat tombol ditekan, supaya izin kamera/mikrofon
+        // dan koneksi tidak jalan otomatis saat halaman dibuka.
+        document.getElementById('joinMeet').addEventListener('click', function () {
+          var f = document.getElementById('jitsiFrame');
+          f.src = 'https://meet.jit.si/Asdsrghdh';
+          f.style.display = 'block';
+          this.style.display = 'none';
+        });
+      </script>
 
       <a class="prev" href="#" onclick="plusSlides(-1); return false;" aria-label="Sebelumnya">&#10094;</a>
       <a class="next" href="#" onclick="plusSlides(1); return false;" aria-label="Berikutnya">&#10095;</a>
