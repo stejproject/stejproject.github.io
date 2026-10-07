@@ -89,49 +89,85 @@
   <div class="right">
     <div class="slideshow-container">
       <div class="mySlides fade">
-        <!-- Logo = tombol masuk Video Conference -->
-        <button type="button" id="joinMeet" title="Gabung Video Conference" aria-label="Gabung Video Conference"
-          style="display: block; width: 100%; background: none; border: 0; padding: 0; cursor: pointer;">
-          <picture>
-            <source srcset="./images/favicon-128.png 380w, ./images/favicon-128.png 1080w" sizes="100vw" type="image/png">
-            <img src="./images/favicon-128.png" loading="lazy" alt="Stej-Logo" class="par con" style="pointer-events: none; height: 50%; width: 50%; margin: 30vh auto 10%; display: block;">
-          </picture>
-        </button>
-        <h1 id="homeTitle" style="font-family: 'Marcellus'; font-size: calc(50px - 20px); margin: calc(0% + 50px) auto auto; align-content: center; display: grid; text-align: center;">STEJ Project</h1>
-        <p id="homeHint" style="text-align: center; opacity: 0.7; margin-top: 10px;">Ketuk logo untuk masuk Video Conference</p>
+        <!-- Logo = tombol masuk Video Conference (dipusatkan horizontal + vertikal) -->
+        <div id="homeWrap"
+          style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 80vh; min-height: 80dvh; padding: 0 16px; box-sizing: border-box;">
+          <button type="button" id="joinMeet" title="Gabung Video Conference" aria-label="Gabung Video Conference"
+            style="display: block; background: none; border: 0; padding: 0; margin: 0; cursor: pointer;">
+            <picture>
+              <source srcset="./images/favicon-128.png 380w, ./images/favicon-128.png 1080w" sizes="100vw" type="image/png">
+              <img src="./images/favicon-128.png" loading="lazy" alt="Stej-Logo" class="par con"
+                style="pointer-events: none; display: block; margin: 0 auto; width: clamp(120px, 40vw, 280px); height: auto;">
+            </picture>
+          </button>
+          <h1 id="homeTitle" style="font-family: 'Marcellus'; font-size: 30px; margin: 24px 0 0; text-align: center;">STEJ Project</h1>
+          <p id="homeHint" style="text-align: center; opacity: 0.7; margin: 10px 0 0;">Ketuk logo untuk masuk Video Conference</p>
+        </div>
 
         <button type="button" id="leaveMeet" class="sub" style="display: none; margin: 10px auto;">Keluar Meeting</button>
-        <iframe id="jitsiFrame" title="Video Conference STEJ"
-          allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
-          style="display: none; width: 100%; height: 75vh; border: 0;"></iframe>
+        <div id="jaas-container" style="display: none; width: 100%; height: 75vh;"></div>
       </div>
       <script>
-        // Meeting dimuat hanya saat logo diketuk, supaya izin kamera/mikrofon
-        // dan koneksi tidak jalan otomatis saat halaman dibuka.
+        // Video Conference (JaaS / 8x8.vc). Script dan meeting baru dimuat saat
+        // logo diketuk, supaya kamera/mikrofon dan koneksi tidak jalan otomatis.
         (function () {
+          // Sementara memakai Jitsi publik (meet.jit.si).
+          var DOMAIN = 'meet.jit.si';
+          var ROOM = 'Asdsrghdh';
+
+          // Untuk pindah ke JaaS nanti, ganti tiga baris di atas dengan:
+          // var DOMAIN = '8x8.vc';
+          // var APP_ID = 'vpaas-magic-cookie-0abcbf402b284e209b9cf5a5a9afa633';
+          // var ROOM = APP_ID + '/NamaRuangAnda';
+          // lalu ubah SCRIPT_URL di bawah menjadi 'https://8x8.vc/' + APP_ID + '/external_api.js'
+          var SCRIPT_URL = 'https://' + DOMAIN + '/external_api.js';
+
           var join = document.getElementById('joinMeet');
           var leave = document.getElementById('leaveMeet');
-          var frame = document.getElementById('jitsiFrame');
-          var title = document.getElementById('homeTitle');
-          var hint = document.getElementById('homeHint');
+          var box = document.getElementById('jaas-container');
+          var home = document.getElementById('homeWrap');
+          var api = null;
+
+          function showMeeting() {
+            box.style.display = 'block';
+            leave.style.display = 'block';
+            home.style.display = 'none';
+          }
+
+          function showHome() {
+            if (api) { api.dispose(); api = null; }
+            box.style.display = 'none';
+            leave.style.display = 'none';
+            home.style.display = 'flex';
+          }
+
+          function loadApi(done) {
+            if (window.JitsiMeetExternalAPI) { done(); return; }
+            var s = document.createElement('script');
+            s.src = SCRIPT_URL;
+            s.onload = done;
+            s.onerror = function () {
+              alert('Video Conference gagal dimuat. Coba lagi nanti.');
+              showHome();
+            };
+            document.head.appendChild(s);
+          }
 
           join.addEventListener('click', function () {
-            frame.src = 'https://meet.jit.si/Asdsrghdh';
-            frame.style.display = 'block';
-            leave.style.display = 'block';
-            join.style.display = 'none';
-            title.style.display = 'none';
-            hint.style.display = 'none';
+            showMeeting();
+            loadApi(function () {
+              api = new JitsiMeetExternalAPI(DOMAIN, {
+                roomName: ROOM,
+                parentNode: box,
+                width: '100%',
+                height: '100%'
+                // jwt: sebaiknya dibuat di server dan berumur pendek, jangan ditulis di sini.
+              });
+              api.addListener('readyToClose', showHome);
+            });
           });
 
-          leave.addEventListener('click', function () {
-            frame.src = 'about:blank';
-            frame.style.display = 'none';
-            leave.style.display = 'none';
-            join.style.display = 'block';
-            title.style.display = 'grid';
-            hint.style.display = 'block';
-          });
+          leave.addEventListener('click', showHome);
         })();
       </script>
 
