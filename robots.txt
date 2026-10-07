@@ -1,4 +1,13 @@
-User-agent: *
+# Izinkan Googlebot (Search, Image, News, Video ikut aturan ini)
+User-agent: Googlebot
 Allow: /
+
+# Blokir pelatihan AI Google (Gemini). Tidak mempengaruhi Google Search.
+User-agent: Google-Extended
+Disallow: /
+
+# Semua bot lain diblokir
+User-agent: *
+Disallow: /
 
 Sitemap: https://stejproject.github.io/sitemap.xml
