@@ -1,9 +1,10 @@
-# Izinkan Googlebot (Search, Image, News, Video ikut aturan ini)
+# Izinkan bot
 User-agent: Googlebot
-Allow: /
-
-# Blokir pelatihan AI Google (Gemini). Tidak mempengaruhi Google Search.
-User-agent: Google-Extended
+User-agent: OAI-SearchBot
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: anthropic-ai
 Allow: /
 
 # Semua bot lain diblokir
