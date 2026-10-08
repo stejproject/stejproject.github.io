@@ -4,7 +4,7 @@ Allow: /
 
 # Blokir pelatihan AI Google (Gemini). Tidak mempengaruhi Google Search.
 User-agent: Google-Extended
-Disallow: /
+Allow: /
 
 # Semua bot lain diblokir
 User-agent: *
