@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// Membuat index.json dari content/system/*.md dan content/articles/*.md (tanpa dependensi).
+// Jalankan: node scripts/build-index.js
 const fs = require('fs'), path = require('path'), cp = require('child_process');
 const root = path.join(__dirname, '..');
 const dir = path.join(root, 'content');
@@ -60,8 +62,10 @@ for (const sub of SUBDIRS) {
   }
 }
 
+// Riwayat perubahan dari git log (bila tersedia).
+// --relative: path dibaca relatif terhadap folder wiki, jadi tetap benar walau wiki ada di subfolder repo.
 const changes = [];
-const log = git(['log', '-n', '200', '--name-status', '--format=@@%H|%an|%cI|%s', '--', 'content']);
+const log = git(['log', '-n', '200', '--relative', '--name-status', '--format=@@%H|%an|%cI|%s', '--', 'content']);
 for (const block of log.split('@@').slice(1)) {
   const [head, ...rest] = block.split('\n');
   const [hash, author, date, ...msg] = head.split('|');
@@ -71,6 +75,8 @@ for (const block of log.split('@@').slice(1)) {
   }
 }
 
+// Buang riwayat halaman yang sudah dihapus / diganti nama / bukan halaman wiki,
+// supaya "Perubahan terbaru" tidak menampilkan entri hantu (mis. "postingan").
 const known = new Set(pages.map(p => p.slug.toLowerCase()));
 const shown = changes.filter(c => c.type !== 'D' && known.has(c.slug.toLowerCase()));
 
