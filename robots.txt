@@ -1,0 +1,14 @@
+# Izinkan bot
+User-agent: Googlebot
+User-agent: OAI-SearchBot
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: anthropic-ai
+Allow: /
+
+# Semua bot lain diblokir
+User-agent: *
+Disallow: /
+
+Sitemap: https://stejproject.github.io/sitemap.xml

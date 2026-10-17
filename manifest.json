@@ -1,0 +1,35 @@
+{
+  "background_color": "#ffffff",
+  "description": "Simple Trusted Elegant and Jenius Projects",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "stejproject.apps",
+  "orientation": "portrait",
+  "scope": "https://stejproject.github.io/",
+  "short_name": "stejproject",
+  "start_url": "https://stejproject.github.io/",
+  "theme_color": "#ddae3b",
+  "icons": [
+    {
+      "src": "https://stejproject.github.io/images/favicon-128.ico",
+      "type": "image/x-icon",
+      "isSquare": false,
+      "isPng": false,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    }
+  ],
+  "lang": "en",
+  "categories": [
+    "books &amp; reference",
+    "education",
+    "parenting",
+    "productivity",
+    "social networking",
+    "utilities"
+  ]
+}
