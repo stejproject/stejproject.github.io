@@ -10,10 +10,12 @@ backend:
     deleteMedia: 'Hapus "{{path}}"'
 
 locale: id
-site_url: ../
-display_url: ../
+# Mesin wiki sekarang ada di stejproject.github.io/posts/category/wiki/
+site_url: https://stejproject.github.io/posts/category/wiki/
+display_url: https://stejproject.github.io/posts/category/wiki/
 media_folder: uploads
-public_folder: uploads
+# Absolut, supaya gambar tetap tampil di mesin wiki (alamat berbeda dari artikel)
+public_folder: /wikis/uploads
 
 slug:
   encoding: unicode
