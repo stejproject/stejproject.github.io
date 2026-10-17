@@ -1,7 +1,9 @@
 {
-  "title": "Wiki",
-  "repo": "",
-  "branch": "main",
-  "contentDir": "content",
-  "mainPage": "Halaman_Utama"
+     "title": "Wiki",
+     "repo": "stejproject/wikis",
+     "branch": "main",
+     "contentDir": "content",
+     "mainPage": "Halaman_Utama",
+     "contentBase": "/wikis/",
+     "adminBase": "/wikis/admin/"
 }
