@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: stejproject/wikis
+  repo: stejproject/stejproject.github.io
   branch: main
   commit_messages:
     create: 'Buat halaman "{{slug}}"'
@@ -10,12 +10,12 @@ backend:
     deleteMedia: 'Hapus "{{path}}"'
 
 locale: id
-# Mesin wiki sekarang ada di stejproject.github.io/posts/category/wiki/
-site_url: https://stejproject.github.io/posts/category/wiki/
-display_url: https://stejproject.github.io/posts/category/wiki/
-media_folder: uploads
-# Absolut, supaya gambar tetap tampil di mesin wiki (alamat berbeda dari artikel)
-public_folder: /wikis/uploads
+site_url: ../
+display_url: ../
+# Path di dalam repo (wiki ada di posts/category/wiki/)
+media_folder: posts/category/wiki/uploads
+# Path di tulisan artikel; relatif terhadap halaman wiki
+public_folder: uploads
 
 slug:
   encoding: unicode
@@ -23,11 +23,11 @@ slug:
   sanitize_replacement: _
 
 collections:
-  # Artikel biasa -> content/articles (tombol "Buat halaman baru" mengarah ke sini)
+  # Artikel biasa (tombol "Buat halaman baru" mengarah ke sini)
   - name: pages
     label: Artikel
     label_singular: Artikel
-    folder: content/articles
+    folder: posts/category/wiki/content/articles
     extension: md
     format: frontmatter
     create: true
@@ -41,11 +41,11 @@ collections:
       - { name: categories, label: Kategori, widget: list, required: false, hint: 'Satu kategori per baris' }
       - { name: body, label: Isi, widget: markdown, hint: 'Tautan antar halaman: [[Judul Halaman]] atau [[Judul Halaman|teks tampil]]' }
 
-  # Halaman wiki sendiri (Halaman Utama, Bantuan, Tentang Wiki, dll.) -> content/system
+  # Halaman wiki sendiri (Halaman Utama, Bantuan, Tentang Wiki, dll.)
   - name: system
     label: Halaman Sistem
     label_singular: Halaman Sistem
-    folder: content/system
+    folder: posts/category/wiki/content/system
     extension: md
     format: frontmatter
     create: true
