@@ -12,6 +12,16 @@
     <button id="menu-btn" aria-label="Menu">☰</button>
     <a id="site-title" href="#/Halaman_Utama">Wiki</a>
     <form id="search-form" role="search">
+      <a>Terjemahkan Bahasa/Translate</a>
+      <div id="google_translate_element"></div>
+      <script>
+      function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+      pageLanguage: 'id'
+      }, 'google_translate_element');
+      }
+      </script>
+      <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script>
       <input id="search-input" type="search" placeholder="Cari di wiki" autocomplete="off">
       <button type="submit">Cari</button>
     </form>
