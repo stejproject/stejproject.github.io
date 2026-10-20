@@ -76,3 +76,4 @@ a.new{color:var(--red)}
 .accordion .acc-panel{padding:4px 18px 10px;border:1px solid #3e0d78;border-top:0;
   border-radius:0 0 .375rem .375rem;max-height:60vh;overflow:auto}
 .accordion .acc-panel[hidden]{display:none}
+#google_translate_element{overflow:auto; height:50%;width:5vw;}
