@@ -263,7 +263,7 @@
   </footer>
 
   <script>
-const input = document.getElementById("codeInput");
+    const input = document.getElementById("codeInput");
     const fileTypeSelect = document.getElementById("fileType");
     const btnDetect = document.getElementById("btnDetect");
     const btnInsert = document.getElementById("btnInsert");
@@ -330,6 +330,42 @@ const input = document.getElementById("codeInput");
       const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avg, 2), 0) / lengths.length;
       return Math.sqrt(variance);
     }
+    // ========== ANALISIS LANJUTAN: PERILAKU PURE LOGIC LLM ==========
+    function analyzePureLogicBehavior(code) {
+      let logicScore = 0;
+      const findings = [];
+
+      // 1. Cek Konsistensi Penamaan Rigorous (CamelCase Sempurna tanpa anomali manusia)
+      const camelCaseMatches = code.match(/[a-z][A-Z][a-zA-Z]*/g) || [];
+      const totalWords = (code.match(/\b[a-zA-Z_]\w*\b/g) || []).length;
+      if (totalWords > 40 && (camelCaseMatches.length / totalWords) > 0.15) {
+        logicScore += 25;
+        findings.push("Pola penamaan camelCase sangat steril dan konsisten khas LLM");
+      }
+
+      // 2. Cek Pola Blok Error Handling Standar LLM (try...catch berulang)
+      const tryCatchCount = (code.match(/try\s*\{[\s\S]*?\}\s*catch\s*\(\s*\w+\s*\)/g) || []).length;
+      if (tryCatchCount >= 2) {
+        logicScore += 20;
+        findings.push("Struktur error handling try...catch yang sangat prosedural");
+      }
+
+      // 3. Cek Kebiasaan Komentar Penjelas AI (Inline Docstring)
+      const aiCommentPattern = /\/\/\s*(helper|initialize|check|validate|process|handle|format|compute|render)\s+/i;
+      if (aiCommentPattern.test(code)) {
+        logicScore += 25;
+        findings.push("Komentar penjelas fungsi khas dokumentasi LLM");
+      }
+
+      // 4. Cek Keberadaan Jeda/Kondisional Defensif (Null/Undefined checks berlebih)
+      const defensiveChecks = (code.match(/if\s*\(\s*!\w+\s*\)/g) || []).length;
+      if (defensiveChecks >= 3) {
+        logicScore += 15;
+        findings.push("Pola pengecekan defensif (null/undefined) yang sangat terstruktur");
+      }
+
+      return { score: logicScore, findings: findings };
+    }
 
     // ========== FUNGSI UTAMA ANALISIS GABUNGAN ==========
     function analyze(code, forcedType) {
@@ -341,7 +377,7 @@ const input = document.getElementById("codeInput");
       let score = 0;
       const found = [];
 
-      // 1. Cek indikator common (termasuk STEJ-LICENSE7)
+      // 1. Cek indikator common & lisensi
       indicators.common.forEach(function (item) {
         if (item.pattern.test(code)) {
           score += item.weight;
@@ -349,7 +385,7 @@ const input = document.getElementById("codeInput");
         }
       });
 
-      // 2. Cek indikator spesifik jenis file
+      // 2. Cek indikator spesifik jenis file (Regex standar)
       const typeIndicators = indicators[type] || [];
       typeIndicators.forEach(function (item) {
         if (item.pattern.test(code)) {
@@ -358,25 +394,32 @@ const input = document.getElementById("codeInput");
         }
       });
 
-      // 3. Cek Analisis Non-Regex (Burstiness struktur baris)
+      // 3. Cek Analisis Burstiness (Struktur baris)
       const burstinessScore = calculateCodeBurstiness(code);
       if (burstinessScore > 0 && burstinessScore < 6) {
-        score += 20;
+        score += 15;
         found.push("Struktur baris terlalu seragam (Low Burstiness)");
+      }
+
+      // 4. ✨ TAMBAHAN UTAMA: Deteksi Pure Logic / Raw Code LLM (Claude/DeepSeek)
+      const logicAnalysis = analyzePureLogicBehavior(code);
+      if (logicAnalysis.score > 0) {
+        score += logicAnalysis.score;
+        logicAnalysis.findings.forEach(f => found.push(f));
       }
 
       score = Math.min(Math.round(score), 100);
 
-      // 4. ATURAN KHUSUS: JIKA ADA STEJ-LICENSE7, OTOMATIS JADI HIJAU (AMAN)
+      // 5. Override Lisensi STEJ-LICENSE7
       const hasStejLicense = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(code);
       
       let level = "human";
       if (hasStejLicense) {
-        score = 0; // Reset skor jadi 0 karena sudah mendeklarasikan lisensi transparan
+        score = 0;
         level = "human";
       } else {
-        if (score >= 65) level = "ai";
-        else if (score >= 30) level = "uncertain";
+        if (score >= 60) level = "ai";
+        else if (score >= 25) level = "uncertain";
       }
 
       return {
@@ -386,7 +429,7 @@ const input = document.getElementById("codeInput");
         found: found,
         reasons: hasStejLicense
           ? ["Lisensi STEJ-LICENSE7 terdeteksi. Kode dinyatakan sah, transparan, dan aman."]
-          : (found.length ? ["Terdeteksi " + found.length + " indikator AI."] : ["Tidak ditemukan indikator kuat tools AI modern."])
+          : (found.length ? ["Terdeteksi " + found.length + " indikator struktur AI."] : ["Kode tampak murni buatan manusia."])
       };
     }
 
