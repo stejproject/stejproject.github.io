@@ -276,7 +276,7 @@ const input = document.getElementById("codeInput");
     const indicatorsBox = document.getElementById("indicatorsBox");
     const indicatorsList = document.getElementById("indicatorsList");
 
-    // ========== INDIKATOR PER JENIS FILE ==========
+    // ========== INDIKATOR PER JENIS FILE (DIPERBAIKI) ==========
     const indicators = {
       css: [
         { pattern: /--v0-gradient|--v0-|--shadcn/i, label: "Variabel komersial v0 / shadcn", weight: 40 },
@@ -286,14 +286,11 @@ const input = document.getElementById("codeInput");
       ],
       html: [
         { pattern: /data-v0-id|data-v0-|data-lovable/i, label: "Atribut data-v0 / data-lovable", weight: 45 },
-      { pattern: /lucide-react|from\s+['"]lucide-react['"]/i, label: "Pustaka ikon lucide-react", weight: 35 },
-      // Indikator Tailwind
-      { pattern: /tailwind(?:\.min)?\.css|cdn\.jsdelivr\.net\/npm\/tailwind/i, label: "Menggunakan CDN Tailwind CSS", weight: 8 },
-      { pattern: /class="[^"]*(?:bg-\w+-(?:100|200|300|400|500|600|700|800|900|950)|space-[xy]-|inset-y-|w-1\/\d|flex-col-reverse)/i, label: "Kelas utilitas spesifik Tailwind CSS", weight: 10 },
-      // Indikator Bootstrap
-      { pattern: /bootstrap(?:\.min)?\.css|cdn\.jsdelivr\.net\/npm\/bootstrap/i, label: "Menggunakan Framework Bootstrap", weight: 8 },
-      { pattern: /class="[^"]*(?:d-flex|container-fluid|row\s+g-|card-header|nav-pills)/i, label: "Kelas struktur khas Bootstrap", weight: 10 },
-      { pattern: /data-slot=|data-state=|data-radix/i, label: "Atribut data Radix / shadcn", weight: 30 }
+        { pattern: /lucide-react|from\s+['"]lucide-react['"]/i, label: "Pustaka ikon lucide-react", weight: 35 },
+        { pattern: /tailwind(?:\.min)?\.css|cdn\.jsdelivr\.net\/npm\/tailwind/i, label: "Menggunakan CDN Tailwind CSS", weight: 15 },
+        { pattern: /class="[^"]*(?:bg-\w+-(?:100|200|300|400|500|600|700|800|900|950)|space-[xy]-|inset-y-|w-1\/\d|flex-col-reverse)/i, label: "Kelas utilitas spesifik Tailwind CSS", weight: 25 },
+        { pattern: /bootstrap(?:\.min)?\.css|cdn\.jsdelivr\.net\/npm\/bootstrap/i, label: "Menggunakan Framework Bootstrap", weight: 0 },
+        { pattern: /data-slot=|data-state=|data-radix/i, label: "Atribut data Radix / shadcn", weight: 30 }
       ],
       js: [
         { pattern: /insert your api key here|YOUR_API_KEY|replace with your/i, label: "Boilerplate API key generik", weight: 40 },
@@ -322,9 +319,7 @@ const input = document.getElementById("codeInput");
       return "js"; // default
     }
 
-    // ========== TAMBAHAN: ANALISIS LANJUTAN (ADVANCED METRICS) ==========
-    
-    // 1. Mengukur variasi panjang baris (Burstiness sederhana untuk kode)
+    // ========== ANALISIS LANJUTAN (NON-REGEX / BURSTINESS) ==========
     function calculateCodeBurstiness(code) {
       const lines = code.split('\n').map(l => l.trim()).filter(l => l.length > 0);
       if (lines.length < 3) return 0;
@@ -336,7 +331,7 @@ const input = document.getElementById("codeInput");
       return Math.sqrt(variance);
     }
 
-    // ========== FUNGSI UTAMA ANALISIS (GABUNGAN REGEX + ADVANCED) ==========
+    // ========== FUNGSI UTAMA ANALISIS GABUNGAN ==========
     function analyze(code, forcedType) {
       if (!code || !code.trim()) {
         return { score: 0, level: "empty", reasons: ["Tidak ada kode yang dimasukkan."], found: [] };
@@ -346,7 +341,7 @@ const input = document.getElementById("codeInput");
       let score = 0;
       const found = [];
 
-      // 1. Cek indikator common (STEJ)
+      // 1. Cek indikator common (termasuk STEJ-LICENSE7)
       indicators.common.forEach(function (item) {
         if (item.pattern.test(code)) {
           score += item.weight;
@@ -354,7 +349,7 @@ const input = document.getElementById("codeInput");
         }
       });
 
-      // 2. Cek indikator spesifik jenis file (Regex)
+      // 2. Cek indikator spesifik jenis file
       const typeIndicators = indicators[type] || [];
       typeIndicators.forEach(function (item) {
         if (item.pattern.test(code)) {
@@ -363,52 +358,48 @@ const input = document.getElementById("codeInput");
         }
       });
 
-      // 3. Analisis Lanjutan (Advanced Checks)
-      // A. Cek Burstiness: AI cenderung menghasilkan panjang baris yang terlalu seragam
+      // 3. Cek Analisis Non-Regex (Burstiness struktur baris)
       const burstinessScore = calculateCodeBurstiness(code);
       if (burstinessScore > 0 && burstinessScore < 6) {
         score += 20;
         found.push("Struktur baris terlalu seragam (Low Burstiness)");
       }
 
-      // B. Cek pola error handling berulang khas LLM
-      const catchBlocks = code.match(/catch\s*\([^)]+\)\s*\{\s*console\.(error|log)/g) || [];
-      if (catchBlocks.length >= 2) {
-        score += 15;
-        found.push("Pola error handling berulang khas LLM");
-      }
-
-      // Bonus jika banyak indikator
-      if (found.length >= 3) score += 15;
-
       score = Math.min(Math.round(score), 100);
 
+      // 4. ATURAN KHUSUS: JIKA ADA STEJ-LICENSE7, OTOMATIS JADI HIJAU (AMAN)
+      const hasStejLicense = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(code);
+      
       let level = "human";
-      if (score >= 65) level = "ai";
-      else if (score >= 30) level = "uncertain";
+      if (hasStejLicense) {
+        score = 0; // Reset skor jadi 0 karena sudah mendeklarasikan lisensi transparan
+        level = "human";
+      } else {
+        if (score >= 65) level = "ai";
+        else if (score >= 30) level = "uncertain";
+      }
 
       return {
         score: score,
         level: level,
         type: type,
         found: found,
-        reasons: found.length
-          ? ["Terdeteksi " + found.length + " indikator AI (Regex + Advanced)."]
-          : ["Tidak ditemukan indikator kuat tools AI modern."]
+        reasons: hasStejLicense
+          ? ["Lisensi STEJ-LICENSE7 terdeteksi. Kode dinyatakan sah, transparan, dan aman."]
+          : (found.length ? ["Terdeteksi " + found.length + " indikator AI."] : ["Tidak ditemukan indikator kuat tools AI modern."])
       };
     }
 
     // ========== SUNTIK LISENSI AMAN ==========
     const LICENSE_TEXT = `nama: STEJ-LICENSE7 Makna: PERINGATAN, seluruh muatan dan isi di dalamnya merupakan hasil kreasi yang bukan bersumber dari manusia. Mohon kritisi, pelajari dan perbaiki sesuai batasan lisensi STEJ.`;
-
     function wrapLicense(type) {
       if (type === "html") {
         return "\n<!-- \n+===BATAS.ISI.LISENSI===+\n" + LICENSE_TEXT + "\n+===BATAS.ISI.LISENSI===+\n-->";
       }
-      // CSS & JS memakai komentar multi-baris
       return "\n/* \n+===BATAS.ISI.LISENSI===+\n" + LICENSE_TEXT + "\n+===BATAS.ISI.LISENSI===+\n*/";
     }
 
+    // ========== EVENT LISTENERS TOMBOL UI ==========
     btnDetect.addEventListener("click", function () {
       const code = input.value;
       const forcedType = fileTypeSelect.value;
@@ -431,12 +422,18 @@ const input = document.getElementById("codeInput");
         indicatorsBox.style.display = "none";
       }
 
-      if (result.level === "ai") {
-        scoreBar.style.background = "var(--danger)";
+      // Pengaturan Warna Bar & Teks Hasil
+      const hasStejLicense = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(code);
+      if (hasStejLicense) {
+        scoreBar.style.background = "var(--success, #198754)";
+        resultTitle.textContent = "Terlisensi Resmi (STEJ-LICENSE7)";
+        resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons[0];
+      } else if (result.level === "ai") {
+        scoreBar.style.background = "var(--danger, #dc3545)";
         resultTitle.textContent = "Kemungkinan besar dibuat oleh AI";
         resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
       } else if (result.level === "uncertain") {
-        scoreBar.style.background = "var(--warning)";
+        scoreBar.style.background = "var(--warning, #ffc107)";
         resultTitle.textContent = "Ada indikasi AI (tidak pasti)";
         resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
       } else if (result.level === "empty") {
@@ -444,7 +441,7 @@ const input = document.getElementById("codeInput");
         resultTitle.textContent = "Tidak ada data";
         resultDetail.textContent = result.reasons[0];
       } else {
-        scoreBar.style.background = "var(--success)";
+        scoreBar.style.background = "var(--success, #198754)";
         resultTitle.textContent = "Lebih mungkin dibuat manusia";
         resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
       }
@@ -461,7 +458,7 @@ const input = document.getElementById("codeInput");
 
       const licenseBlock = wrapLicense(type);
       input.value = code.trimEnd() + "\n" + licenseBlock;
-      alert("STEJ-LICENSE7 berhasil disisipkan dengan format komentar " + (type === "html" ? "HTML" : "multi-baris") + ".");
+      alert("STEJ-LICENSE7 berhasil disisipkan! Klik 'Deteksi' kembali untuk melihat statusnya berubah menjadi hijau.");
     });
 
     btnClear.addEventListener("click", function () {
