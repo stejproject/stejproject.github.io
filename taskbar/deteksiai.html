@@ -286,9 +286,14 @@ const input = document.getElementById("codeInput");
       ],
       html: [
         { pattern: /data-v0-id|data-v0-|data-lovable/i, label: "Atribut data-v0 / data-lovable", weight: 45 },
-        { pattern: /lucide-react|from\s+['"]lucide-react['"]/i, label: "Pustaka ikon lucide-react", weight: 35 },
-        { pattern: /class="[^"]*(?:flex|grid|gap-|p-|m-|text-|bg-|rounded-|shadow-)/i, label: "Kelas Tailwind dalam HTML", weight: 25 },
-        { pattern: /data-slot=|data-state=|data-radix/i, label: "Atribut data Radix / shadcn", weight: 30 }
+      { pattern: /lucide-react|from\s+['"]lucide-react['"]/i, label: "Pustaka ikon lucide-react", weight: 35 },
+      // Indikator Tailwind
+      { pattern: /tailwind(?:\.min)?\.css|cdn\.jsdelivr\.net\/npm\/tailwind/i, label: "Menggunakan CDN Tailwind CSS", weight: 8 },
+      { pattern: /class="[^"]*(?:bg-\w+-(?:100|200|300|400|500|600|700|800|900|950)|space-[xy]-|inset-y-|w-1\/\d|flex-col-reverse)/i, label: "Kelas utilitas spesifik Tailwind CSS", weight: 10 },
+      // Indikator Bootstrap
+      { pattern: /bootstrap(?:\.min)?\.css|cdn\.jsdelivr\.net\/npm\/bootstrap/i, label: "Menggunakan Framework Bootstrap", weight: 8 },
+      { pattern: /class="[^"]*(?:d-flex|container-fluid|row\s+g-|card-header|nav-pills)/i, label: "Kelas struktur khas Bootstrap", weight: 10 },
+      { pattern: /data-slot=|data-state=|data-radix/i, label: "Atribut data Radix / shadcn", weight: 30 }
       ],
       js: [
         { pattern: /insert your api key here|YOUR_API_KEY|replace with your/i, label: "Boilerplate API key generik", weight: 40 },
