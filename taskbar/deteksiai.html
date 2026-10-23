@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detektor Skrip AI – STEJ</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #38bdf8;
+      --danger: #f87171;
+      --success: #4ade80;
+      --warning: #facc15;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.4rem;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 1.8rem;
+      text-align: center;
+      max-width: 640px;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 860px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .type-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .type-row span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    select {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: var(--text);
+      padding: 0.45rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 300px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: var(--text);
+      padding: 1rem;
+      font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+      font-size: 0.88rem;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56,189,248,0.2);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.7rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.65rem 1.25rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    #btnDetect {
+      background: var(--accent);
+      color: #0f172a;
+    }
+    #btnDetect:hover { background: #7dd3fc; transform: translateY(-1px); }
+
+    #btnInsert {
+      background: #8b5cf6;
+      color: white;
+    }
+    #btnInsert:hover { background: #a78bfa; transform: translateY(-1px); }
+
+    #btnClear {
+      background: #334155;
+      color: var(--text);
+    }
+    #btnClear:hover { background: #475569; }
+
+    #result {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      border-radius: 12px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    #result.show { display: block; }
+
+    #result.ai {
+      background: rgba(248,113,113,0.15);
+      border: 1px solid var(--danger);
+    }
+    #result.human {
+      background: rgba(74,222,128,0.12);
+      border: 1px solid var(--success);
+    }
+    #result.uncertain {
+      background: rgba(250,204,21,0.12);
+      border: 1px solid var(--warning);
+    }
+
+    .result-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-detail {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .indicators {
+      margin-top: 0.8rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .indicators ul {
+      margin-top: 0.35rem;
+      padding-left: 1.2rem;
+    }
+
+    .score {
+      margin-top: 0.9rem;
+      font-size: 0.9rem;
+    }
+
+    .bar {
+      height: 8px;
+      background: #334155;
+      border-radius: 4px;
+      margin-top: 0.4rem;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Detektor Skrip AI</h1>
+  <p class="subtitle">
+    Mendeteksi kode hasil tools AI modern (v0.dev, Lovable, shadcn, dll.) berdasarkan indikator spesifik per jenis file.
+    Juga bisa menyisipkan STEJ-LICENSE7 dengan format komentar yang aman.
+  </p>
+
+  <div class="container">
+    <div class="type-row">
+      <span>Jenis file:</span>
+      <select id="fileType">
+        <option value="auto">Deteksi Otomatis</option>
+        <option value="html">HTML</option>
+        <option value="css">CSS</option>
+        <option value="js">JavaScript</option>
+      </select>
+    </div>
+
+    <label for="codeInput">Tempel kode di sini:</label>
+    <textarea id="codeInput" placeholder="Tempel kode HTML, CSS, atau JavaScript..."></textarea>
+
+    <div class="actions">
+      <button id="btnDetect">Deteksi Sekarang</button>
+      <button id="btnInsert">Sisipkan STEJ-LICENSE7</button>
+      <button id="btnClear">Bersihkan</button>
+    </div>
+
+    <div id="result">
+      <div class="result-title" id="resultTitle"></div>
+      <div class="result-detail" id="resultDetail"></div>
+      <div class="indicators" id="indicatorsBox" style="display:none;">
+        <strong>Indikator yang ditemukan:</strong>
+        <ul id="indicatorsList"></ul>
+      </div>
+      <div class="score">
+        Skor kemungkinan AI: <span id="scoreValue">0</span>%
+        <div class="bar">
+          <div class="bar-fill" id="scoreBar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Detektor berbasis pola teks &bull; STEJ Project
+  </footer>
+
+  <script>
+    const input = document.getElementById("codeInput");
+    const fileTypeSelect = document.getElementById("fileType");
+    const btnDetect = document.getElementById("btnDetect");
+    const btnInsert = document.getElementById("btnInsert");
+    const btnClear = document.getElementById("btnClear");
+    const resultBox = document.getElementById("result");
+    const resultTitle = document.getElementById("resultTitle");
+    const resultDetail = document.getElementById("resultDetail");
+    const scoreValue = document.getElementById("scoreValue");
+    const scoreBar = document.getElementById("scoreBar");
+    const indicatorsBox = document.getElementById("indicatorsBox");
+    const indicatorsList = document.getElementById("indicatorsList");
+
+    // ========== INDIKATOR PER JENIS FILE ==========
+    const indicators = {
+      css: [
+        { pattern: /--v0-gradient|--v0-|--shadcn/i, label: "Variabel komersial v0 / shadcn", weight: 40 },
+        { pattern: /@apply\s+|@tailwind|@layer\s+(base|components|utilities)/i, label: "Utilitas Tailwind CSS", weight: 35 },
+        { pattern: /--background|--foreground|--primary|--muted|--card|--border/i, label: "Variabel CSS shadcn/ui", weight: 30 },
+        { pattern: /bg-gradient-to-|from-\w+-500|to-\w+-600/i, label: "Kelas Tailwind gradient modern", weight: 25 }
+      ],
+      html: [
+        { pattern: /data-v0-id|data-v0-|data-lovable/i, label: "Atribut data-v0 / data-lovable", weight: 45 },
+        { pattern: /lucide-react|from\s+['"]lucide-react['"]/i, label: "Pustaka ikon lucide-react", weight: 35 },
+        { pattern: /class="[^"]*(?:flex|grid|gap-|p-|m-|text-|bg-|rounded-|shadow-)/i, label: "Kelas Tailwind dalam HTML", weight: 25 },
+        { pattern: /data-slot=|data-state=|data-radix/i, label: "Atribut data Radix / shadcn", weight: 30 }
+      ],
+      js: [
+        { pattern: /insert your api key here|YOUR_API_KEY|replace with your/i, label: "Boilerplate API key generik", weight: 40 },
+        { pattern: /\/\/\s*(TODO|FIXME|NOTE):\s*(implement|add|handle|replace)/i, label: "Komentar instruksi generik LLM", weight: 30 },
+        { pattern: /catch\s*\(\s*\w+\s*\)\s*\{\s*console\.(error|log)/i, label: "Pola error handling berulang", weight: 20 },
+        { pattern: /Generated by|AI generated|created by AI|v0\.dev|lovable\.dev/i, label: "Komentar penanda AI", weight: 45 },
+        { pattern: /from\s+['"]@?\/components\/ui\//i, label: "Import komponen shadcn/ui", weight: 35 }
+      ],
+      common: [
+        { pattern: /STEJ-LICENSE7|bukan bersumber dari manusia|BATAS\.ISI\.LISENSI/i, label: "Lisensi STEJ-LICENSE7", weight: 50 }
+      ]
+    };
+
+    // Deteksi jenis file dari konten
+    function detectFileType(code) {
+      const trimmed = code.trim();
+      if (/^<!DOCTYPE|^<html|^<head|^<body|^<div|^<section/i.test(trimmed) || /<\/(html|head|body|div|section)>/i.test(code)) {
+        return "html";
+      }
+      if (/\{[\s\S]*\}/.test(code) && (/^[.#@\w\-\s,:]+\{/.test(trimmed) || /--[\w-]+:/.test(code) || /@media|@keyframes|@import/.test(code))) {
+        return "css";
+      }
+      if (/function\s|const\s|let\s|var\s|=>|import\s|export\s|console\.|document\./.test(code)) {
+        return "js";
+      }
+      return "js"; // default
+    }
+
+    function analyze(code, forcedType) {
+      if (!code || !code.trim()) {
+        return { score: 0, level: "empty", reasons: ["Tidak ada kode yang dimasukkan."], found: [] };
+      }
+
+      const type = forcedType === "auto" ? detectFileType(code) : forcedType;
+      let score = 0;
+      const found = [];
+
+      // Cek indikator common (STEJ)
+      indicators.common.forEach(function (item) {
+        if (item.pattern.test(code)) {
+          score += item.weight;
+          found.push(item.label);
+        }
+      });
+
+      // Cek indikator spesifik jenis file
+      const typeIndicators = indicators[type] || [];
+      typeIndicators.forEach(function (item) {
+        if (item.pattern.test(code)) {
+          score += item.weight;
+          found.push(item.label + " (" + type.toUpperCase() + ")");
+        }
+      });
+
+      // Bonus jika banyak indikator
+      if (found.length >= 3) score += 15;
+
+      score = Math.min(Math.round(score), 100);
+
+      let level = "human";
+      if (score >= 65) level = "ai";
+      else if (score >= 30) level = "uncertain";
+
+      return {
+        score: score,
+        level: level,
+        type: type,
+        found: found,
+        reasons: found.length
+          ? ["Terdeteksi " + found.length + " indikator AI."]
+          : ["Tidak ditemukan indikator kuat tools AI modern."]
+      };
+    }
+
+    // ========== SUNTIK LISENSI AMAN ==========
+    const LICENSE_TEXT = `nama: STEJ-LICENSE7 Makna: PERINGATAN, seluruh muatan dan isi di dalamnya merupakan hasil kreasi yang bukan bersumber dari manusia. Mohon kritisi, pelajari dan perbaiki sesuai batasan lisensi STEJ.`;
+
+    function wrapLicense(type) {
+      if (type === "html") {
+        return "\n<!-- \n+===BATAS.ISI.LISENSI===+\n" + LICENSE_TEXT + "\n+===BATAS.ISI.LISENSI===+\n-->";
+      }
+      // CSS & JS memakai komentar multi-baris
+      return "\n/* \n+===BATAS.ISI.LISENSI===+\n" + LICENSE_TEXT + "\n+===BATAS.ISI.LISENSI===+\n*/";
+    }
+
+    btnDetect.addEventListener("click", function () {
+      const code = input.value;
+      const forcedType = fileTypeSelect.value;
+      const result = analyze(code, forcedType);
+
+      resultBox.className = "show " + result.level;
+      scoreValue.textContent = result.score;
+      scoreBar.style.width = result.score + "%";
+
+      // Tampilkan indikator
+      if (result.found.length > 0) {
+        indicatorsBox.style.display = "block";
+        indicatorsList.innerHTML = "";
+        result.found.forEach(function (item) {
+          const li = document.createElement("li");
+          li.textContent = item;
+          indicatorsList.appendChild(li);
+        });
+      } else {
+        indicatorsBox.style.display = "none";
+      }
+
+      if (result.level === "ai") {
+        scoreBar.style.background = "var(--danger)";
+        resultTitle.textContent = "Kemungkinan besar dibuat oleh AI";
+        resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
+      } else if (result.level === "uncertain") {
+        scoreBar.style.background = "var(--warning)";
+        resultTitle.textContent = "Ada indikasi AI (tidak pasti)";
+        resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
+      } else if (result.level === "empty") {
+        scoreBar.style.background = "#64748b";
+        resultTitle.textContent = "Tidak ada data";
+        resultDetail.textContent = result.reasons[0];
+      } else {
+        scoreBar.style.background = "var(--success)";
+        resultTitle.textContent = "Lebih mungkin dibuat manusia";
+        resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
+      }
+    });
+
+    btnInsert.addEventListener("click", function () {
+      let code = input.value;
+      const forcedType = fileTypeSelect.value;
+      const type = forcedType === "auto" ? detectFileType(code || " ") : forcedType;
+
+      // Hapus lisensi lama jika sudah ada
+      code = code.replace(/<!--\s*\+===BATAS\.ISI\.LISENSI===+[\s\S]*?\+===BATAS\.ISI\.LISENSI===+\s*-->/gi, "");
+      code = code.replace(/\/\*\s*\+===BATAS\.ISI\.LISENSI===+[\s\S]*?\+===BATAS\.ISI\.LISENSI===+\s*\*\//gi, "");
+
+      const licenseBlock = wrapLicense(type);
+      input.value = code.trimEnd() + "\n" + licenseBlock;
+      alert("STEJ-LICENSE7 berhasil disisipkan dengan format komentar " + (type === "html" ? "HTML" : "multi-baris") + ".");
+    });
+
+    btnClear.addEventListener("click", function () {
+      input.value = "";
+      resultBox.className = "";
+      scoreBar.style.width = "0%";
+      scoreValue.textContent = "0";
+      indicatorsBox.style.display = "none";
+    });
+  </script>
+
+<!-- 
++===BATAS.ISI.LISENSI===+
+nama: STEJ-LICENSE7 Makna: PERINGATAN, seluruh muatan dan isi di dalamnya merupakan hasil kreasi yang bukan bersumber dari manusia. Mohon kritisi, pelajari dan perbaiki sesuai batasan lisensi STEJ.
++===BATAS.ISI.LISENSI===+
+-->
+</body>
+</html>
