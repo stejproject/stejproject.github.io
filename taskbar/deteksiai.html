@@ -263,7 +263,7 @@
   </footer>
 
   <script>
-    const input = document.getElementById("codeInput");
+const input = document.getElementById("codeInput");
     const fileTypeSelect = document.getElementById("fileType");
     const btnDetect = document.getElementById("btnDetect");
     const btnInsert = document.getElementById("btnInsert");
@@ -317,6 +317,21 @@
       return "js"; // default
     }
 
+    // ========== TAMBAHAN: ANALISIS LANJUTAN (ADVANCED METRICS) ==========
+    
+    // 1. Mengukur variasi panjang baris (Burstiness sederhana untuk kode)
+    function calculateCodeBurstiness(code) {
+      const lines = code.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length < 3) return 0;
+      
+      const lengths = lines.map(line => line.length);
+      const avg = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+      
+      const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avg, 2), 0) / lengths.length;
+      return Math.sqrt(variance);
+    }
+
+    // ========== FUNGSI UTAMA ANALISIS (GABUNGAN REGEX + ADVANCED) ==========
     function analyze(code, forcedType) {
       if (!code || !code.trim()) {
         return { score: 0, level: "empty", reasons: ["Tidak ada kode yang dimasukkan."], found: [] };
@@ -326,7 +341,7 @@
       let score = 0;
       const found = [];
 
-      // Cek indikator common (STEJ)
+      // 1. Cek indikator common (STEJ)
       indicators.common.forEach(function (item) {
         if (item.pattern.test(code)) {
           score += item.weight;
@@ -334,7 +349,7 @@
         }
       });
 
-      // Cek indikator spesifik jenis file
+      // 2. Cek indikator spesifik jenis file (Regex)
       const typeIndicators = indicators[type] || [];
       typeIndicators.forEach(function (item) {
         if (item.pattern.test(code)) {
@@ -342,6 +357,21 @@
           found.push(item.label + " (" + type.toUpperCase() + ")");
         }
       });
+
+      // 3. Analisis Lanjutan (Advanced Checks)
+      // A. Cek Burstiness: AI cenderung menghasilkan panjang baris yang terlalu seragam
+      const burstinessScore = calculateCodeBurstiness(code);
+      if (burstinessScore > 0 && burstinessScore < 6) {
+        score += 20;
+        found.push("Struktur baris terlalu seragam (Low Burstiness)");
+      }
+
+      // B. Cek pola error handling berulang khas LLM
+      const catchBlocks = code.match(/catch\s*\([^)]+\)\s*\{\s*console\.(error|log)/g) || [];
+      if (catchBlocks.length >= 2) {
+        score += 15;
+        found.push("Pola error handling berulang khas LLM");
+      }
 
       // Bonus jika banyak indikator
       if (found.length >= 3) score += 15;
@@ -358,7 +388,7 @@
         type: type,
         found: found,
         reasons: found.length
-          ? ["Terdeteksi " + found.length + " indikator AI."]
+          ? ["Terdeteksi " + found.length + " indikator AI (Regex + Advanced)."]
           : ["Tidak ditemukan indikator kuat tools AI modern."]
       };
     }
