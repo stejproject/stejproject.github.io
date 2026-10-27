@@ -420,20 +420,39 @@
       const type = forcedType === "auto" ? detectFileType(code) : forcedType;
       let score = 0;
       const found = [];
-
-      indicators.common.forEach(item => { if (item.pattern.test(code)) { score += item.weight; found.push(item.label); } });
-      (indicators[type] || []).forEach(item => { if (item.pattern.test(code)) { score += item.weight; found.push(item.label + " (" + type.toUpperCase() + ")"); } });
-
+      indicators.common.forEach(item => { 
+        if (item.pattern.test(code)) { 
+          score += item.weight; 
+          found.push(item.label); 
+        } 
+      });
+      Object.keys(indicators).forEach(cat => {
+        if (cat !== 'common') {
+          indicators[cat].forEach(item => {
+            // Cek agar tidak duplikat jika pola sudah masuk
+            if (item.pattern.test(code) && !found.includes(item.label)) {
+              score += item.weight;
+              found.push(item.label + " (" + cat.toUpperCase() + ")");
+            }
+          });
+        }
+      });
+      const logicAnalysis = analyzePureLogicBehavior(code);
+      if (logicAnalysis.score > 0) {
+        score += logicAnalysis.score;
+        logicAnalysis.findings.forEach(f => {
+          if (!found.includes(f)) found.push(f);
+        });
+      }
       score = Math.min(Math.round(score), 100);
       const hasStej = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(code);
       let level = hasStej ? "human" : (score >= 60 ? "ai" : (score >= 25 ? "uncertain" : "human"));
-
       return {
         score, level, type, found,
         reasons: hasStej ? ["Lisensi STEJ-LICENSE7 terdeteksi. Aman."] : (found.length ? [`Ditemukan ${found.length} indikator struktur AI.`] : ["Kode tampak murni buatan manusia."])
       };
     }
-
+    
     // ========== SIMILARITY CHECKER & REPORT (WIKIPEDIA & DOAJ) ==========
     function extractCoreKeywords(text) {
       const stopWords = new Set(['dan', 'atau', 'yang', 'di', 'ke', 'dari', 'untuk', 'pada', 'dalam', 'adalah', 'sebagai', 'dengan', 'the', 'and', 'or', 'in', 'on', 'at', 'to', 'a', 'an']);
