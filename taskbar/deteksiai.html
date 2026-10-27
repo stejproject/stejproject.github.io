@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Online Plagiarism Checker (Wikipedia & DOAJ) – STEJ</title>
+  <title>Detektor Skrip AI & Plagiarisme Online – STEJ</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -47,7 +47,7 @@
 
     .container {
       width: 100%;
-      max-width: 860px;
+      max-width: 880px;
       background: var(--card);
       border-radius: 16px;
       padding: 1.5rem;
@@ -60,16 +60,38 @@
       font-weight: 600;
     }
 
+    .type-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .type-row span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    select {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: var(--text);
+      padding: 0.45rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
     textarea {
       width: 100%;
-      height: 250px;
+      height: 280px;
       background: #0f172a;
       border: 1px solid #334155;
       border-radius: 10px;
       color: var(--text);
       padding: 1rem;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      font-size: 0.95rem;
+      font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+      font-size: 0.88rem;
       resize: vertical;
       line-height: 1.5;
     }
@@ -97,12 +119,18 @@
       font-size: 0.9rem;
     }
 
-    #btnCheck {
+    #btnAction {
       background: var(--accent);
       color: #0f172a;
     }
-    #btnCheck:hover { background: #7dd3fc; transform: translateY(-1px); }
-    #btnCheck:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
+    #btnAction:hover { background: #7dd3fc; transform: translateY(-1px); }
+    #btnAction:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
+
+    #btnInsert {
+      background: #8b5cf6;
+      color: white;
+    }
+    #btnInsert:hover { background: #a78bfa; transform: translateY(-1px); }
 
     #btnClear {
       background: #334155;
@@ -119,8 +147,19 @@
     }
 
     #result.show { display: block; }
-    #result.safe { background: rgba(74,222,128,0.12); border: 1px solid var(--success); }
-    #result.plagiarized { background: rgba(248,113,113,0.15); border: 1px solid var(--danger); }
+
+    #result.ai, #result.plagiarized {
+      background: rgba(248,113,113,0.15);
+      border: 1px solid var(--danger);
+    }
+    #result.human, #result.safe {
+      background: rgba(74,222,128,0.12);
+      border: 1px solid var(--success);
+    }
+    #result.uncertain {
+      background: rgba(250,204,21,0.12);
+      border: 1px solid var(--warning);
+    }
 
     .result-title {
       font-size: 1.15rem;
@@ -134,13 +173,13 @@
       line-height: 1.55;
     }
 
-    .sources-list {
+    .indicators {
       margin-top: 0.8rem;
       font-size: 0.85rem;
       color: var(--muted);
     }
 
-    .sources-list ul {
+    .indicators ul {
       margin-top: 0.35rem;
       padding-left: 1.2rem;
     }
@@ -187,31 +226,46 @@
   </style>
 </head>
 <body>
-  <h1>Online Plagiarism Checker</h1>
+  <h1>Detektor Skrip AI & Plagiarisme Online</h1>
   <p class="subtitle">
-    Mengecek kemiripan teks secara online langsung terhadap database <strong>Wikipedia (ID/EN)</strong> dan jurnal ilmiah terbuka <strong>DOAJ (Crossref API)</strong>.
+    Mendeteksi kode hasil tools AI modern (v0, Lovable, shadcn) sekaligus mengecek plagiarisme teks/artikel secara online ke database <strong>Wikipedia & DOAJ (Jurnal Ilmiah)</strong>.
   </p>
 
   <div class="container">
-    <label for="textInput">Tempel teks artikel atau paragraf di sini:</label>
-    <textarea id="textInput" placeholder="Masukkan teks minimal 15-20 kata untuk hasil pencarian online yang akurat..."></textarea>
+    <div class="type-row">
+      <span>Pilih Mode Alat:</span>
+      <select id="toolMode">
+        <option value="ai">Detektor Skrip AI</option>
+        <option value="online-plag">Cek Plagiarisme Online (Wikipedia & DOAJ)</option>
+      </select>
+
+      <span id="fileTypeGroup" style="margin-left: 1rem;">Jenis file:</span>
+      <select id="fileType">
+        <option value="auto">Deteksi Otomatis</option>
+        <option value="html">HTML</option>
+        <option value="css">CSS</option>
+        <option value="js">JavaScript</option>
+      </select>
+    </div>
+
+    <label for="codeInput" id="inputLabel">Tempel kode di sini:</label>
+    <textarea id="codeInput" placeholder="Tempel kode HTML, CSS, atau JavaScript..."></textarea>
 
     <div class="actions">
-      <button id="btnCheck">Cek Plagiarisme Online</button>
+      <button id="btnAction">Deteksi Sekarang</button>
+      <button id="btnInsert">Sisipkan STEJ-LICENSE7</button>
       <button id="btnClear">Bersihkan</button>
     </div>
 
     <div id="result">
       <div class="result-title" id="resultTitle"></div>
       <div class="result-detail" id="resultDetail"></div>
-      
-      <div class="sources-list" id="sourcesBox" style="display:none;">
-        <strong>Sumber Referensi / Kemiripan Ditemukan:</strong>
-        <ul id="sourcesList"></ul>
+      <div class="indicators" id="indicatorsBox" style="display:none;">
+        <strong id="indicatorsTitle">Indikator yang ditemukan:</strong>
+        <ul id="indicatorsList"></ul>
       </div>
-
       <div class="score">
-        Estimasi Tingkat Plagiarisme: <span id="scoreValue">0</span>%
+        <span id="scoreTextLabel">Skor kemungkinan AI:</span> <span id="scoreValue">0</span>%
         <div class="bar">
           <div class="bar-fill" id="scoreBar"></div>
         </div>
@@ -220,27 +274,190 @@
   </div>
 
   <footer>
-    Online Plagiarism Scanner • Integrasi Wikipedia & DOAJ • STEJ Project
+    AI Script Detector & Online Plagiarism Checker • STEJ Project
   </footer>
 
   <script>
-    const textInput = document.getElementById("textInput");
-    const btnCheck = document.getElementById("btnCheck");
+    const input = document.getElementById("codeInput");
+    const fileTypeSelect = document.getElementById("fileType");
+    const fileTypeGroup = document.getElementById("fileTypeGroup");
+    const toolModeSelect = document.getElementById("toolMode");
+    const inputLabel = document.getElementById("inputLabel");
+
+    const btnAction = document.getElementById("btnAction");
+    const btnInsert = document.getElementById("btnInsert");
     const btnClear = document.getElementById("btnClear");
     const resultBox = document.getElementById("result");
     const resultTitle = document.getElementById("resultTitle");
     const resultDetail = document.getElementById("resultDetail");
+    const scoreTextLabel = document.getElementById("scoreTextLabel");
     const scoreValue = document.getElementById("scoreValue");
     const scoreBar = document.getElementById("scoreBar");
-    const sourcesBox = document.getElementById("sourcesBox");
-    const sourcesList = document.getElementById("sourcesList");
+    const indicatorsBox = document.getElementById("indicatorsBox");
+    const indicatorsTitle = document.getElementById("indicatorsTitle");
+    const indicatorsList = document.getElementById("indicatorsList");
 
-    // Fungsi ekstrak kata kunci / frasa terpanjang untuk query pencarian online
+    // Toggle antar Mode Alat
+    toolModeSelect.addEventListener("change", function () {
+      if (this.value === "online-plag") {
+        fileTypeSelect.style.display = "none";
+        fileTypeGroup.style.display = "none";
+        inputLabel.textContent = "Tempel teks atau paragraf artikel di sini:";
+        input.placeholder = "Masukkan teks minimal 15-20 kata untuk dicek ke Wikipedia & DOAJ...";
+        btnAction.textContent = "Cek Plagiarisme Online";
+        btnInsert.style.display = "none";
+      } else {
+        fileTypeSelect.style.display = "inline-block";
+        fileTypeGroup.style.display = "inline";
+        inputLabel.textContent = "Tempel kode di sini:";
+        input.placeholder = "Tempel kode HTML, CSS, atau JavaScript...";
+        btnAction.textContent = "Deteksi Sekarang";
+        btnInsert.style.display = "inline-block";
+      }
+      btnClear.click();
+    });
+
+    // ========== INDIKATOR AI DETECTOR ==========
+    const indicators = {
+      css: [
+        { pattern: /--v0-gradient|--v0-|--shadcn/i, label: "Variabel komersial v0 / shadcn", weight: 40 },
+        { pattern: /@apply\s+|@tailwind|@layer\s+(base|components|utilities)/i, label: "Utilitas Tailwind CSS", weight: 35 },
+        { pattern: /--background|--foreground|--primary|--muted|--card|--border/i, label: "Variabel CSS shadcn/ui", weight: 30 },
+        { pattern: /bg-gradient-to-|from-\w+-500|to-\w+-600/i, label: "Kelas Tailwind gradient modern", weight: 25 }
+      ],
+      html: [
+        { pattern: /data-v0-id|data-v0-|data-lovable/i, label: "Atribut data-v0 / data-lovable", weight: 45 },
+        { pattern: /lucide-react|from\s+['"]lucide-react['"]/i, label: "Pustaka ikon lucide-react", weight: 35 },
+        { pattern: /tailwind(?:\.min)?\.css|cdn\.jsdelivr\.net\/npm\/tailwind/i, label: "Menggunakan CDN Tailwind CSS", weight: 15 },
+        { pattern: /class="[^"]*(?:bg-\w+-(?:100|200|300|400|500|600|700|800|900|950)|space-[xy]-|inset-y-|w-1\/\d|flex-col-reverse)/i, label: "Kelas utilitas spesifik Tailwind CSS", weight: 25 },
+        { pattern: /bootstrap(?:\.min)?\.css|cdn\.jsdelivr\.net\/npm\/bootstrap/i, label: "Menggunakan Framework Bootstrap", weight: 0 },
+        { pattern: /data-slot=|data-state=|data-radix/i, label: "Atribut data Radix / shadcn", weight: 30 }
+      ],
+      js: [
+        { pattern: /insert your api key here|YOUR_API_KEY|replace with your/i, label: "Boilerplate API key generik", weight: 40 },
+        { pattern: /\/\/\s*(TODO|FIXME|NOTE):\s*(implement|add|handle|replace)/i, label: "Komentar instruksi generik LLM", weight: 30 },
+        { pattern: /catch\s*\(\s*\w+\s*\)\s*\{\s*console\.(error|log)/i, label: "Pola error handling berulang", weight: 20 },
+        { pattern: /Generated by|AI generated|created by AI|v0\.dev|lovable\.dev/i, label: "Komentar penanda AI", weight: 45 },
+        { pattern: /from\s+['"]@?\/components\/ui\//i, label: "Import komponen shadcn/ui", weight: 35 }
+      ],
+      common: [
+        { pattern: /STEJ-LICENSE7|bukan bersumber dari manusia|BATAS\.ISI\.LISENSI/i, label: "Lisensi STEJ-LICENSE7", weight: 50 }
+      ]
+    };
+
+    function detectFileType(code) {
+      const trimmed = code.trim();
+      if (/^<!DOCTYPE|^<html|^<head|^<body|^<div|^<section/i.test(trimmed) || /<\/(html|head|body|div|section)>/i.test(code)) {
+        return "html";
+      }
+      if (/\{[\s\S]*\}/.test(code) && (/^[.#@\w\-\s,:]+\{/.test(trimmed) || /--[\w-]+:/.test(code) || /@media|@keyframes|@import/.test(code))) {
+        return "css";
+      }
+      if (/function\s|const\s|let\s|var\s|=>|import\s|export\s|console\.|document\./.test(code)) {
+        return "js";
+      }
+      return "js";
+    }
+
+    function calculateCodeBurstiness(code) {
+      const lines = code.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length < 3) return 0;
+      const lengths = lines.map(line => line.length);
+      const avg = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+      const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avg, 2), 0) / lengths.length;
+      return Math.sqrt(variance);
+    }
+
+    function analyzePureLogicBehavior(code) {
+      let logicScore = 0;
+      const findings = [];
+      const camelCaseMatches = code.match(/[a-z][A-Z][a-zA-Z]*/g) || [];
+      const totalWords = (code.match(/\b[a-zA-Z_]\w*\b/g) || []).length;
+      if (totalWords > 40 && (camelCaseMatches.length / totalWords) > 0.15) {
+        logicScore += 25;
+        findings.push("Pola penamaan camelCase sangat steril dan konsisten khas LLM");
+      }
+      const tryCatchCount = (code.match(/try\s*\{[\s\S]*?\}\s*catch\s*\(\s*\w+\s*\)/g) || []).length;
+      if (tryCatchCount >= 2) {
+        logicScore += 20;
+        findings.push("Struktur error handling try...catch yang sangat prosedural");
+      }
+      const aiCommentPattern = /\/\/\s*(helper|initialize|check|validate|process|handle|format|compute|render)\s+/i;
+      if (aiCommentPattern.test(code)) {
+        logicScore += 25;
+        findings.push("Komentar penjelas fungsi khas dokumentasi LLM");
+      }
+      const defensiveChecks = (code.match(/if\s*\(\s*!\w+\s*\)/g) || []).length;
+      if (defensiveChecks >= 3) {
+        logicScore += 15;
+        findings.push("Pola pengecekan defensif (null/undefined) yang sangat terstruktur");
+      }
+      return { score: logicScore, findings: findings };
+    }
+
+    function analyzeAI(code, forcedType) {
+      if (!code || !code.trim()) {
+        return { score: 0, level: "empty", reasons: ["Tidak ada kode yang dimasukkan."], found: [] };
+      }
+      const type = forcedType === "auto" ? detectFileType(code) : forcedType;
+      let score = 0;
+      const found = [];
+
+      indicators.common.forEach(function (item) {
+        if (item.pattern.test(code)) {
+          score += item.weight;
+          found.push(item.label);
+        }
+      });
+
+      const typeIndicators = indicators[type] || [];
+      typeIndicators.forEach(function (item) {
+        if (item.pattern.test(code)) {
+          score += item.weight;
+          found.push(item.label + " (" + type.toUpperCase() + ")");
+        }
+      });
+
+      const burstinessScore = calculateCodeBurstiness(code);
+      if (burstinessScore > 0 && burstinessScore < 6) {
+        score += 15;
+        found.push("Struktur baris terlalu seragam (Low Burstiness)");
+      }
+
+      const logicAnalysis = analyzePureLogicBehavior(code);
+      if (logicAnalysis.score > 0) {
+        score += logicAnalysis.score;
+        logicAnalysis.findings.forEach(f => found.push(f));
+      }
+
+      score = Math.min(Math.round(score), 100);
+      const hasStejLicense = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(code);
+
+      let level = "human";
+      if (hasStejLicense) {
+        score = 0;
+        level = "human";
+      } else {
+        if (score >= 60) level = "ai";
+        else if (score >= 25) level = "uncertain";
+      }
+
+      return {
+        score: score,
+        level: level,
+        type: type,
+        found: found,
+        reasons: hasStejLicense
+          ? ["Lisensi STEJ-LICENSE7 terdeteksi. Kode dinyatakan sah, transparan, dan aman."]
+          : (found.length ? ["Terdeteksi " + found.length + " indikator struktur AI."] : ["Kode tampak murni buatan manusia."])
+      };
+    }
+
+    // ========== ONLINE PLAGIARISM CHECKER (WIKIPEDIA & DOAJ) ==========
     function extractSearchQuery(text) {
       const clean = text.replace(/[^\w\s]/gi, '').trim();
       const words = clean.split(/\s+/);
       if (words.length <= 6) return clean;
-      // Ambil 6-8 kata pertama atau acak bermakna untuk query API
       return words.slice(0, 7).join(' ');
     }
 
@@ -264,7 +481,6 @@
 
     async function checkDOAJCrossref(query) {
       try {
-        // Menggunakan Crossref API publik (induk database jurnal akademik termasuk DOAJ)
         const url = `https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=3`;
         const res = await fetch(url);
         const data = await res.json();
@@ -281,78 +497,152 @@
       return [];
     }
 
-    btnCheck.addEventListener("click", async function() {
-      const text = textInput.value.trim();
-      if (!text || text.split(/\s+/).length < 10) {
-        alert("Masukkan minimal 10-15 kata agar sistem dapat melakukan pencarian online yang akurat.");
-        return;
+    // ========== SUNTIK LISENSI AMAN ==========
+    const LICENSE_TEXT = `nama: STEJ-LICENSE7 Makna: PERINGATAN, seluruh muatan dan isi di dalamnya merupakan hasil kreasi yang bukan bersumber dari manusia. Mohon kritisi, pelajari dan perbaiki sesuai batasan lisensi STEJ.`;
+    function wrapLicense(type) {
+      if (type === "html") {
+        return "\n<!-- \n+===BATAS.ISI.LISENSI===+\n" + LICENSE_TEXT + "\n+===BATAS.ISI.LISENSI===+\n-->";
       }
+      return "\n/* \n+===BATAS.ISI.LISENSI===+\n" + LICENSE_TEXT + "\n+===BATAS.ISI.LISENSI===+\n*/";
+    }
 
-      btnCheck.disabled = true;
-      btnCheck.textContent = "Memeriksa ke Wikipedia & DOAJ...";
-      resultBox.className = "show";
-      resultTitle.textContent = "Sedang Memindai Database Online...";
-      resultDetail.textContent = "Melakukan kueri pencarian teks ke peladen Wikipedia dan jurnal ilmiah terbuka...";
-      sourcesBox.style.display = "none";
-      scoreBar.style.width = "0%";
-      scoreValue.textContent = "...";
+    // ========== EVENT LISTENERS TOMBOL UTAMA ==========
+    btnAction.addEventListener("click", async function () {
+      const mode = toolModeSelect.value;
+      const textVal = input.value;
 
-      const query = extractSearchQuery(text);
+      if (mode === "online-plag") {
+        // Mode Plagiarisme Online
+        if (!textVal.trim() || textVal.split(/\s+/).length < 10) {
+          alert("Masukkan minimal 10-15 kata agar sistem dapat melakukan pencarian online ke Wikipedia & DOAJ.");
+          return;
+        }
 
-      // Jalankan pencarian paralel ke Wikipedia dan DOAJ
-      const [wikiResults, doajResults] = await Promise.all([
-        checkWikipedia(query),
-        checkDOAJCrossref(query)
-      ]);
+        btnAction.disabled = true;
+        btnAction.textContent = "Memeriksa ke Wikipedia & DOAJ...";
+        resultBox.className = "show";
+        resultTitle.textContent = "Sedang Memindai Database Online...";
+        resultDetail.textContent = "Melakukan kueri pencarian teks ke peladen Wikipedia dan jurnal ilmiah terbuka...";
+        indicatorsBox.style.display = "none";
+        scoreBar.style.width = "0%";
+        scoreValue.textContent = "...";
 
-      const allFound = [...wikiResults, ...doajResults];
-      let similarityScore = 0;
+        const query = extractSearchQuery(textVal);
+        const [wikiResults, doajResults] = await Promise.all([
+          checkWikipedia(query),
+          checkDOAJCrossref(query)
+        ]);
 
-      if (allFound.length > 0) {
-        // Berdasarkan seberapa banyak referensi online yang match dengan cuplikan teks
-        similarityScore = Math.min(allFound.length * 28 + 15, 92);
+        const allFound = [...wikiResults, ...doajResults];
+        let similarityScore = allFound.length > 0 ? Math.min(allFound.length * 28 + 15, 92) : Math.floor(Math.random() * 8);
+
+        scoreTextLabel.textContent = "Estimasi Tingkat Plagiarisme:";
+        scoreValue.textContent = similarityScore;
+        scoreBar.style.width = similarityScore + "%";
+
+        indicatorsTitle.textContent = "Sumber Referensi / Kemiripan Ditemukan:";
+        indicatorsList.innerHTML = "";
+        if (allFound.length > 0) {
+          allFound.forEach(ref => {
+            const li = document.createElement("li");
+            li.className = "sources-list";
+            li.innerHTML = `<strong>[${ref.source}]</strong> <a href="${ref.url}" target="_blank">${ref.title}</a>`;
+            indicatorsList.appendChild(li);
+          });
+          indicatorsBox.style.display = "block";
+        } else {
+          indicatorsBox.style.display = "none";
+        }
+
+        if (similarityScore >= 40) {
+          resultBox.className = "show plagiarized";
+          scoreBar.style.background = "var(--danger, #dc3545)";
+          resultTitle.textContent = "Terdeteksi Indikasi Plagiarisme / Kesamaan Tinggi";
+          resultDetail.textContent = `Ditemukan ${allFound.length} sumber referensi daring yang memiliki pola teks serupa di Wikipedia atau Jurnal DOAJ.`;
+        } else {
+          resultBox.className = "show safe";
+          scoreBar.style.background = "var(--success, #198754)";
+          resultTitle.textContent = "Teks Cukup Unik / Original";
+          resultDetail.textContent = "Tidak ditemukan kecocokan plagiarisme yang signifikan pada database online Wikipedia maupun DOAJ.";
+        }
+
+        btnAction.disabled = false;
+        btnAction.textContent = "Cek Plagiarisme Online";
+
       } else {
-        similarityScore = Math.floor(Math.random() * 8); // Rendah / Original
+        // Mode Detektor Skrip AI
+        scoreTextLabel.textContent = "Skor kemungkinan AI:";
+        indicatorsTitle.textContent = "Indikator yang ditemukan:";
+        const forcedType = fileTypeSelect.value;
+        const result = analyzeAI(textVal, forcedType);
+
+        resultBox.className = "show " + result.level;
+        scoreValue.textContent = result.score;
+        scoreBar.style.width = result.score + "%";
+
+        if (result.found.length > 0) {
+          indicatorsBox.style.display = "block";
+          indicatorsList.innerHTML = "";
+          result.found.forEach(function (item) {
+            const li = document.createElement("li");
+            li.textContent = item;
+            indicatorsList.appendChild(li);
+          });
+        } else {
+          indicatorsBox.style.display = "none";
+        }
+
+        const hasStejLicense = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(textVal);
+        if (hasStejLicense) {
+          scoreBar.style.background = "var(--success, #198754)";
+          resultTitle.textContent = "Terlisensi Resmi (STEJ-LICENSE7)";
+          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons[0];
+        } else if (result.level === "ai") {
+          scoreBar.style.background = "var(--danger, #dc3545)";
+          resultTitle.textContent = "Kemungkinan besar dibuat oleh AI";
+          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
+        } else if (result.level === "uncertain") {
+          scoreBar.style.background = "var(--warning, #ffc107)";
+          resultTitle.textContent = "Ada indikasi AI (tidak pasti)";
+          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
+        } else if (result.level === "empty") {
+          scoreBar.style.background = "#64748b";
+          resultTitle.textContent = "Tidak ada data";
+          resultDetail.textContent = result.reasons[0];
+        } else {
+          scoreBar.style.background = "var(--success, #198754)";
+          resultTitle.textContent = "Lebih mungkin dibuat manusia";
+          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
+        }
       }
-
-      scoreValue.textContent = similarityScore;
-      scoreBar.style.width = similarityScore + "%";
-
-      sourcesList.innerHTML = "";
-      if (allFound.length > 0) {
-        allFound.forEach(ref => {
-          const li = document.createElement("li");
-          li.innerHTML = `<strong>[${ref.source}]</strong> <a href="${ref.url}" target="_blank">${ref.title}</a>`;
-          sourcesList.appendChild(li);
-        });
-        sourcesBox.style.display = "block";
-      } else {
-        sourcesBox.style.display = "none";
-      }
-
-      if (similarityScore >= 40) {
-        resultBox.className = "show plagiarized";
-        scoreBar.style.background = "var(--danger, #dc3545)";
-        resultTitle.textContent = "Terdeteksi Indikasi Plagiarisme / Kesamaan Tinggi";
-        resultDetail.textContent = `Ditemukan ${allFound.length} sumber referensi daring yang memiliki pola teks atau topik serupa di Wikipedia atau Jurnal DOAJ.`;
-      } else {
-        resultBox.className = "show safe";
-        scoreBar.style.background = "var(--success, #198754)";
-        resultTitle.textContent = "Teks Cukup Unik / Original";
-        resultDetail.textContent = "Tidak ditemukan kecocokan plagiarisme yang signifikan pada database online Wikipedia maupun DOAJ.";
-      }
-
-      btnCheck.disabled = false;
-      btnCheck.textContent = "Cek Plagiarisme Online";
     });
 
-    btnClear.addEventListener("click", function() {
-      textInput.value = "";
+    btnInsert.addEventListener("click", function () {
+      let code = input.value;
+      const forcedType = fileTypeSelect.value;
+      const type = forcedType === "auto" ? detectFileType(code || " ") : forcedType;
+
+      code = code.replace(/<!--\s*\+===BATAS\.ISI\.LISENSI===+[\s\S]*?\+===BATAS\.ISI\.LISENSI===+\s*-->/gi, "");
+      code = code.replace(/\/\*\s*\+===BATAS\.ISI\.LISENSI===+[\s\S]*?\+===BATAS\.ISI\.LISENSI===+\s*\*\//gi, "");
+
+      const licenseBlock = wrapLicense(type);
+      input.value = code.trimEnd() + "\n" + licenseBlock;
+      alert("STEJ-LICENSE7 berhasil disisipkan!");
+    });
+
+    btnClear.addEventListener("click", function () {
+      input.value = "";
       resultBox.className = "";
       scoreBar.style.width = "0%";
       scoreValue.textContent = "0";
-      sourcesBox.style.display = "none";
+      indicatorsBox.style.display = "none";
     });
   </script>
+
+<!-- 
++===BATAS.ISI.LISENSI===+
+nama: STEJ-LICENSE7 Makna: PERINGATAN, seluruh muatan dan isi di dalamnya merupakan hasil kreasi yang bukan bersumber dari manusia. Mohon kritisi, pelajari dan perbaiki sesuai batasan lisensi STEJ.
++===BATAS.ISI.LISENSI===+
+-->
 </body>
 </html>
