@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detektor Skrip AI – STEJ</title>
+  <title>Detektor Skrip AI & Similarity Checker – STEJ</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -46,7 +46,7 @@
 
     .container {
       width: 100%;
-      max-width: 860px;
+      max-width: 900px;
       background: var(--card);
       border-radius: 16px;
       padding: 1.5rem;
@@ -81,9 +81,25 @@
       font-size: 0.9rem;
     }
 
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .editor-grid.dual {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 768px) {
+      .editor-grid.dual {
+        grid-template-columns: 1fr;
+      }
+    }
+
     textarea {
       width: 100%;
-      height: 300px;
+      height: 280px;
       background: #0f172a;
       border: 1px solid #334155;
       border-radius: 10px;
@@ -118,11 +134,11 @@
       font-size: 0.9rem;
     }
 
-    #btnDetect {
+    #btnAction {
       background: var(--accent);
       color: #0f172a;
     }
-    #btnDetect:hover { background: #7dd3fc; transform: translateY(-1px); }
+    #btnAction:hover { background: #7dd3fc; transform: translateY(-1px); }
 
     #btnInsert {
       background: #8b5cf6;
@@ -146,15 +162,15 @@
 
     #result.show { display: block; }
 
-    #result.ai {
+    #result.ai, #result.high-similarity {
       background: rgba(248,113,113,0.15);
       border: 1px solid var(--danger);
     }
-    #result.human {
+    #result.human, #result.low-similarity {
       background: rgba(74,222,128,0.12);
       border: 1px solid var(--success);
     }
-    #result.uncertain {
+    #result.uncertain, #result.mid-similarity {
       background: rgba(250,204,21,0.12);
       border: 1px solid var(--warning);
     }
@@ -216,15 +232,20 @@
   </style>
 </head>
 <body>
-  <h1>Detektor Skrip AI</h1>
+  <h1>Detektor Skrip AI & Similarity Checker</h1>
   <p class="subtitle">
-    Mendeteksi kode hasil tools AI modern (v0.dev, Lovable, shadcn, dll.) berdasarkan indikator spesifik per jenis file.
-    Juga bisa menyisipkan STEJ-LICENSE7 dengan format komentar yang aman.
+    Mendeteksi kode hasil AI modern (v0, Lovable, shadcn) dan mengecek tingkat kemiripan (similarity) antar skrip kode.
   </p>
 
   <div class="container">
     <div class="type-row">
-      <span>Jenis file:</span>
+      <span>Mode Alat:</span>
+      <select id="toolMode">
+        <option value="detector">Detektor AI Skrip</option>
+        <option value="similarity">Similarity Checker (Cek Kemiripan)</option>
+      </select>
+
+      <span style="margin-left: 1rem;">Jenis file:</span>
       <select id="fileType">
         <option value="auto">Deteksi Otomatis</option>
         <option value="html">HTML</option>
@@ -233,11 +254,20 @@
       </select>
     </div>
 
-    <label for="codeInput">Tempel kode di sini:</label>
-    <textarea id="codeInput" placeholder="Tempel kode HTML, CSS, atau JavaScript..."></textarea>
+    <div class="editor-grid" id="editorGrid">
+      <div id="boxSource">
+        <label for="codeInput" id="labelSource">Tempel kode di sini:</label>
+        <textarea id="codeInput" placeholder="Tempel kode HTML, CSS, atau JavaScript..."></textarea>
+      </div>
+
+      <div id="boxTarget" style="display: none;">
+        <label for="codeCompare">Kode pembanding (Target):</label>
+        <textarea id="codeCompare" placeholder="Tempel kode pembanding di sini untuk mengecek kemiripan..."></textarea>
+      </div>
+    </div>
 
     <div class="actions">
-      <button id="btnDetect">Deteksi Sekarang</button>
+      <button id="btnAction">Deteksi Sekarang</button>
       <button id="btnInsert">Sisipkan STEJ-LICENSE7</button>
       <button id="btnClear">Bersihkan</button>
     </div>
@@ -246,11 +276,11 @@
       <div class="result-title" id="resultTitle"></div>
       <div class="result-detail" id="resultDetail"></div>
       <div class="indicators" id="indicatorsBox" style="display:none;">
-        <strong>Indikator yang ditemukan:</strong>
+        <strong id="indicatorsTitle">Indikator yang ditemukan:</strong>
         <ul id="indicatorsList"></ul>
       </div>
       <div class="score">
-        Skor kemungkinan AI: <span id="scoreValue">0</span>%
+        <span id="scoreLabel">Skor kemungkinan AI:</span> <span id="scoreValue">0</span>%
         <div class="bar">
           <div class="bar-fill" id="scoreBar"></div>
         </div>
@@ -259,24 +289,50 @@
   </div>
 
   <footer>
-    Detektor berbasis pola teks &bull; STEJ Project
+    Detektor & Similarity Checker berbasis pola teks • STEJ Project
   </footer>
 
   <script>
     const input = document.getElementById("codeInput");
+    const codeCompare = document.getElementById("codeCompare");
     const fileTypeSelect = document.getElementById("fileType");
-    const btnDetect = document.getElementById("btnDetect");
+    const toolModeSelect = document.getElementById("toolMode");
+    const editorGrid = document.getElementById("editorGrid");
+    const boxTarget = document.getElementById("boxTarget");
+    const labelSource = document.getElementById("labelSource");
+
+    const btnAction = document.getElementById("btnAction");
     const btnInsert = document.getElementById("btnInsert");
     const btnClear = document.getElementById("btnClear");
     const resultBox = document.getElementById("result");
     const resultTitle = document.getElementById("resultTitle");
     const resultDetail = document.getElementById("resultDetail");
+    const scoreLabel = document.getElementById("scoreLabel");
     const scoreValue = document.getElementById("scoreValue");
     const scoreBar = document.getElementById("scoreBar");
     const indicatorsBox = document.getElementById("indicatorsBox");
+    const indicatorsTitle = document.getElementById("indicatorsTitle");
     const indicatorsList = document.getElementById("indicatorsList");
 
-    // ========== INDIKATOR PER JENIS FILE (DIPERBAIKI) ==========
+    // Switch Mode
+    toolModeSelect.addEventListener("change", function() {
+      if (this.value === "similarity") {
+        editorGrid.classList.add("dual");
+        boxTarget.style.display = "block";
+        labelSource.textContent = "Kode Utama (Sumber):";
+        btnAction.textContent = "Cek Kemiripan Kode";
+        btnInsert.style.display = "none";
+      } else {
+        editorGrid.classList.remove("dual");
+        boxTarget.style.display = "none";
+        labelSource.textContent = "Tempel kode di sini:";
+        btnAction.textContent = "Deteksi Sekarang";
+        btnInsert.style.display = "inline-block";
+      }
+      btnClear.click();
+    });
+
+    // ========== INDIKATOR PER JENIS FILE ==========
     const indicators = {
       css: [
         { pattern: /--v0-gradient|--v0-|--shadcn/i, label: "Variabel komersial v0 / shadcn", weight: 40 },
@@ -304,7 +360,6 @@
       ]
     };
 
-    // Deteksi jenis file dari konten
     function detectFileType(code) {
       const trimmed = code.trim();
       if (/^<!DOCTYPE|^<html|^<head|^<body|^<div|^<section/i.test(trimmed) || /<\/(html|head|body|div|section)>/i.test(code)) {
@@ -316,92 +371,105 @@
       if (/function\s|const\s|let\s|var\s|=>|import\s|export\s|console\.|document\./.test(code)) {
         return "js";
       }
-      return "js"; // default
+      return "js";
     }
 
-    // ========== ANALISIS LANJUTAN (NON-REGEX / BURSTINESS) ==========
     function calculateCodeBurstiness(code) {
       const lines = code.split('\n').map(l => l.trim()).filter(l => l.length > 0);
       if (lines.length < 3) return 0;
-      
       const lengths = lines.map(line => line.length);
       const avg = lengths.reduce((a, b) => a + b, 0) / lengths.length;
-      
       const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avg, 2), 0) / lengths.length;
       return Math.sqrt(variance);
     }
-    // ========== ANALISIS LANJUTAN: PERILAKU PURE LOGIC LLM ==========
+
     function analyzePureLogicBehavior(code) {
       let logicScore = 0;
       const findings = [];
-
-      // 1. Cek Konsistensi Penamaan Rigorous (CamelCase Sempurna tanpa anomali manusia)
       const camelCaseMatches = code.match(/[a-z][A-Z][a-zA-Z]*/g) || [];
       const totalWords = (code.match(/\b[a-zA-Z_]\w*\b/g) || []).length;
+
       if (totalWords > 40 && (camelCaseMatches.length / totalWords) > 0.15) {
         logicScore += 25;
         findings.push("Pola penamaan camelCase sangat steril dan konsisten khas LLM");
       }
-
-      // 2. Cek Pola Blok Error Handling Standar LLM (try...catch berulang)
       const tryCatchCount = (code.match(/try\s*\{[\s\S]*?\}\s*catch\s*\(\s*\w+\s*\)/g) || []).length;
       if (tryCatchCount >= 2) {
         logicScore += 20;
         findings.push("Struktur error handling try...catch yang sangat prosedural");
       }
-
-      // 3. Cek Kebiasaan Komentar Penjelas AI (Inline Docstring)
       const aiCommentPattern = /\/\/\s*(helper|initialize|check|validate|process|handle|format|compute|render)\s+/i;
       if (aiCommentPattern.test(code)) {
         logicScore += 25;
         findings.push("Komentar penjelas fungsi khas dokumentasi LLM");
       }
-
-      // 4. Cek Keberadaan Jeda/Kondisional Defensif (Null/Undefined checks berlebih)
       const defensiveChecks = (code.match(/if\s*\(\s*!\w+\s*\)/g) || []).length;
       if (defensiveChecks >= 3) {
         logicScore += 15;
         findings.push("Pola pengecekan defensif (null/undefined) yang sangat terstruktur");
       }
-
       return { score: logicScore, findings: findings };
     }
 
-    // ========== FUNGSI UTAMA ANALISIS GABUNGAN ==========
+    // ========== SIMILARITY CHECKER ALGORITHM (JACCARD + TOKENIZER) ==========
+    function tokenizeCode(code) {
+      // Bersihkan komentar & whitespace agar fokus pada struktur token logika
+      const cleanCode = code
+        .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+        .replace(/\s+/g, ' ');
+      return cleanCode.match(/\b\w+\b|[^\w\s]/g) || [];
+    }
+
+    function calculateSimilarity(code1, code2) {
+      const tokens1 = tokenizeCode(code1);
+      const tokens2 = tokenizeCode(code2);
+
+      if (tokens1.length === 0 || tokens2.length === 0) return { percentage: 0, sharedTokens: [] };
+
+      const set1 = new Set(tokens1);
+      const set2 = new Set(tokens2);
+
+      const intersection = [...set1].filter(token => set2.has(token));
+      const union = new Set([...set1, ...set2]);
+
+      const jaccardScore = (intersection.length / union.size) * 100;
+
+      return {
+        percentage: Math.min(Math.round(jaccardScore * 1.2), 100), // Normalized scaling
+        sharedTokens: intersection.slice(0, 15) // ambil sampel token yang cocok
+      };
+    }
+
+    // ========== ANALISIS AI DETECTOR ==========
     function analyze(code, forcedType) {
       if (!code || !code.trim()) {
         return { score: 0, level: "empty", reasons: ["Tidak ada kode yang dimasukkan."], found: [] };
       }
-
       const type = forcedType === "auto" ? detectFileType(code) : forcedType;
       let score = 0;
       const found = [];
 
-      // 1. Cek indikator common & lisensi
-      indicators.common.forEach(function (item) {
+      indicators.common.forEach(item => {
         if (item.pattern.test(code)) {
           score += item.weight;
           found.push(item.label);
         }
       });
 
-      // 2. Cek indikator spesifik jenis file (Regex standar)
       const typeIndicators = indicators[type] || [];
-      typeIndicators.forEach(function (item) {
+      typeIndicators.forEach(item => {
         if (item.pattern.test(code)) {
           score += item.weight;
           found.push(item.label + " (" + type.toUpperCase() + ")");
         }
       });
 
-      // 3. Cek Analisis Burstiness (Struktur baris)
       const burstinessScore = calculateCodeBurstiness(code);
       if (burstinessScore > 0 && burstinessScore < 6) {
         score += 15;
         found.push("Struktur baris terlalu seragam (Low Burstiness)");
       }
 
-      // 4. ✨ TAMBAHAN UTAMA: Deteksi Pure Logic / Raw Code LLM (Claude/DeepSeek)
       const logicAnalysis = analyzePureLogicBehavior(code);
       if (logicAnalysis.score > 0) {
         score += logicAnalysis.score;
@@ -409,10 +477,8 @@
       }
 
       score = Math.min(Math.round(score), 100);
-
-      // 5. Override Lisensi STEJ-LICENSE7
       const hasStejLicense = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(code);
-      
+
       let level = "human";
       if (hasStejLicense) {
         score = 0;
@@ -443,50 +509,96 @@
     }
 
     // ========== EVENT LISTENERS TOMBOL UI ==========
-    btnDetect.addEventListener("click", function () {
-      const code = input.value;
-      const forcedType = fileTypeSelect.value;
-      const result = analyze(code, forcedType);
+    btnAction.addEventListener("click", function () {
+      const mode = toolModeSelect.value;
 
-      resultBox.className = "show " + result.level;
-      scoreValue.textContent = result.score;
-      scoreBar.style.width = result.score + "%";
+      if (mode === "similarity") {
+        // PERIKSA KEMIRIPAN KODE
+        const code1 = input.value;
+        const code2 = codeCompare.value;
 
-      // Tampilkan indikator
-      if (result.found.length > 0) {
-        indicatorsBox.style.display = "block";
+        if (!code1.trim() || !code2.trim()) {
+          alert("Harap masukkan kode pada kedua kolom untuk membandingkan kemiripan!");
+          return;
+        }
+
+        const simResult = calculateSimilarity(code1, code2);
+        scoreLabel.textContent = "Skor Kemiripan (Similarity):";
+        scoreValue.textContent = simResult.percentage;
+        scoreBar.style.width = simResult.percentage + "%";
+
+        indicatorsTitle.textContent = "Sampel Token Identik:";
+        indicatorsBox.style.display = simResult.sharedTokens.length ? "block" : "none";
         indicatorsList.innerHTML = "";
-        result.found.forEach(function (item) {
+        simResult.sharedTokens.forEach(token => {
           const li = document.createElement("li");
-          li.textContent = item;
+          li.textContent = `Token Identik: "${token}"`;
           indicatorsList.appendChild(li);
         });
-      } else {
-        indicatorsBox.style.display = "none";
-      }
 
-      // Pengaturan Warna Bar & Teks Hasil
-      const hasStejLicense = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(code);
-      if (hasStejLicense) {
-        scoreBar.style.background = "var(--success, #198754)";
-        resultTitle.textContent = "Terlisensi Resmi (STEJ-LICENSE7)";
-        resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons[0];
-      } else if (result.level === "ai") {
-        scoreBar.style.background = "var(--danger, #dc3545)";
-        resultTitle.textContent = "Kemungkinan besar dibuat oleh AI";
-        resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
-      } else if (result.level === "uncertain") {
-        scoreBar.style.background = "var(--warning, #ffc107)";
-        resultTitle.textContent = "Ada indikasi AI (tidak pasti)";
-        resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
-      } else if (result.level === "empty") {
-        scoreBar.style.background = "#64748b";
-        resultTitle.textContent = "Tidak ada data";
-        resultDetail.textContent = result.reasons[0];
+        if (simResult.percentage >= 70) {
+          resultBox.className = "show high-similarity";
+          scoreBar.style.background = "var(--danger, #dc3545)";
+          resultTitle.textContent = "Tingkat Kemiripan Sangat Tinggi";
+          resultDetail.textContent = "Kedua skrip memiliki struktur token dan logika yang sangat identik.";
+        } else if (simResult.percentage >= 35) {
+          resultBox.className = "show mid-similarity";
+          scoreBar.style.background = "var(--warning, #ffc107)";
+          resultTitle.textContent = "Tingkat Kemiripan Sedang";
+          resultDetail.textContent = "Sebagian struktur atau pustaka yang digunakan memiliki kesamaan.";
+        } else {
+          resultBox.className = "show low-similarity";
+          scoreBar.style.background = "var(--success, #198754)";
+          resultTitle.textContent = "Tingkat Kemiripan Rendah";
+          resultDetail.textContent = "Kedua kode memiliki struktur dan alur logika yang berbeda.";
+        }
+
       } else {
-        scoreBar.style.background = "var(--success, #198754)";
-        resultTitle.textContent = "Lebih mungkin dibuat manusia";
-        resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
+        // DETEKSI AI
+        scoreLabel.textContent = "Skor kemungkinan AI:";
+        indicatorsTitle.textContent = "Indikator yang ditemukan:";
+        const code = input.value;
+        const forcedType = fileTypeSelect.value;
+        const result = analyze(code, forcedType);
+
+        resultBox.className = "show " + result.level;
+        scoreValue.textContent = result.score;
+        scoreBar.style.width = result.score + "%";
+
+        if (result.found.length > 0) {
+          indicatorsBox.style.display = "block";
+          indicatorsList.innerHTML = "";
+          result.found.forEach(function (item) {
+            const li = document.createElement("li");
+            li.textContent = item;
+            indicatorsList.appendChild(li);
+          });
+        } else {
+          indicatorsBox.style.display = "none";
+        }
+
+        const hasStejLicense = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(code);
+        if (hasStejLicense) {
+          scoreBar.style.background = "var(--success, #198754)";
+          resultTitle.textContent = "Terlisensi Resmi (STEJ-LICENSE7)";
+          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons[0];
+        } else if (result.level === "ai") {
+          scoreBar.style.background = "var(--danger, #dc3545)";
+          resultTitle.textContent = "Kemungkinan besar dibuat oleh AI";
+          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
+        } else if (result.level === "uncertain") {
+          scoreBar.style.background = "var(--warning, #ffc107)";
+          resultTitle.textContent = "Ada indikasi AI (tidak pasti)";
+          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
+        } else if (result.level === "empty") {
+          scoreBar.style.background = "#64748b";
+          resultTitle.textContent = "Tidak ada data";
+          resultDetail.textContent = result.reasons[0];
+        } else {
+          scoreBar.style.background = "var(--success, #198754)";
+          resultTitle.textContent = "Lebih mungkin dibuat manusia";
+          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
+        }
       }
     });
 
@@ -495,17 +607,17 @@
       const forcedType = fileTypeSelect.value;
       const type = forcedType === "auto" ? detectFileType(code || " ") : forcedType;
 
-      // Hapus lisensi lama jika sudah ada
       code = code.replace(/<!--\s*\+===BATAS\.ISI\.LISENSI===+[\s\S]*?\+===BATAS\.ISI\.LISENSI===+\s*-->/gi, "");
       code = code.replace(/\/\*\s*\+===BATAS\.ISI\.LISENSI===+[\s\S]*?\+===BATAS\.ISI\.LISENSI===+\s*\*\//gi, "");
 
       const licenseBlock = wrapLicense(type);
       input.value = code.trimEnd() + "\n" + licenseBlock;
-      alert("STEJ-LICENSE7 berhasil disisipkan! Klik 'Deteksi' kembali untuk melihat statusnya berubah menjadi hijau.");
+      alert("STEJ-LICENSE7 berhasil disisipkan!");
     });
 
     btnClear.addEventListener("click", function () {
       input.value = "";
+      codeCompare.value = "";
       resultBox.className = "";
       scoreBar.style.width = "0%";
       scoreValue.textContent = "0";
