@@ -15,7 +15,7 @@
       --text: #e2e8f0;
       --muted: #94a3b8;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
       background: var(--bg);
@@ -105,21 +105,12 @@
       transition: all 0.2s;
       font-size: 0.9rem;
     }
-    #btnAction {
-      background: var(--accent);
-      color: #0f172a;
-    }
+    #btnAction { background: var(--accent); color: #0f172a; }
     #btnAction:hover { background: #7dd3fc; transform: translateY(-1px); }
     #btnAction:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
-    #btnInsert {
-      background: #8b5cf6;
-      color: white;
-    }
+    #btnInsert { background: #8b5cf6; color: white; }
     #btnInsert:hover { background: #a78bfa; transform: translateY(-1px); }
-    #btnClear {
-      background: #334155;
-      color: var(--text);
-    }
+    #btnClear { background: #334155; color: var(--text); }
     #btnClear:hover { background: #475569; }
     
     #result {
@@ -320,6 +311,7 @@
     const btnAction = document.getElementById("btnAction");
     const btnInsert = document.getElementById("btnInsert");
     const btnClear = document.getElementById("btnClear");
+
     const resultBox = document.getElementById("result");
     const resultTitle = document.getElementById("resultTitle");
     const resultDetail = document.getElementById("resultDetail");
@@ -393,6 +385,7 @@
       const findings = [];
       const camelCaseMatches = code.match(/[a-z][A-Z][a-zA-Z]*/g) || [];
       const totalWords = (code.match(/\b[a-zA-Z_]\w*\b/g) || []).length;
+      
       if (totalWords > 40 && (camelCaseMatches.length / totalWords) > 0.15) {
         logicScore += 25;
         findings.push("Pola penamaan camelCase sangat steril dan konsisten khas LLM");
@@ -402,41 +395,33 @@
         logicScore += 20;
         findings.push("Struktur error handling try...catch yang sangat prosedural");
       }
-      const aiCommentPattern = /\/\/\s*(helper|initialize|check|validate|process|handle|format|compute|render)\s+/i;
-      if (aiCommentPattern.test(code)) {
-        logicScore += 25;
-        findings.push("Komentar penjelas fungsi khas dokumentasi LLM");
-      }
-      const defensiveChecks = (code.match(/if\s*\(\s*!\w+\s*\)/g) || []).length;
-      if (defensiveChecks >= 3) {
-        logicScore += 15;
-        findings.push("Pola pengecekan defensif (null/undefined) yang sangat terstruktur");
-      }
       return { score: logicScore, findings: findings };
     }
-    
+
     function analyzeAI(code, forcedType) {
       if (!code || !code.trim()) return { score: 0, level: "empty", reasons: ["Tidak ada data kode."], found: [] };
       const type = forcedType === "auto" ? detectFileType(code) : forcedType;
       let score = 0;
       const found = [];
-      indicators.common.forEach(item => { 
-        if (item.pattern.test(code)) { 
-          score += item.weight; 
-          found.push(item.label); 
-        } 
+
+      indicators.common.forEach(item => {
+         if (item.pattern.test(code)) {
+           score += item.weight;
+           found.push(item.label);
+         }
       });
+
       Object.keys(indicators).forEach(cat => {
         if (cat !== 'common') {
           indicators[cat].forEach(item => {
-            // Cek agar tidak duplikat jika pola sudah masuk
-            if (item.pattern.test(code) && !found.includes(item.label)) {
+            if (item.pattern.test(code) && !found.some(f => f.includes(item.label))) {
               score += item.weight;
               found.push(item.label + " (" + cat.toUpperCase() + ")");
             }
           });
         }
       });
+
       const logicAnalysis = analyzePureLogicBehavior(code);
       if (logicAnalysis.score > 0) {
         score += logicAnalysis.score;
@@ -444,15 +429,17 @@
           if (!found.includes(f)) found.push(f);
         });
       }
+
       score = Math.min(Math.round(score), 100);
       const hasStej = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(code);
       let level = hasStej ? "human" : (score >= 60 ? "ai" : (score >= 25 ? "uncertain" : "human"));
+
       return {
         score, level, type, found,
         reasons: hasStej ? ["Lisensi STEJ-LICENSE7 terdeteksi. Aman."] : (found.length ? [`Ditemukan ${found.length} indikator struktur AI.`] : ["Kode tampak murni buatan manusia."])
       };
     }
-    
+
     // ========== SIMILARITY CHECKER & REPORT (WIKIPEDIA & DOAJ) ==========
     function extractCoreKeywords(text) {
       const stopWords = new Set(['dan', 'atau', 'yang', 'di', 'ke', 'dari', 'untuk', 'pada', 'dalam', 'adalah', 'sebagai', 'dengan', 'the', 'and', 'or', 'in', 'on', 'at', 'to', 'a', 'an']);
