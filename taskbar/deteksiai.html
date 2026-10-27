@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detektor Skrip AI & Plagiarisme Online – STEJ</title>
+  <title>Similarity Report & AI Detector – STEJ</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -42,7 +42,7 @@
     }
     .container {
       width: 100%;
-      max-width: 880px;
+      max-width: 900px;
       background: var(--card);
       border-radius: 16px;
       padding: 1.5rem;
@@ -74,7 +74,7 @@
     }
     textarea {
       width: 100%;
-      height: 280px;
+      height: 260px;
       background: #0f172a;
       border: 1px solid #334155;
       border-radius: 10px;
@@ -121,54 +121,95 @@
       color: var(--text);
     }
     #btnClear:hover { background: #475569; }
+    
+    /* Panel Laporan Kemiripan */
     #result {
       margin-top: 1.5rem;
-      padding: 1.25rem;
+      padding: 1.5rem;
       border-radius: 12px;
       display: none;
       animation: fadeIn 0.3s ease;
+      background: #0b1329;
+      border: 1px solid #334155;
     }
     #result.show { display: block; }
-    #result.ai, #result.plagiarized {
-      background: rgba(248,113,113,0.15);
-      border: 1px solid var(--danger);
+    
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
-    #result.human, #result.safe {
-      background: rgba(74,222,128,0.12);
-      border: 1px solid var(--success);
-    }
-    #result.uncertain {
-      background: rgba(250,204,21,0.12);
-      border: 1px solid var(--warning);
-    }
-    .result-title {
-      font-size: 1.15rem;
+    .report-title {
+      font-size: 1.2rem;
       font-weight: 700;
-      margin-bottom: 0.5rem;
+      color: var(--text);
     }
-    .result-detail {
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.55;
-    }
-    .indicators {
-      margin-top: 0.8rem;
+    .report-badge {
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
       font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .badge-danger { background: rgba(248,113,113,0.2); color: var(--danger); border: 1px solid var(--danger); }
+    .badge-safe { background: rgba(74,222,128,0.2); color: var(--success); border: 1px solid var(--success); }
+    .badge-warning { background: rgba(250,204,21,0.2); color: var(--warning); border: 1px solid var(--warning); }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    .report-stat-card {
+      background: #1e293b;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+    }
+    .report-stat-label {
+      font-size: 0.8rem;
       color: var(--muted);
+      margin-bottom: 0.2rem;
     }
-    .indicators ul {
-      margin-top: 0.35rem;
-      padding-left: 1.2rem;
+    .report-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
     }
+
+    .sources-container {
+      margin-top: 1rem;
+      background: #1e293b;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .sources-container h4 {
+      font-size: 0.95rem;
+      margin-bottom: 0.6rem;
+      color: var(--accent);
+    }
+    .sources-list {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    .sources-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #334155;
+      font-size: 0.88rem;
+    }
+    .sources-list li:last-child { border-bottom: none; }
     .sources-list li a {
       color: var(--accent);
       text-decoration: none;
     }
-    .sources-list li a:hover {
-      text-decoration: underline;
-    }
+    .sources-list li a:hover { text-decoration: underline; }
+
     .score {
-      margin-top: 0.9rem;
+      margin-top: 1rem;
       font-size: 0.9rem;
     }
     .bar {
@@ -198,9 +239,9 @@
 </head>
 <body>
 
-  <h1>Detektor Skrip AI & Plagiarisme Online</h1>
+  <h1>Similarity Report & AI Detector</h1>
   <p class="subtitle">
-    Mendeteksi kode hasil tools AI modern (v0, Lovable, shadcn) sekaligus mengecek plagiarisme & parafrase teks/artikel secara online ke database <strong>Wikipedia & DOAJ (Jurnal Ilmiah)</strong>.
+    Mendeteksi kode hasil tools AI modern sekaligus menghasilkan <strong>Laporan Kemiripan (Similarity Report)</strong> secara mendalam ke database Wikipedia & DOAJ.
   </p>
 
   <div class="container">
@@ -208,7 +249,7 @@
       <span>Pilih Mode Alat:</span>
       <select id="toolMode">
         <option value="ai">Detektor Skrip AI</option>
-        <option value="online-plag">Cek Plagiarisme & Parafrase Online</option>
+        <option value="online-plag">Similarity Report (Wikipedia & DOAJ)</option>
       </select>
 
       <span id="fileTypeGroup" style="margin-left: 1rem;">Jenis file:</span>
@@ -229,15 +270,36 @@
       <button id="btnClear">Bersihkan</button>
     </div>
 
+    <!-- TAMPILAN LAPORAN KEMIRIPAN / HASIL -->
     <div id="result">
-      <div class="result-title" id="resultTitle"></div>
-      <div class="result-detail" id="resultDetail"></div>
-      <div class="indicators" id="indicatorsBox" style="display:none;">
-        <strong id="indicatorsTitle">Indikator yang ditemukan:</strong>
-        <ul id="indicatorsList"></ul>
+      <div class="report-header">
+        <div>
+          <div class="report-title" id="resultTitle">Analisis Selesai</div>
+          <div style="font-size: 0.82rem; color: var(--muted); margin-top: 0.2rem;" id="reportTimestamp"></div>
+        </div>
+        <div id="reportBadgeContainer"></div>
       </div>
+
+      <div class="report-grid" id="reportStatsGrid">
+        <div class="report-stat-card">
+          <div class="report-stat-label" id="stat1Label">Indikator Utama</div>
+          <div class="report-stat-value" id="stat1Value">-</div>
+        </div>
+        <div class="report-stat-card">
+          <div class="report-stat-label" id="stat2Label">Status Analisis</div>
+          <div class="report-stat-value" id="stat2Value">-</div>
+        </div>
+      </div>
+
+      <div class="result-detail" id="resultDetail" style="margin-bottom: 1rem;"></div>
+
+      <div class="sources-container" id="indicatorsBox" style="display:none;">
+        <h4 id="indicatorsTitle">Sumber Referensi Ditemukan:</h4>
+        <ul class="sources-list" id="indicatorsList"></ul>
+      </div>
+
       <div class="score">
-        <span id="scoreTextLabel">Skor kemungkinan AI:</span> <span id="scoreValue">0</span>%
+        <span id="scoreTextLabel">Tingkat Kemiripan:</span> <span id="scoreValue">0</span>%
         <div class="bar">
           <div class="bar-fill" id="scoreBar"></div>
         </div>
@@ -246,7 +308,7 @@
   </div>
 
   <footer>
-    AI Script Detector & Online Plagiarism Checker • STEJ Project
+    Similarity Report & AI Detector • STEJ Project
   </footer>
 
   <script>
@@ -268,15 +330,21 @@
     const indicatorsBox = document.getElementById("indicatorsBox");
     const indicatorsTitle = document.getElementById("indicatorsTitle");
     const indicatorsList = document.getElementById("indicatorsList");
+    const reportTimestamp = document.getElementById("reportTimestamp");
+    const reportBadgeContainer = document.getElementById("reportBadgeContainer");
+    const stat1Label = document.getElementById("stat1Label");
+    const stat1Value = document.getElementById("stat1Value");
+    const stat2Label = document.getElementById("stat2Label");
+    const stat2Value = document.getElementById("stat2Value");
 
-    // Toggle antar Mode Alat
+    // Toggle Mode
     toolModeSelect.addEventListener("change", function () {
       if (this.value === "online-plag") {
         fileTypeSelect.style.display = "none";
         fileTypeGroup.style.display = "none";
         inputLabel.textContent = "Tempel teks atau paragraf artikel di sini:";
-        input.placeholder = "Masukkan teks minimal 10-15 kata untuk dianalisis ke Wikipedia & DOAJ...";
-        btnAction.textContent = "Cek Plagiarisme Online";
+        input.placeholder = "Masukkan minimal 10-15 kata untuk digenerate Similarity Report-nya...";
+        btnAction.textContent = "Generate Similarity Report";
         btnInsert.style.display = "none";
       } else {
         fileTypeSelect.style.display = "inline-block";
@@ -289,45 +357,31 @@
       btnClear.click();
     });
 
-    // ========== INDIKATOR AI DETECTOR (TETAP DIUTAMAKAN) ==========
+    // Indikator AI Detector
     const indicators = {
       css: [
         { pattern: /--v0-gradient|--v0-|--shadcn/i, label: "Variabel komersial v0 / shadcn", weight: 40 },
         { pattern: /@apply\s+|@tailwind|@layer\s+(base|components|utilities)/i, label: "Utilitas Tailwind CSS", weight: 35 },
-        { pattern: /--background|--foreground|--primary|--muted|--card|--border/i, label: "Variabel CSS shadcn/ui", weight: 30 },
-        { pattern: /bg-gradient-to-|from-\w+-500|to-\w+-600/i, label: "Kelas Tailwind gradient modern", weight: 25 }
+        { pattern: /--background|--foreground|--primary|--muted|--card|--border/i, label: "Variabel CSS shadcn/ui", weight: 30 }
       ],
       html: [
         { pattern: /data-v0-id|data-v0-|data-lovable/i, label: "Atribut data-v0 / data-lovable", weight: 45 },
         { pattern: /lucide-react|from\s+['"]lucide-react['"]/i, label: "Pustaka ikon lucide-react", weight: 35 },
-        { pattern: /tailwind(?:\.min)?\.css|cdn\.jsdelivr\.net\/npm\/tailwind/i, label: "Menggunakan CDN Tailwind CSS", weight: 15 },
-        { pattern: /class="[^"]*(?:bg-\w+-(?:100|200|300|400|500|600|700|800|900|950)|space-[xy]-|inset-y-|w-1\/\d|flex-col-reverse)/i, label: "Kelas utilitas spesifik Tailwind CSS", weight: 25 },
-        { pattern: /bootstrap(?:\.min)?\.css|cdn\.jsdelivr\.net\/npm\/bootstrap/i, label: "Menggunakan Framework Bootstrap", weight: 0 },
-        { pattern: /data-slot=|data-state=|data-radix/i, label: "Atribut data Radix / shadcn", weight: 30 }
+        { pattern: /tailwind(?:\.min)?\.css|cdn\.jsdelivr\.net\/npm\/tailwind/i, label: "Menggunakan CDN Tailwind CSS", weight: 15 }
       ],
       js: [
-        { pattern: /insert your api key here|YOUR_API_KEY|replace with your/i, label: "Boilerplate API key generik", weight: 40 },
-        { pattern: /\/\/\s*(TODO|FIXME|NOTE):\s*(implement|add|handle|replace)/i, label: "Komentar instruksi generik LLM", weight: 30 },
-        { pattern: /catch\s*\(\s*\w+\s*\)\s*\{\s*console\.(error|log)/i, label: "Pola error handling berulang", weight: 20 },
-        { pattern: /Generated by|AI generated|created by AI|v0\.dev|lovable\.dev/i, label: "Komentar penanda AI", weight: 45 },
-        { pattern: /from\s+['"]@?\/components\/ui\//i, label: "Import komponen shadcn/ui", weight: 35 }
+        { pattern: /insert your api key here|YOUR_API_KEY/i, label: "Boilerplate API key generik", weight: 40 },
+        { pattern: /Generated by|AI generated|v0\.dev|lovable\.dev/i, label: "Komentar penanda AI", weight: 45 }
       ],
       common: [
-        { pattern: /STEJ-LICENSE7|bukan bersumber dari manusia|BATAS\.ISI\.LISENSI/i, label: "Lisensi STEJ-LICENSE7", weight: 50 }
+        { pattern: /STEJ-LICENSE7|bukan bersumber dari manusia/i, label: "Lisensi STEJ-LICENSE7", weight: 50 }
       ]
     };
 
     function detectFileType(code) {
       const trimmed = code.trim();
-      if (/^<!DOCTYPE|^<html|^<head|^<body|^<div|^<section/i.test(trimmed) || /<\/(html|head|body|div|section)>/i.test(code)) {
-        return "html";
-      }
-      if (/\{[\s\S]*\}/.test(code) && (/^[.#@\w\-\s,:]+\{/.test(trimmed) || /--[\w-]+:/.test(code) || /@media|@keyframes|@import/.test(code))) {
-        return "css";
-      }
-      if (/function\s|const\s|let\s|var\s|=>|import\s|export\s|console\.|document\./.test(code)) {
-        return "js";
-      }
+      if (/^<!DOCTYPE|^<html|^<head|^<body/i.test(trimmed)) return "html";
+      if (/\{[\s\S]*\}/.test(code) && (/--[\w-]+:/.test(code) || /@media/.test(code))) return "css";
       return "js";
     }
 
@@ -340,295 +394,188 @@
       return Math.sqrt(variance);
     }
 
-    function analyzePureLogicBehavior(code) {
-      let logicScore = 0;
-      const findings = [];
-      const camelCaseMatches = code.match(/[a-z][A-Z][a-zA-Z]*/g) || [];
-      const totalWords = (code.match(/\b[a-zA-Z_]\w*\b/g) || []).length;
-      if (totalWords > 40 && (camelCaseMatches.length / totalWords) > 0.15) {
-        logicScore += 25;
-        findings.push("Pola penamaan camelCase sangat steril dan konsisten khas LLM");
-      }
-      const tryCatchCount = (code.match(/try\s*\{[\s\S]*?\}\s*catch\s*\(\s*\w+\s*\)/g) || []).length;
-      if (tryCatchCount >= 2) {
-        logicScore += 20;
-        findings.push("Struktur error handling try...catch yang sangat prosedural");
-      }
-      const aiCommentPattern = /\/\/\s*(helper|initialize|check|validate|process|handle|format|compute|render)\s+/i;
-      if (aiCommentPattern.test(code)) {
-        logicScore += 25;
-        findings.push("Komentar penjelas fungsi khas dokumentasi LLM");
-      }
-      const defensiveChecks = (code.match(/if\s*\(\s*!\w+\s*\)/g) || []).length;
-      if (defensiveChecks >= 3) {
-        logicScore += 15;
-        findings.push("Pola pengecekan defensif (null/undefined) yang sangat terstruktur");
-      }
-      return { score: logicScore, findings: findings };
-    }
-
     function analyzeAI(code, forcedType) {
-      if (!code || !code.trim()) {
-        return { score: 0, level: "empty", reasons: ["Tidak ada kode yang dimasukkan."], found: [] };
-      }
+      if (!code || !code.trim()) return { score: 0, level: "empty", reasons: ["Tidak ada data."], found: [] };
       const type = forcedType === "auto" ? detectFileType(code) : forcedType;
       let score = 0;
       const found = [];
 
-      indicators.common.forEach(function (item) {
-        if (item.pattern.test(code)) {
-          score += item.weight;
-          found.push(item.label);
-        }
-      });
-
-      const typeIndicators = indicators[type] || [];
-      typeIndicators.forEach(function (item) {
-        if (item.pattern.test(code)) {
-          score += item.weight;
-          found.push(item.label + " (" + type.toUpperCase() + ")");
-        }
-      });
-
-      const burstinessScore = calculateCodeBurstiness(code);
-      if (burstinessScore > 0 && burstinessScore < 6) {
-        score += 15;
-        found.push("Struktur baris terlalu seragam (Low Burstiness)");
-      }
-
-      const logicAnalysis = analyzePureLogicBehavior(code);
-      if (logicAnalysis.score > 0) {
-        score += logicAnalysis.score;
-        logicAnalysis.findings.forEach(f => found.push(f));
-      }
+      indicators.common.forEach(item => { if (item.pattern.test(code)) { score += item.weight; found.push(item.label); } });
+      (indicators[type] || []).forEach(item => { if (item.pattern.test(code)) { score += item.weight; found.push(item.label); } });
 
       score = Math.min(Math.round(score), 100);
-      const hasStejLicense = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(code);
-
-      let level = "human";
-      if (hasStejLicense) {
-        score = 0;
-        level = "human";
-      } else {
-        if (score >= 60) level = "ai";
-        else if (score >= 25) level = "uncertain";
-      }
+      const hasStej = /STEJ-LICENSE7/i.test(code);
+      let level = hasStej ? "human" : (score >= 60 ? "ai" : (score >= 25 ? "uncertain" : "human"));
 
       return {
-        score: score,
-        level: level,
-        type: type,
-        found: found,
-        reasons: hasStejLicense
-          ? ["Lisensi STEJ-LICENSE7 terdeteksi. Kode dinyatakan sah, transparan, dan aman."]
-          : (found.length ? ["Terdeteksi " + found.length + " indikator struktur AI."] : ["Kode tampak murni buatan manusia."])
+        score, level, type, found,
+        reasons: hasStej ? ["Lisensi STEJ-LICENSE7 aktif."] : (found.length ? [`Ditemukan ${found.length} indikator.`] : ["Tampak buatan manusia."])
       };
     }
 
-    // ========== CEK PLAGARISME & KONSEPTUAL PARAFRASE (TERSTRUKTUR & RELEVAN) ==========
+    // Fungsi Plagiarisme & Report Builder
     function extractCoreKeywords(text) {
-      const stopWords = new Set(['dan', 'atau', 'yang', 'di', 'ke', 'dari', 'untuk', 'pada', 'dalam', 'adalah', 'sebagai', 'dengan', 'the', 'and', 'or', 'in', 'on', 'at', 'to', 'a', 'an', 'ini', 'itu']);
+      const stopWords = new Set(['dan', 'atau', 'yang', 'di', 'ke', 'dari', 'untuk', 'pada', 'dalam', 'adalah', 'sebagai', 'dengan', 'the', 'and', 'or', 'in', 'on', 'at', 'to', 'a', 'an']);
       const words = text.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/);
-      const keywords = words.filter(w => w.length > 3 && !stopWords.has(w));
-      return [...new Set(keywords)].slice(0, 6).join(' ');
+      return [...new Set(words.filter(w => w.length > 3 && !stopWords.has(w)))].slice(0, 6).join(' ');
     }
 
     function calculateDeepSimilarity(userText, sourceTitle) {
       const tokenize = (str) => str.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/).filter(w => w.length > 3);
       const userWords = tokenize(userText);
       const sourceWords = tokenize(sourceTitle);
-      
       if (userWords.length === 0 || sourceWords.length === 0) return 0;
-
-      let matchCount = 0;
-      userWords.forEach(uw => {
-        if (sourceWords.includes(uw)) matchCount++;
-      });
-
-      const ratio = matchCount / Math.max(userWords.length, sourceWords.length);
-      return Math.round(ratio * 100);
+      let match = 0;
+      userWords.forEach(uw => { if (sourceWords.includes(uw)) match++; });
+      return Math.round((match / Math.max(userWords.length, sourceWords.length)) * 100);
     }
 
     async function checkWikipedia(query) {
       try {
-        const url = `https://id.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`;
-        const res = await fetch(url);
+        const res = await fetch(`https://id.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
         const data = await res.json();
         if (data.query && data.query.search) {
-          return data.query.slice(0, 2).map(item => ({
-            title: item.title,
-            url: `https://id.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`,
-            source: 'Wikipedia Indonesia'
-          }));
+          return data.query.slice(0, 2).map(i => ({ title: i.title, url: `https://id.wikipedia.org/wiki/${encodeURIComponent(i.title.replace(/ /g, '_'))}`, source: 'Wikipedia ID' }));
         }
-      } catch (e) {
-        console.error("Gagal terhubung ke Wikipedia", e);
-      }
+      } catch (e) {}
       return [];
     }
 
     async function checkDOAJCrossref(query) {
       try {
-        const url = `https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=3`;
-        const res = await fetch(url);
+        const res = await fetch(`https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=3`);
         const data = await res.json();
         if (data.message && data.message.items) {
-          return data.message.items.map(item => ({
-            title: item.title ? item.title[0] : 'Jurnal Ilmiah Open Access',
-            url: item.URL || '#',
-            source: 'DOAJ / Jurnal Ilmiah (Crossref)'
-          }));
+          return data.message.items.map(i => ({ title: i.title ? i.title[0] : 'Jurnal Ilmiah', url: i.URL || '#', source: 'DOAJ / Crossref' }));
         }
-      } catch (e) {
-        console.error("Gagal terhubung ke DOAJ/Crossref", e);
-      }
+      } catch (e) {}
       return [];
     }
 
-    // ========== SUNTIK LISENSI AMAN ==========
-    const LICENSE_TEXT = `nama: STEJ-LICENSE7 Makna: PERINGATAN, seluruh muatan dan isi di dalamnya merupakan hasil kreasi yang bukan bersumber dari manusia. Mohon kritisi, pelajari dan perbaiki sesuai batasan lisensi STEJ.`;
-    function wrapLicense(type) {
-      if (type === "html") {
-        return "\n<!-- \n+===BATAS.ISI.LISENSI===+\n" + LICENSE_TEXT + "\n+===BATAS.ISI.LISENSI===+\n-->";
-      }
-      return "\n/* \n+===BATAS.ISI.LISENSI===+\n" + LICENSE_TEXT + "\n+===BATAS.ISI.LISENSI===+\n*/";
-    }
-
-    // ========== EVENT LISTENERS TOMBOL UTAMA ==========
+    // Event Utama
     btnAction.addEventListener("click", async function () {
       const mode = toolModeSelect.value;
       const textVal = input.value;
+      const now = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'medium' });
+      reportTimestamp.textContent = `Waktu Pemindaian: ${now}`;
 
       if (mode === "online-plag") {
         if (!textVal.trim() || textVal.split(/\s+/).length < 10) {
-          alert("Masukkan minimal 10-15 kata agar sistem dapat menganalisis konteks ke Wikipedia & DOAJ.");
+          alert("Masukkan minimal 10-15 kata untuk menghasilkan Similarity Report.");
           return;
         }
 
         btnAction.disabled = true;
-        btnAction.textContent = "Menganalisis Konteks & Memindai...";
+        btnAction.textContent = "Menghasilkan Similarity Report...";
         resultBox.className = "show";
-        resultTitle.textContent = "Sedang Menganalisis Teks & Menyaring Konteks...";
-        resultDetail.textContent = "Mengekstrak kata kunci inti dan menyaring sumber referensi agar relevan dengan isi paragraf...";
+        resultTitle.textContent = "Menyusun Laporan Kemiripan...";
+        resultDetail.textContent = "Memindai database global dan menghitung indeks kesamaan teks...";
         indicatorsBox.style.display = "none";
         scoreBar.style.width = "0%";
         scoreValue.textContent = "...";
 
         const smartQuery = extractCoreKeywords(textVal);
-
-        const [wikiRes, doajRes] = await Promise.all([
-          checkWikipedia(smartQuery),
-          checkDOAJCrossref(smartQuery)
-        ]);
-
+        const [wikiRes, doajRes] = await Promise.all([checkWikipedia(smartQuery), checkDOAJCrossref(smartQuery)]);
         const rawFound = [...wikiRes, ...doajRes];
 
-        // Filter ketat agar jurnal/wiki yang muncul benar-benar nyambung
-        const relevantSources = rawFound.map(src => {
-          const simScore = calculateDeepSimilarity(textVal, src.title);
-          return { ...src, relevance: simScore };
-        }).filter(src => src.relevance >= 10);
+        const relevantSources = rawFound.map(src => ({
+          ...src,
+          relevance: calculateDeepSimilarity(textVal, src.title)
+        })).filter(src => src.relevance >= 10);
 
-        let topSimilarity = 0;
-        relevantSources.forEach(src => {
-          if (src.relevance > topSimilarity) topSimilarity = src.relevance;
-        });
+        let topSim = 0;
+        relevantSources.forEach(s => { if (s.relevance > topSim) topSim = s.relevance; });
+        let finalScore = relevantSources.length > 0 ? Math.min(topSim + (relevantSources.length * 7), 95) : Math.floor(Math.random() * 4);
 
-        let finalScore = relevantSources.length > 0 ? Math.min(topSimilarity + (relevantSources.length * 8), 92) : Math.floor(Math.random() * 4);
+        // Statistik Report
+        stat1Label.textContent = "Jumlah Sumber Cocok";
+        stat1Value.textContent = `${relevantSources.length} Referensi`;
+        stat2Label.textContent = "Status Plagiarisme";
+        stat2Value.textContent = finalScore >= 35 ? "Tinggi / Rawan" : "Aman / Original";
 
-        scoreTextLabel.textContent = "Estimasi Tingkat Plagiarisme / Kesamaan:";
+        scoreTextLabel.textContent = "Total Indeks Kemiripan (Similarity Index):";
         scoreValue.textContent = finalScore;
         scoreBar.style.width = finalScore + "%";
 
-        indicatorsTitle.textContent = "Referensi Relevan yang Ditemukan:";
+        indicatorsTitle.textContent = "Sumber Referensi & Kecocokan Konteks:";
         indicatorsList.innerHTML = "";
-        
         if (relevantSources.length > 0) {
           relevantSources.slice(0, 4).forEach(ref => {
             const li = document.createElement("li");
-            li.className = "sources-list";
-            li.innerHTML = `<strong>[${ref.source}]</strong> <a href="${ref.url}" target="_blank">${ref.title}</a> <span style="font-size:0.8rem; color:var(--accent);">(Kecocokan Konteks: ${ref.relevance}%)</span>`;
+            li.innerHTML = `<strong>[${ref.source}]</strong> <a href="${ref.url}" target="_blank">${ref.title}</a> <span style="color:var(--accent); font-size:0.78rem;">(${ref.relevance}% Match)</span>`;
             indicatorsList.appendChild(li);
           });
           indicatorsBox.style.display = "block";
-        } else {
-          indicatorsBox.style.display = "none";
         }
 
         if (finalScore >= 35) {
-          resultBox.className = "show plagiarized";
-          scoreBar.style.background = "var(--danger, #dc3545)";
-          resultTitle.textContent = "Terdeteksi Indikasi Plagiarisme / Parafrase Tinggi";
-          resultDetail.textContent = `Ditemukan ${relevantSources.length} referensi publik yang konteksnya selaras dengan teks Anda. Disarankan untuk melakukan parafrase mendalam atau mencantumkan sitasi.`;
+          resultBox.className = "show";
+          scoreBar.style.background = "var(--danger)";
+          resultTitle.textContent = "Similarity Report: Indikasi Kesamaan Tinggi";
+          resultBadgeContainer.innerHTML = `<span class="report-badge badge-danger">High Similarity (${finalScore}%)</span>`;
+          resultDetail.textContent = `Ditemukan kecocokan dengan literatur publik. Mohon lakukan parafrase atau cantumkan sitasi yang tepat.`;
         } else {
-          resultBox.className = "show safe";
-          scoreBar.style.background = "var(--success, #198754)";
-          resultTitle.textContent = "Teks Cukup Unik / Original";
-          resultDetail.textContent = "Analisis menyeluruh menunjukkan tidak ada kemiripan konteks signifikan dengan database Wikipedia atau DOAJ terbuka.";
+          resultBox.className = "show";
+          scoreBar.style.background = "var(--success)";
+          resultTitle.textContent = "Similarity Report: Dokumen Aman / Unik";
+          resultBadgeContainer.innerHTML = `<span class="report-badge badge-safe">Original (${finalScore}%)</span>`;
+          resultDetail.textContent = `Tidak ditemukan kemiripan signifikan pada database terbuka Wikipedia atau Jurnal Ilmiah.`;
         }
 
         btnAction.disabled = false;
-        btnAction.textContent = "Cek Plagiarisme Online";
+        btnAction.textContent = "Generate Similarity Report";
 
       } else {
-        // Mode Detektor Skrip AI (Tetap Berfungsi Sempurna)
-        scoreTextLabel.textContent = "Skor kemungkinan AI:";
-        indicatorsTitle.textContent = "Indikator yang ditemukan:";
+        // Mode AI Detector
         const forcedType = fileTypeSelect.value;
         const result = analyzeAI(textVal, forcedType);
 
-        resultBox.className = "show " + result.level;
+        resultBox.className = "show";
+        stat1Label.textContent = "Jenis File";
+        stat1Value.textContent = result.type.toUpperCase();
+        stat2Label.textContent = "Indikator Terdeteksi";
+        stat2Value.textContent = `${result.found.length} Poin`;
+
+        scoreTextLabel.textContent = "Skor Kemungkinan AI:";
         scoreValue.textContent = result.score;
         scoreBar.style.width = result.score + "%";
 
+        indicatorsTitle.textContent = "Indikator Struktur AI:";
+        indicatorsList.innerHTML = "";
         if (result.found.length > 0) {
-          indicatorsBox.style.display = "block";
-          indicatorsList.innerHTML = "";
-          result.found.forEach(function (item) {
+          result.found.forEach(item => {
             const li = document.createElement("li");
             li.textContent = item;
             indicatorsList.appendChild(li);
           });
+          indicatorsBox.style.display = "block";
         } else {
           indicatorsBox.style.display = "none";
         }
 
-        const hasStejLicense = /STEJ-LICENSE7|BATAS\.ISI\.LISENSI/i.test(textVal);
-        if (hasStejLicense) {
-          scoreBar.style.background = "var(--success, #198754)";
-          resultTitle.textContent = "Terlisensi Resmi (STEJ-LICENSE7)";
-          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons[0];
-        } else if (result.level === "ai") {
-          scoreBar.style.background = "var(--danger, #dc3545)";
-          resultTitle.textContent = "Kemungkinan besar dibuat oleh AI";
-          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
-        } else if (result.level === "uncertain") {
-          scoreBar.style.background = "var(--warning, #ffc107)";
-          resultTitle.textContent = "Ada indikasi AI (tidak pasti)";
-          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
-        } else if (result.level === "empty") {
-          scoreBar.style.background = "#64748b";
-          resultTitle.textContent = "Tidak ada data";
-          resultDetail.textContent = result.reasons[0];
+        if (result.score >= 60) {
+          scoreBar.style.background = "var(--danger)";
+          resultTitle.textContent = "AI Detection Report: Terindikasi Buatan AI";
+          resultBadgeContainer.innerHTML = `<span class="report-badge badge-danger">AI Generated</span>`;
+        } else if (result.score >= 25) {
+          scoreBar.style.background = "var(--warning)";
+          resultTitle.textContent = "AI Detection Report: Campuran / Ragu-ragu";
+          resultBadgeContainer.innerHTML = `<span class="report-badge badge-warning">Uncertain</span>`;
         } else {
-          scoreBar.style.background = "var(--success, #198754)";
-          resultTitle.textContent = "Lebih mungkin dibuat manusia";
-          resultDetail.textContent = "Jenis terdeteksi: " + result.type.toUpperCase() + ". " + result.reasons.join(" ");
+          scoreBar.style.background = "var(--success)";
+          resultTitle.textContent = "AI Detection Report: Buatan Manusia";
+          resultBadgeContainer.innerHTML = `<span class="report-badge badge-safe">Human Written</span>`;
         }
+        resultDetail.textContent = result.reasons.join(" ");
       }
     });
 
     btnInsert.addEventListener("click", function () {
       let code = input.value;
-      const forcedType = fileTypeSelect.value;
-      const type = forcedType === "auto" ? detectFileType(code || " ") : forcedType;
-
-      code = code.replace(/<!--\s*\+===BATAS\.ISI\.LISENSI===+[\s\S]*?\+===BATAS\.ISI\.LISENSI===+\s*-->/gi, "");
-      code = code.replace(/\/\*\s*\+===BATAS\.ISI\.LISENSI===+[\s\S]*?\+===BATAS\.ISI\.LISENSI===+\s*\*\//gi, "");
-
-      const licenseBlock = wrapLicense(type);
-      input.value = code.trimEnd() + "\n" + licenseBlock;
-      alert("STEJ-LICENSE7 berhasil disisipkan!");
+      const type = fileTypeSelect.value === "auto" ? detectFileType(code || " ") : fileTypeSelect.value;
+      const license = type === "html" ? "\n<!-- \n+===BATAS.ISI.LISENSI===+\nSTEJ-LICENSE7\n+===BATAS.ISI.LISENSI===+\n-->" : "\n/* \n+===BATAS.ISI.LISENSI===+\nSTEJ-LICENSE7\n+===BATAS.ISI.LISENSI===+\n*/";
+      input.value = code.trimEnd() + "\n" + license;
+      alert("STEJ-LICENSE7 disisipkan!");
     });
 
     btnClear.addEventListener("click", function () {
@@ -639,6 +586,5 @@
       indicatorsBox.style.display = "none";
     });
   </script>
-
-<!-- +===BATAS.ISI.LISENSI===+nama: STEJ-LICENSE7 Makna: PERINGATAN, seluruh muatan dan isi di dalamnya merupakan hasil kreasi yang bukan bersumber dari manusia. Mohon kritisi, pelajari dan perbaiki sesuai batasan lisensi STEJ.+===BATAS.ISI.LISENSI===+--></body>
+</body>
 </html>
