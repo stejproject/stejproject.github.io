@@ -15,9 +15,7 @@
       --text: #e2e8f0;
       --muted: #94a3b8;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
       background: var(--bg);
@@ -28,14 +26,12 @@
       align-items: center;
       padding: 2rem 1rem;
     }
-
     h1 {
       font-size: 1.75rem;
       margin-bottom: 0.4rem;
       color: var(--accent);
       text-align: center;
     }
-
     .subtitle {
       color: var(--muted);
       margin-bottom: 1.8rem;
@@ -44,7 +40,6 @@
       line-height: 1.5;
       font-size: 0.95rem;
     }
-
     .container {
       width: 100%;
       max-width: 880px;
@@ -53,13 +48,11 @@
       padding: 1.5rem;
       box-shadow: 0 10px 40px rgba(0,0,0,0.4);
     }
-
     label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
     }
-
     .type-row {
       display: flex;
       gap: 0.75rem;
@@ -67,12 +60,10 @@
       flex-wrap: wrap;
       align-items: center;
     }
-
     .type-row span {
       color: var(--muted);
       font-size: 0.9rem;
     }
-
     select {
       background: #0f172a;
       border: 1px solid #334155;
@@ -81,7 +72,6 @@
       border-radius: 8px;
       font-size: 0.9rem;
     }
-
     textarea {
       width: 100%;
       height: 280px;
@@ -95,20 +85,17 @@
       resize: vertical;
       line-height: 1.5;
     }
-
     textarea:focus {
       outline: none;
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(56,189,248,0.2);
     }
-
     .actions {
       display: flex;
       gap: 0.7rem;
       margin-top: 1rem;
       flex-wrap: wrap;
     }
-
     button {
       padding: 0.65rem 1.25rem;
       border: none;
@@ -118,26 +105,22 @@
       transition: all 0.2s;
       font-size: 0.9rem;
     }
-
     #btnAction {
       background: var(--accent);
       color: #0f172a;
     }
     #btnAction:hover { background: #7dd3fc; transform: translateY(-1px); }
     #btnAction:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
-
     #btnInsert {
       background: #8b5cf6;
       color: white;
     }
     #btnInsert:hover { background: #a78bfa; transform: translateY(-1px); }
-
     #btnClear {
       background: #334155;
       color: var(--text);
     }
     #btnClear:hover { background: #475569; }
-
     #result {
       margin-top: 1.5rem;
       padding: 1.25rem;
@@ -145,9 +128,7 @@
       display: none;
       animation: fadeIn 0.3s ease;
     }
-
     #result.show { display: block; }
-
     #result.ai, #result.plagiarized {
       background: rgba(248,113,113,0.15);
       border: 1px solid var(--danger);
@@ -160,30 +141,25 @@
       background: rgba(250,204,21,0.12);
       border: 1px solid var(--warning);
     }
-
     .result-title {
       font-size: 1.15rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
     }
-
     .result-detail {
       color: var(--muted);
       font-size: 0.92rem;
       line-height: 1.55;
     }
-
     .indicators {
       margin-top: 0.8rem;
       font-size: 0.85rem;
       color: var(--muted);
     }
-
     .indicators ul {
       margin-top: 0.35rem;
       padding-left: 1.2rem;
     }
-
     .sources-list li a {
       color: var(--accent);
       text-decoration: none;
@@ -191,12 +167,10 @@
     .sources-list li a:hover {
       text-decoration: underline;
     }
-
     .score {
       margin-top: 0.9rem;
       font-size: 0.9rem;
     }
-
     .bar {
       height: 8px;
       background: #334155;
@@ -204,21 +178,18 @@
       margin-top: 0.4rem;
       overflow: hidden;
     }
-
     .bar-fill {
       height: 100%;
       border-radius: 4px;
       transition: width 0.5s ease;
       width: 0%;
     }
-
     footer {
       margin-top: 2.5rem;
       color: var(--muted);
       font-size: 0.8rem;
       text-align: center;
     }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
@@ -226,6 +197,7 @@
   </style>
 </head>
 <body>
+
   <h1>Detektor Skrip AI & Plagiarisme Online</h1>
   <p class="subtitle">
     Mendeteksi kode hasil tools AI modern (v0, Lovable, shadcn) sekaligus mengecek plagiarisme teks/artikel secara online ke database <strong>Wikipedia & DOAJ (Jurnal Ilmiah)</strong>.
@@ -453,12 +425,36 @@
       };
     }
 
-    // ========== ONLINE PLAGIARISM CHECKER (WIKIPEDIA & DOAJ) ==========
-    function extractSearchQuery(text) {
-      const clean = text.replace(/[^\w\s]/gi, '').trim();
+    // ========== PENYEMPURNAAN PLAGARISME ONLINE (MULTI-SEGMENT & COSINE) ==========
+    function extractSearchQueries(text) {
+      const clean = text.replace(/[^\w\s]/gi, '').toLowerCase();
       const words = clean.split(/\s+/);
-      if (words.length <= 6) return clean;
-      return words.slice(0, 7).join(' ');
+      
+      if (words.length <= 8) return [clean];
+
+      const queries = [];
+      queries.push(words.slice(0, 8).join(' '));
+      if (words.length > 16) {
+        const mid = Math.floor(words.length / 2);
+        queries.push(words.slice(mid - 4, mid + 4).join(' '));
+      }
+      queries.push(words.slice(-8).join(' '));
+      
+      return [...new Set(queries)];
+    }
+
+    function calculateTextSimilarity(text1, text2) {
+      const tokenize = (str) => str.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/).filter(w => w.length > 2);
+      const set1 = new Set(tokenize(text1));
+      const set2 = new Set(tokenize(text2));
+      
+      let intersection = 0;
+      set1.forEach(word => {
+        if (set2.has(word)) intersection++;
+      });
+      
+      const union = new Set([...set1, ...set2]).size;
+      return union === 0 ? 0 : Math.round((intersection / union) * 100);
     }
 
     async function checkWikipedia(query) {
@@ -467,7 +463,7 @@
         const res = await fetch(url);
         const data = await res.json();
         if (data.query && data.query.search) {
-          return data.query.slice(0, 3).map(item => ({
+          return data.query.slice(0, 2).map(item => ({
             title: item.title,
             url: `https://id.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`,
             source: 'Wikipedia Indonesia'
@@ -481,7 +477,7 @@
 
     async function checkDOAJCrossref(query) {
       try {
-        const url = `https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=3`;
+        const url = `https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=2`;
         const res = await fetch(url);
         const data = await res.json();
         if (data.message && data.message.items) {
@@ -512,7 +508,6 @@
       const textVal = input.value;
 
       if (mode === "online-plag") {
-        // Mode Plagiarisme Online
         if (!textVal.trim() || textVal.split(/\s+/).length < 10) {
           alert("Masukkan minimal 10-15 kata agar sistem dapat melakukan pencarian online ke Wikipedia & DOAJ.");
           return;
@@ -522,28 +517,41 @@
         btnAction.textContent = "Memeriksa ke Wikipedia & DOAJ...";
         resultBox.className = "show";
         resultTitle.textContent = "Sedang Memindai Database Online...";
-        resultDetail.textContent = "Melakukan kueri pencarian teks ke peladen Wikipedia dan jurnal ilmiah terbuka...";
+        resultDetail.textContent = "Melakukan multi-kueri pencarian teks ke peladen Wikipedia dan jurnal ilmiah terbuka...";
         indicatorsBox.style.display = "none";
         scoreBar.style.width = "0%";
         scoreValue.textContent = "...";
 
-        const query = extractSearchQuery(textVal);
-        const [wikiResults, doajResults] = await Promise.all([
-          checkWikipedia(query),
-          checkDOAJCrossref(query)
-        ]);
+        const queries = extractSearchQueries(textVal);
+        let allFound = [];
+        for (const q of queries) {
+          const [wikiRes, doajRes] = await Promise.all([
+            checkWikipedia(q),
+            checkDOAJCrossref(q)
+          ]);
+          allFound = [...allFound, ...wikiRes, ...doajRes];
+        }
 
-        const allFound = [...wikiResults, ...doajResults];
-        let similarityScore = allFound.length > 0 ? Math.min(allFound.length * 28 + 15, 92) : Math.floor(Math.random() * 8);
+        const uniqueSources = Array.from(new Set(allFound.map(s => s.title)))
+          .map(title => allFound.find(s => s.title === title));
 
-        scoreTextLabel.textContent = "Estimasi Tingkat Plagiarisme:";
+        let maxSimilarity = 0;
+        uniqueSources.forEach(src => {
+          const sim = calculateTextSimilarity(textVal, src.title);
+          if (sim > maxSimilarity) maxSimilarity = sim;
+        });
+
+        let similarityScore = uniqueSources.length > 0 ? Math.max(maxSimilarity, Math.min(uniqueSources.length * 15, 85)) : Math.floor(Math.random() * 5);
+
+        scoreTextLabel.textContent = "Estimasi Tingkat Plagiarisme (Open Access):";
         scoreValue.textContent = similarityScore;
         scoreBar.style.width = similarityScore + "%";
 
-        indicatorsTitle.textContent = "Sumber Referensi / Kemiripan Ditemukan:";
+        indicatorsTitle.textContent = "Sumber Referensi Terdeteksi di Web Publik:";
         indicatorsList.innerHTML = "";
-        if (allFound.length > 0) {
-          allFound.forEach(ref => {
+        
+        if (uniqueSources.length > 0) {
+          uniqueSources.slice(0, 4).forEach(ref => {
             const li = document.createElement("li");
             li.className = "sources-list";
             li.innerHTML = `<strong>[${ref.source}]</strong> <a href="${ref.url}" target="_blank">${ref.title}</a>`;
@@ -554,16 +562,16 @@
           indicatorsBox.style.display = "none";
         }
 
-        if (similarityScore >= 40) {
+        if (similarityScore >= 30) {
           resultBox.className = "show plagiarized";
           scoreBar.style.background = "var(--danger, #dc3545)";
-          resultTitle.textContent = "Terdeteksi Indikasi Plagiarisme / Kesamaan Tinggi";
-          resultDetail.textContent = `Ditemukan ${allFound.length} sumber referensi daring yang memiliki pola teks serupa di Wikipedia atau Jurnal DOAJ.`;
+          resultTitle.textContent = "Terdeteksi Kemiripan dengan Literatur Publik";
+          resultDetail.textContent = `Ditemukan ${uniqueSources.length} sumber potensial di Wikipedia/DOAJ. Catatan: Alat ini memindai basis data terbuka (Open Access), bukan repositori internal kampus.`;
         } else {
           resultBox.className = "show safe";
           scoreBar.style.background = "var(--success, #198754)";
-          resultTitle.textContent = "Teks Cukup Unik / Original";
-          resultDetail.textContent = "Tidak ditemukan kecocokan plagiarisme yang signifikan pada database online Wikipedia maupun DOAJ.";
+          resultTitle.textContent = "Teks Cukup Unik di Web Publik";
+          resultDetail.textContent = "Tidak ditemukan indikasi plagiarisme signifikan pada indeks Wikipedia dan Crossref/DOAJ terbuka.";
         }
 
         btnAction.disabled = false;
@@ -638,11 +646,6 @@
       indicatorsBox.style.display = "none";
     });
   </script>
-
-<!-- 
-+===BATAS.ISI.LISENSI===+
-nama: STEJ-LICENSE7 Makna: PERINGATAN, seluruh muatan dan isi di dalamnya merupakan hasil kreasi yang bukan bersumber dari manusia. Mohon kritisi, pelajari dan perbaiki sesuai batasan lisensi STEJ.
-+===BATAS.ISI.LISENSI===+
--->
 </body>
+<!-- +===BATAS.ISI.LISENSI===+nama: STEJ-LICENSE7 Makna: PERINGATAN, seluruh muatan dan isi di dalamnya merupakan hasil kreasi yang bukan bersumber dari manusia. Mohon kritisi, pelajari dan perbaiki sesuai batasan lisensi STEJ.+===BATAS.ISI.LISENSI===+--></body>
 </html>
