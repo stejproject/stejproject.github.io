@@ -388,6 +388,33 @@
       return "js";
     }
 
+    function analyzePureLogicBehavior(code) {
+      let logicScore = 0;
+      const findings = [];
+      const camelCaseMatches = code.match(/[a-z][A-Z][a-zA-Z]*/g) || [];
+      const totalWords = (code.match(/\b[a-zA-Z_]\w*\b/g) || []).length;
+      if (totalWords > 40 && (camelCaseMatches.length / totalWords) > 0.15) {
+        logicScore += 25;
+        findings.push("Pola penamaan camelCase sangat steril dan konsisten khas LLM");
+      }
+      const tryCatchCount = (code.match(/try\s*\{[\s\S]*?\}\s*catch\s*\(\s*\w+\s*\)/g) || []).length;
+      if (tryCatchCount >= 2) {
+        logicScore += 20;
+        findings.push("Struktur error handling try...catch yang sangat prosedural");
+      }
+      const aiCommentPattern = /\/\/\s*(helper|initialize|check|validate|process|handle|format|compute|render)\s+/i;
+      if (aiCommentPattern.test(code)) {
+        logicScore += 25;
+        findings.push("Komentar penjelas fungsi khas dokumentasi LLM");
+      }
+      const defensiveChecks = (code.match(/if\s*\(\s*!\w+\s*\)/g) || []).length;
+      if (defensiveChecks >= 3) {
+        logicScore += 15;
+        findings.push("Pola pengecekan defensif (null/undefined) yang sangat terstruktur");
+      }
+      return { score: logicScore, findings: findings };
+    }
+    
     function analyzeAI(code, forcedType) {
       if (!code || !code.trim()) return { score: 0, level: "empty", reasons: ["Tidak ada data kode."], found: [] };
       const type = forcedType === "auto" ? detectFileType(code) : forcedType;
