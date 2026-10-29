@@ -279,27 +279,40 @@
       log.scrollTop = log.scrollHeight;
     }
 
-    function isHumanReadable(text) {
-      if (!text || text.length === 0) return false;
-      if (/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(text)) return false;
+    // Skor seberapa "bersih / readable" sebuah teks (0 ~ 1)
+    function readabilityScore(text) {
+      if (!text || text.length === 0) return 0;
+      if (/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(text)) return 0;
 
-      // Masih mengandung tanda encoding yang kuat → belum bersih
-      if (/\\x[0-9a-fA-F]{2}/.test(text)) return false;
-      if (/\\u[0-9a-fA-F]{4}/.test(text)) return false;
-      if (/%[0-9a-fA-F]{2}/.test(text)) return false;
-      if (/%[A-Za-z0-9]{2}/.test(text)) return false; // residual URL-like
-      if (/^[01\s]+$/.test(text) && text.replace(/\s/g, '').length >= 8) return false;
+      let score = 0.15; // base
+
+      // Penalti keras untuk sisa encoding
+      if (/\\x[0-9a-fA-F]{2}/.test(text)) score -= 0.7;
+      if (/\\u[0-9a-fA-F]{4}/.test(text)) score -= 0.7;
+      if (/%[0-9a-fA-F]{2}/.test(text)) score -= 0.55;
+      if (/%[A-Za-z0-9]{2}/.test(text)) score -= 0.4;
+      if (/^[01\s]+$/.test(text) && text.replace(/\s/g, '').length >= 8) score -= 0.8;
+      // Penalti jika hampir seluruhnya base64-like tanpa spasi
+      if (/^[A-Za-z0-9+/=]+$/.test(text) && text.length > 20 && !/\s/.test(text)) score -= 0.45;
 
       const printableRatio = (text.match(/[\p{L}\p{N}\p{P}\p{Z}\n\r\t]/gu) || []).length / text.length;
-      if (printableRatio < 0.82) return false;
+      score += printableRatio * 0.4;
 
-      if (!/[\p{L}]/u.test(text)) return false;
-      if (text.length < 10) return true;
-      if (!/\s/.test(text) && text.length > 25) return false;
+      if (/[\p{L}]/u.test(text)) score += 0.18;
+      if (/\s/.test(text)) score += 0.15;
+      if (text.length >= 4 && text.length < 800) score += 0.1;
 
-      // Kata-kata umum (EN + ID + tech)
-      const common = /\b(the|and|for|are|but|not|you|all|can|had|her|was|one|our|out|day|get|has|him|his|how|man|new|now|old|see|two|way|who|yang|dan|untuk|dari|dengan|adalah|ini|itu|akan|bisa|sudah|atau|juga|pada|proyek|bisnis|stej|hello|world|project|secret|message|teks|pesan|kode|core|function|console|log|test|data|user|admin|password|key|sample|code|file|path|name|value|true|false|null|return|const|let|var|this|from|with|that|have|been|will|would|could|should|about|which|their|there|what|when|where|your|into|than|them|then|these|some|only|over|such|after|most|also|back|just|like|make|many|more|other|same|time|very|well|work)\b/i;
-      return common.test(text);
+      // Bonus kata umum (EN + ID + tech) — tidak wajib, hanya bonus
+      const common = /\b(the|and|for|are|but|not|you|all|can|had|her|was|one|our|out|day|get|has|him|his|how|man|new|now|old|see|two|way|who|yang|dan|untuk|dari|dengan|adalah|ini|itu|akan|bisa|sudah|atau|juga|pada|proyek|bisnis|stej|hello|world|project|secret|message|teks|pesan|kode|core|function|console|log|test|data|user|admin|password|key|sample|code|file|path|name|value|true|false|null|return|const|let|var|this|from|with|that|have|been|will|would|could|should|about|which|their|there|what|when|where|your|into|than|them|then|these|some|only|over|such|after|most|also|back|just|like|make|many|more|other|same|time|very|well|work|aku|kamu|dia|mereka|kita|kami|saya|apa|siapa|dimana|bagaimana|mengapa|kalau|karena|tetapi|namun|sedang|telah|masih|belum|sangat|sekali|hanya|juga|sudah|nanti|sekarang)\b/gi;
+      const matches = text.match(common);
+      if (matches) score += Math.min(0.3, matches.length * 0.06);
+
+      return Math.max(0, Math.min(1, score));
+    }
+
+    function isHumanReadable(text) {
+      // Ambang moderat + harus lebih baik dari state sebelumnya (lihat di engine)
+      return readabilityScore(text) >= 0.55;
     }
 
     // ===================== BOMBE ENGINE =====================
@@ -345,14 +358,17 @@
         logAi('Tidak ada ciri encoding yang kuat terdeteksi. Akan mencoba metode generik (reverse/rot/dll).', 'info');
       }
 
-      // BFS search
-      const maxDepth = 8; // tidak dibatasi ketat
+      // BFS search — tidak ada hard limit ketat, hanya dibatasi tombol Stop
+      const maxDepth = 12;
       let queue = [{ text: cipherText, chain: [] }];
       let visited = new Set([cipherText]);
       let found = false;
       let winningChain = [];
       let finalText = '';
       let candidatesTried = 0;
+
+      // Simpan kandidat terbaik (fallback kalau tidak pernah mencapai ambang readable)
+      let bestCandidate = { text: cipherText, chain: [], score: readabilityScore(cipherText) };
 
       for (let depth = 1; depth <= maxDepth && isRunning && !found; depth++) {
         const levelSize = queue.length;
@@ -372,7 +388,6 @@
             }))
             .filter(m => m.score > 0 || ['reverse', 'rot13', 'atbash', 'rot47'].includes(m.id))
             .sort((a, b) => {
-              // prioritas: score deteksi dulu, lalu urutan user
               if (Math.abs(a.score - b.score) > 0.05) return b.score - a.score;
               return a.priority - b.priority;
             });
@@ -386,55 +401,112 @@
             candidatesTried++;
             const newChain = [...chain, id];
             const chainStr = newChain.map(m => METHOD_DEFS[m].label).join(' → ');
+            const rScore = readabilityScore(next);
 
-            // Log setiap percobaan (tapi jangan terlalu spam di depth tinggi)
-            if (depth <= 3 || score > 0.5) {
-              logAi(`Coba [${chainStr}]`, 'try');
+            // Update best candidate
+            if (rScore > bestCandidate.score) {
+              bestCandidate = { text: next, chain: newChain, score: rScore };
             }
 
+            // Log percobaan (dibatasi agar tidak banjir di depth tinggi)
+            if (depth <= 4 || score > 0.55 || rScore > 0.55) {
+              logAi(`Coba [${chainStr}]  (score: ${(rScore * 100).toFixed(0)}%)`, 'try');
+            }
+
+            // Terima jika score melewati ambang
             if (isHumanReadable(next)) {
-              logAi(`✓ BERHASIL dengan kunci: ${chainStr}`, 'success');
+              // Coba satu langkah tambahan (reverse/rot/atbash) — ambil yang skornya terbaik
+              // Kalau skor sama, prefer yang mengandung reverse (karena sering ada di rantai)
+              let bestNext = next;
+              let bestNextChain = newChain;
+              let bestNextScore = rScore;
+
+              for (const extra of ['reverse', 'rot13', 'atbash']) {
+                if (!enabledMethods.has(extra)) continue;
+                const extraResult = METHOD_DEFS[extra].decode(next);
+                if (!extraResult || !isHumanReadable(extraResult)) continue;
+                const extraScore = readabilityScore(extraResult);
+
+                const isBetter = extraScore > bestNextScore + 0.02;
+                const isEqualPreferReverse = Math.abs(extraScore - bestNextScore) <= 0.02 && extra === 'reverse';
+
+                if (isBetter || isEqualPreferReverse) {
+                  bestNext = extraResult;
+                  bestNextChain = [...newChain, extra];
+                  bestNextScore = extraScore;
+                }
+              }
+
+              logAi(`✓ BERHASIL dengan kunci: ${bestNextChain.map(m => METHOD_DEFS[m].label).join(' → ')}  (score ${(bestNextScore*100).toFixed(0)}%)`, 'success');
               found = true;
-              winningChain = newChain;
-              finalText = next;
+              winningChain = bestNextChain;
+              finalText = bestNext;
               break;
             }
 
             visited.add(next);
-            queue.push({ text: next, chain: newChain });
+            // Batasi lebar antrean supaya tidak meledak
+            if (queue.length < 800) {
+              queue.push({ text: next, chain: newChain });
+            }
           }
         }
 
-        // yield ke UI
-        await new Promise(r => setTimeout(r, 12));
+        await new Promise(r => setTimeout(r, 10));
       }
 
       if (found) {
         finishSuccess(winningChain, finalText);
         logAi(`Total kandidat diuji: ${candidatesTried} | Depth final: ${winningChain.length}`, 'info');
+      } else if (!isRunning) {
+        logAi(`[DIHENTIKAN] Proses dihentikan oleh user.`, 'fail');
+        // Tetap tampilkan kandidat terbaik yang sempat ditemukan
+        if (bestCandidate.chain.length > 0) {
+          logAi(`Kandidat terbaik sejauh ini (score ${(bestCandidate.score * 100).toFixed(0)}%): ${bestCandidate.chain.map(m => METHOD_DEFS[m].label).join(' → ')}`, 'info');
+          finishSuccess(bestCandidate.chain, bestCandidate.text, true);
+        } else {
+          document.getElementById('aiStackVisualizer').innerHTML =
+            `<span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 italic">Dihentikan</span>`;
+          resetControls();
+        }
       } else {
-        logAi(isRunning
-          ? `[GAGAL] Tidak ditemukan kunci yang menghasilkan teks readable (max depth ${maxDepth}).`
-          : `[DIHENTIKAN] Proses dihentikan oleh user.`, 'fail');
-        document.getElementById('aiStackVisualizer').innerHTML =
-          `<span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 italic">Kunci tidak ditemukan</span>`;
-        resetControls();
+        // Tidak pernah mencapai ambang readable → kembalikan kandidat terbaik
+        logAi(`Tidak mencapai skor readable sempurna. Mengembalikan kandidat terbaik (score ${(bestCandidate.score * 100).toFixed(0)}%).`, 'info');
+        if (bestCandidate.chain.length > 0) {
+          logAi(`Kunci terbaik: ${bestCandidate.chain.map(m => METHOD_DEFS[m].label).join(' → ')}`, 'info');
+          finishSuccess(bestCandidate.chain, bestCandidate.text, true);
+        } else {
+          // Sama sekali tidak ada transformasi berguna
+          logAi('Tidak ada transformasi yang memperbaiki teks. Hasil dikembalikan apa adanya.', 'info');
+          finishSuccess([], cipherText, true);
+        }
+        logAi(`Total kandidat diuji: ${candidatesTried}`, 'info');
       }
     }
 
-    function finishSuccess(chain, text) {
+    function finishSuccess(chain, text, isPartial = false) {
       const viz = document.getElementById('aiStackVisualizer');
       if (chain.length === 0) {
         viz.innerHTML = `<span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 italic">Sudah bersih (0 lapis)</span>`;
       } else {
+        const badgeClass = isPartial
+          ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+          : 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40';
         viz.innerHTML = chain.map((id, idx) =>
-          `<span class="text-xs px-2 py-1 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-mono whitespace-nowrap">
+          `<span class="text-xs px-2 py-1 rounded ${badgeClass} border font-mono whitespace-nowrap">
              ${idx + 1}.${METHOD_DEFS[id].label}
            </span>`
         ).join(' <span class="text-gray-500">➔</span> ');
+        if (isPartial) {
+          viz.innerHTML += ` <span class="text-xs text-amber-400/80 italic ml-1">(kandidat terbaik)</span>`;
+        }
       }
       document.getElementById('outputResult').value = text;
-      logAi('Pesan asli berhasil dipulihkan.', 'success');
+      if (!isPartial) {
+        logAi('Pesan asli berhasil dipulihkan.', 'success');
+      } else {
+        logAi('Hasil kandidat terbaik ditampilkan. Bisa dicoba lagi dengan metode berbeda atau depth lebih dalam.', 'info');
+      }
       resetControls();
     }
 
