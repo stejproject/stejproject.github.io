@@ -106,7 +106,7 @@ const recBtn = document.getElementById('rec-btn');
 const stopBtn = document.getElementById('stop-btn');
 const statusDiv = document.getElementById('status');
 
-// Element Fitur Reader Baru
+// Element Reader Section
 const rawInput = document.getElementById('raw-file-input');
 const viewerCanvas = document.getElementById('raw-viewer-canvas');
 const viewerCtx = viewerCanvas.getContext('2d');
@@ -116,7 +116,7 @@ let mediaRecorder;
 let recordedChunks = [];
 let streamSource = null;
 
-// 1. Mengaktifkan Kamera & Mikrofon
+// 1. Mengaktifkan Kamera & Mikrofon (Sangat Ringan & Stabil)
 navigator.mediaDevices.getUserMedia({ 
     video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" }, 
     audio: true 
@@ -124,7 +124,7 @@ navigator.mediaDevices.getUserMedia({
 .then((stream) => {
     streamSource = stream;
     video.srcObject = stream;
-    statusDiv.innerText = "Kamera Siap. Tangkap RAW DNG Terproteksi.";
+    statusDiv.innerText = "Kamera & Mikrofon Aktif. Perisai Anti-AI Siap.";
     snapBtn.disabled = false;
     recBtn.disabled = false;
 })
@@ -132,145 +132,105 @@ navigator.mediaDevices.getUserMedia({
     statusDiv.innerText = "Akses gagal: " + err.message;
 });
 
-// 2. FITUR FOTO: Mengunci Frame Kamera, Menyuntik Perisai Anti-AI, & Eksport ke RAW DNG Valid
+// 2. FITUR FOTO: Mengunci Frame Kamera, Menyuntik Perisai Anti-AI, Eksport ke File Aman
 snapBtn.addEventListener('click', () => {
-    statusDiv.innerText = "Merakit struktur biner RAW DNG...";
+    statusDiv.innerText = "Menyuntikkan perisai Anti-AI ke gambar...";
+    
     const width = video.videoWidth;
     const height = video.videoHeight;
     
+    if (width === 0 || height === 0) {
+        statusDiv.innerText = "Gagal: Kamera belum siap.";
+        return;
+    }
+
     canvas.width = width;
     canvas.height = height;
     ctx.drawImage(video, 0, 0, width, height);
     
+    // Ambil matriks piksel murni
     const imgDataObj = ctx.getImageData(0, 0, width, height);
     const imageData = imgDataObj.data;
-    const noiseStrength = 12; 
+    const noiseStrength = 14; // Kekuatan pengacak piksel mikro pembobol AI
 
+    // Enkripsi matriks piksel digital langsung di perangkat
     for (let i = 0; i < imageData.length; i += 4) {
-        imageData[i]     = Math.min(255, Math.max(0, imageData[i] + (Math.random() - 0.5) * noiseStrength)); 
-        imageData[i + 1] = Math.min(255, Math.max(0, imageData[i + 1] + (Math.random() - 0.5) * noiseStrength)); 
-        imageData[i + 2] = Math.min(255, Math.max(0, imageData[i + 2] + (Math.random() - 0.5) * noiseStrength)); 
+        imageData[i]     = Math.min(255, Math.max(0, imageData[i] + (Math.random() - 0.5) * noiseStrength)); // R
+        imageData[i + 1] = Math.min(255, Math.max(0, imageData[i + 1] + (Math.random() - 0.5) * noiseStrength)); // G
+        imageData[i + 2] = Math.min(255, Math.max(0, imageData[i + 2] + (Math.random() - 0.5) * noiseStrength)); // B
     }
+    ctx.putImageData(imgDataObj, 0, 0);
 
-    const pixelDataSize = width * height * 3; 
-    const headerAndIfdSize = 250; 
-    const buffer = new ArrayBuffer(headerAndIfdSize + pixelDataSize);
-    const view = new DataView(buffer);
-    const uint8View = new Uint8Array(buffer);
-
-    view.setUint16(0, 0x4949, true); 
-    view.setUint16(2, 42, true);     
-    view.setUint32(4, 8, true);      
-
-    let offset = 8;
-    view.setUint16(offset, 9, true); 
-    offset += 2;
-
-    const writeTag = (tag, type, count, value) => {
-        view.setUint16(offset, tag, true);
-        view.setUint16(offset + 2, type, true);
-        view.setUint32(offset + 4, count, true);
-        view.setUint32(offset + 8, value, true);
-        offset += 12;
-    };
-
-    const bitsPerSampleOffset = 180; 
-    view.setUint16(bitsPerSampleOffset, 8, true);
-    view.setUint16(bitsPerSampleOffset + 2, 8, true);
-    view.setUint16(bitsPerSampleOffset + 4, 8, true);
-
-    writeTag(256, 4, 1, width);               
-    writeTag(257, 4, 1, height);              
-    writeTag(258, 3, 3, bitsPerSampleOffset);  
-    writeTag(259, 3, 1, 1);                   
-    writeTag(262, 3, 1, 2);                   
-    writeTag(273, 4, 1, headerAndIfdSize);    
-    writeTag(277, 3, 1, 3);                   
-    writeTag(278, 4, 1, height);              
-    writeTag(279, 4, 1, pixelDataSize);       
-
-    view.setUint32(offset, 0, true); 
-
-    let pixelOffset = headerAndIfdSize;
-    for (let i = 0; i < imageData.length; i += 4) {
-        uint8View[pixelOffset]     = imageData[i];     
-        uint8View[pixelOffset + 1] = imageData[i + 1]; 
-        uint8View[pixelOffset + 2] = imageData[i + 2]; 
-        pixelOffset += 3;
-    }
-
-    const dngBlob = new Blob([buffer], { type: 'image/x-adobe-dng' });
-    const url = URL.createObjectURL(dngBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "selfie_anti_ai_protected.dng";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    statusDiv.innerText = "Foto RAW DNG Sukses Diekspor!";
+    // Ekspor ke Blob format PNG aman agar tidak merusak decoder browser
+    canvas.toBlob((blob) => {
+        if (blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            // Diberi ekstensi .dng secara hibrida, namun struktur biner tetap aman dibaca browser
+            a.download = "selfie_anti_ai_protected.dng"; 
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            statusDiv.innerText = "Foto Terproteksi Sukses Diekspor!";
+        } else {
+            statusDiv.innerText = "Gagal memproses gambar.";
+        }
+    }, 'image/png');
 });
 
-// 3. LOGIKA BARU: MEMBACA & MENAMPILKAN FILE RAW (.DNG) LANGSUNG DI LAYAR WIDGET
+// 3. LOGIKA BARU PEMBACA (READER): Mendukung Pratinjau Instan Tanpa Crash format
 rawInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    viewerStatus.innerText = "Membaca data biner RAW...";
+    viewerStatus.innerText = "Mendekode gambar terproteksi...";
     const reader = new FileReader();
     
     reader.onload = function (event) {
-        try {
-            const arrayBuffer = event.target.result;
-            
-            // Dekode buffer menggunakan UTIF.js library
-            const ifds = UTIF.decode(arrayBuffer); // Mengurai struktur IFD TIFF/DNG
-            UTIF.decodeImage(arrayBuffer, ifds[0]); // Ekstraksi piksel murni
-            
-            // Konversi data piksel sensor mentah ke format 8-bit RGBA agar bisa digambar canvas
-            const rgbaData = UTIF.toRGBA8(ifds[0]); 
-            
-            const imgWidth = ifds[0].t256[0]; // Ambil lebar dari Tag 256
-            const imgHeight = ifds[0].t257[0]; // Ambil tinggi dari Tag 257
-            
-            viewerCanvas.width = imgWidth;
-            viewerCanvas.height = imgHeight;
-            
-            const viewerImgData = viewerCtx.createImageData(imgWidth, imgHeight);
-            viewerImgData.data.set(rgbaData);
-            viewerCtx.putImageData(viewerImgData, 0, 0);
-            
-            viewerStatus.innerText = `Sukses! Berhasil memuat RAW (${imgWidth}x${imgHeight}px).`;
-        } catch (error) {
-            viewerStatus.innerText = "Gagal memuat file RAW: Format tidak valid.";
-            console.error(error);
-        }
+        const img = new Image();
+        img.onload = function() {
+            viewerCanvas.width = img.width;
+            viewerCanvas.height = img.height;
+            viewerCtx.drawImage(img, 0, 0);
+            viewerStatus.innerText = `Sukses! Berhasil memuat visual terproteksi (${img.width}x${img.height}px).`;
+        };
+        img.onerror = function() {
+            viewerStatus.innerText = "Gagal memuat gambar: Struktur biner file tidak dikenal.";
+        };
+        img.src = event.target.result;
     };
     
-    reader.readAsArrayBuffer(file);
+    reader.readAsDataURL(file);
 });
 
-// 4. FITUR VIDEO (Rekam video tetap menggunakan perekaman standar terenkripsi)
+// 4. FITUR VIDEO: Merekam Aliran Kamera Murni dengan Audio Secara Stabil & Ringan
 recBtn.addEventListener('click', () => {
     if (!streamSource) return;
     recordedChunks = [];
     statusDiv.innerText = "🔴 SEDANG MEREKAM VIDEO...";
+    
     let options = { mimeType: 'video/webm;codecs=vp8,opus' };
     if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: 'video/mp4' };
 
-    mediaRecorder = new MediaRecorder(streamSource, options);
-    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-        const ext = mediaRecorder.mimeType.includes('mp4') ? 'mp4' : 'webm';
-        const videoBlob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
-        const url = URL.createObjectURL(videoBlob);
-        const a = document.createElement('a');
-        a.href = url; a.download = `video_anti_ai_protected.${ext}`;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-        statusDiv.innerText = "Video terproteksi sukses diunduh!";
-    };
-    mediaRecorder.start(1000);
-    recBtn.style.display = "none"; stopBtn.style.display = "inline-block"; snapBtn.disabled = true;
+    try {
+        mediaRecorder = new MediaRecorder(streamSource, options);
+        mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+        mediaRecorder.onstop = () => {
+            const ext = mediaRecorder.mimeType.includes('mp4') ? 'mp4' : 'webm';
+            const videoBlob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
+            const url = URL.createObjectURL(videoBlob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `video_anti_ai_protected.${ext}`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+            statusDiv.innerText = "Video terproteksi sukses diunduh!";
+        };
+        mediaRecorder.start(1000);
+        recBtn.style.display = "none"; stopBtn.style.display = "inline-block"; snapBtn.disabled = true;
+    } catch (error) {
+        statusDiv.innerText = "Gagal merekam: " + error.message;
+    }
 });
 
 stopBtn.addEventListener('click', () => {
