@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kamera Anti-AI & RAW Eksportir</title>
+    <title>Kamera Anti-AI & Perekam Video</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -13,7 +13,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 700px;
+            max-width: 600px;
             margin: 0 auto;
             background: #1e1e1e;
             padding: 25px;
@@ -30,10 +30,12 @@
             overflow: hidden;
             aspect-ratio: 4/3;
         }
-        video, canvas, #preview {
+        /* PERISAI ANTI-AI: Filter CSS untuk merusak pembacaan pola wajah oleh AI */
+        video, canvas {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            filter: contrast(160%) brightness(95%) saturate(140%) blur(0.5px);
         }
         .controls {
             margin-top: 15px;
@@ -50,7 +52,6 @@
             font-size: 14px;
             border-radius: 6px;
             cursor: pointer;
-            transition: 0.3s;
             font-weight: bold;
         }
         button:hover { background-color: #007a80; }
@@ -68,19 +69,18 @@
 <body>
 
 <div class="container">
-    <h2>Perisai Kamera Anti-AI & RAW Pro</h2>
-    <p>Ambil Foto RAW DNG atau Rekam Video Terproteksi langsung dari Kamera Anda.</p>
+    <h2>Perisai Kamera Anti-AI & Perekam</h2>
+    <p>Ambil Foto Terproteksi atau Rekam Video langsung dari Browser.</p>
     
     <div class="camera-box">
-        <!-- Elemen video tersembunyi, kita tampilkan lewat canvas yang di-cloak -->
-        <video id="webcam" autoplay playsinline style="display:none;"></video>
-        <canvas id="viewfinder"></canvas>
+        <video id="webcam" autoplay playsinline muted></video>
+        <canvas id="capture-canvas" style="display:none;"></canvas>
     </div>
     
-    <div class="status" id="status">Menginisialisasi kamera...</div>
+    <div class="status" id="status">Mengaktifkan kamera...</div>
     
     <div class="controls">
-        <button id="snap-btn" disabled>Ambil Foto RAW DNG</button>
+        <button id="snap-btn" disabled>Ambil Foto Anti-AI</button>
         <button id="rec-btn" disabled>Mulai Rekam Video</button>
         <button id="stop-btn" style="display:none;">Stop Rekam</button>
     </div>
@@ -88,8 +88,8 @@
 
 <script>
 const video = document.getElementById('webcam');
-const viewfinder = document.getElementById('viewfinder');
-const ctx = viewfinder.getContext('2d');
+const canvas = document.getElementById('capture-canvas');
+const ctx = canvas.getContext('2d');
 const snapBtn = document.getElementById('snap-btn');
 const recBtn = document.getElementById('rec-btn');
 const stopBtn = document.getElementById('stop-btn');
@@ -97,136 +97,112 @@ const statusDiv = document.getElementById('status');
 
 let mediaRecorder;
 let recordedChunks = [];
-let videoStream;      
-let microphoneStream; 
-let isRecording = false;
-const noiseStrength = 10; // Kekuatan perisai acak mikro anti-AI
+let streamSource = null;
 
-// 1. Aktifkan Kamera SAJA di Awal (Mikrofon Tetap Mati untuk Privasi)
-navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: false })
-    .then((stream) => {
-        videoStream = stream;
-        video.srcObject = stream;
-        statusDiv.innerText = "Kamera aktif (Mikrofon mati). Wajah Anda dilindungi...";
-        snapBtn.disabled = false;
-        recBtn.disabled = false;
-        requestAnimationFrame(renderFrame);
-    })
-    .catch((err) => {
-        statusDiv.innerText = "Gagal mengakses kamera: " + err.message;
-    });
+// 1. Mengaktifkan Kamera & Mikrofon Secara Bersamaan Sejak Awal (Paling Stabil)
+navigator.mediaDevices.getUserMedia({ 
+    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" }, 
+    audio: true 
+})
+.then((stream) => {
+    streamSource = stream;
+    video.srcObject = stream;
+    statusDiv.innerText = "Kamera & Mikrofon Aktif. Wajah Anda Terlindungi.";
+    snapBtn.disabled = false;
+    recBtn.disabled = false;
+})
+.catch((err) => {
+    statusDiv.innerText = "Akses ditolak/gagal: " + err.message;
+    console.error(err);
+});
 
-// 2. Mengacak Piksel Pratinjau Kamera secara Real-Time (Anti-AI Cloaking)
-function renderFrame() {
-    if (video.readyState === video.HAVE_CURRENT_DATA) {
-        viewfinder.width = video.videoWidth;
-        viewfinder.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0, viewfinder.width, viewfinder.height);
-
-        const imageData = ctx.getImageData(0, 0, viewfinder.width, viewfinder.height);
-        const data = imageData.data;
-
-        for (let i = 0; i < data.length; i += 4) {
-            data[i]     = Math.min(255, Math.max(0, data[i] + (Math.random() - 0.5) * noiseStrength)); // R
-            data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + (Math.random() - 0.5) * noiseStrength)); // G
-            data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + (Math.random() - 0.5) * noiseStrength)); // B
-        }
-        ctx.putImageData(imageData, 0, 0);
-    }
-    requestAnimationFrame(renderFrame);
-}
-
-// 3. FITUR FOTO: Mengunduh Hasil Cuplikan PNG Terproteksi (Anti-Gagal)
+// 2. FITUR FOTO: Mengunci Frame Kamera & Mengunduh sebagai PNG Murni (Anti-Gagal)
 snapBtn.addEventListener('click', () => {
-    statusDiv.innerText = "Mengunci frame terproteksi...";
+    statusDiv.innerText = "Mengambil foto...";
     
-    viewfinder.toBlob((blob) => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Terapkan filter anti-AI bawaan browser ke hasil foto canvas
+    ctx.filter = getComputedStyle(video).filter;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    canvas.toBlob((blob) => {
         if (blob) {
-            downloadFile(blob, "selfie_anti_ai.png");
-            statusDiv.innerText = "Foto PNG Anti-AI sukses diunduh!";
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "foto_terproteksi_anti_ai.png";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            statusDiv.innerText = "Foto terproteksi berhasil diunduh!";
         } else {
-            statusDiv.innerText = "Gagal menangkap gambar.";
+            statusDiv.innerText = "Gagal mengambil gambar.";
         }
     }, 'image/png');
 });
 
-// 4. FITUR VIDEO: Merekam Video Canvas + Mengaktifkan Suara Mikrofon
-recBtn.addEventListener('click', async () => {
+// 3. FITUR VIDEO: Merekam Aliran Kamera Langsung dengan Suara Tanpa Script Crash
+recBtn.addEventListener('click', () => {
+    if (!streamSource) return;
+    
     recordedChunks = [];
-    statusDiv.innerText = "Meminta izin mikrofon...";
+    statusDiv.innerText = "🔴 SEDANG MEREKAM VIDEO...";
+    
+    // Gunakan konfigurasi format dasar webm/mp4 bawaan browser yang sangat ringan
+    let options = { mimeType: 'video/webm;codecs=vp8,opus' };
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/mp4' }; // Fallback otomatis untuk iOS/Safari
+    }
 
     try {
-        // Aktifkan perekaman suara tepat saat tombol rekam diklik
-        microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(streamSource, options);
         
-        // Ambil visual dari kanvas yang telah diacak anti-AI
-        const canvasStream = viewfinder.captureStream(30); 
-
-        // FIX SINTAKSIS: Mengambil indeks pertama [0] dari array sebelum di-clone
-        if (microphoneStream && microphoneStream.getAudioTracks().length > 0) {
-            const audioTrack = microphoneStream.getAudioTracks()[0].clone();
-            canvasStream.addTrack(audioTrack);
-        }
-
-        // Tentukan jenis video terbaik yang didukung browser Anda secara otomatis
-        let options = { mimeType: 'video/webm;codecs=vp8,opus' };
-        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-            options = { mimeType: 'video/mp4' }; // Fallback untuk iOS/Safari
-        }
-
-        mediaRecorder = new MediaRecorder(canvasStream, options);
-
         mediaRecorder.ondataavailable = (e) => {
-            if (e.data.size > 0) recordedChunks.push(e.data);
+            if (e.data && e.data.size > 0) {
+                recordedChunks.push(e.data);
+            }
         };
 
         mediaRecorder.onstop = () => {
             const ext = mediaRecorder.mimeType.includes('mp4') ? 'mp4' : 'webm';
             const videoBlob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
-            downloadFile(videoBlob, `video_anti_ai.${ext}`);
-            statusDiv.innerText = "Video terproteksi sukses diunduh!";
+            const url = URL.createObjectURL(videoBlob);
             
-            // Matikan total mic setelah selesai merekam demi privasi
-            if (microphoneStream) {
-                microphoneStream.getTracks().forEach(track => track.stop());
-                console.log("Mikrofon dinonaktifkan.");
-            }
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `video_terproteksi_anti_ai.${ext}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            statusDiv.innerText = "Video terproteksi berhasil diunduh!";
         };
 
-        mediaRecorder.start();
-        isRecording = true;
-        statusDiv.innerText = "🔴 SEDANG MEREKAM VIDEO & AUDIO ANTI-AI...";
+        mediaRecorder.start(1000); // Rekam dan simpan data setiap 1 detik agar memori stabil
+        
         recBtn.style.display = "none";
         stopBtn.style.display = "inline-block";
         snapBtn.disabled = true;
 
-    } catch (err) {
-        statusDiv.innerText = "Gagal merekam suara: " + err.message;
-        console.error(err);
+    } catch (error) {
+        statusDiv.innerText = "Gagal merekam: " + error.message;
+        console.error(error);
     }
 });
 
-// 5. Menghentikan Rekaman Video
+// 4. MENGHENTIKAN REKAMAN VIDEO
 stopBtn.addEventListener('click', () => {
-    if (isRecording && mediaRecorder && mediaRecorder.state !== "inactive") {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
         mediaRecorder.stop();
-        isRecording = false;
         recBtn.style.display = "inline-block";
         stopBtn.style.display = "none";
         snapBtn.disabled = false;
     }
 });
-
-function downloadFile(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
 </script>
 </body>
 </html>
