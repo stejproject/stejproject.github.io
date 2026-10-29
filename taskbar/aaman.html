@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STEJ CyberCrypt - Bletchley Auto-Crack Engine (Fixed)</title>
+  <title>STEJ CyberCrypt - Dynamic Stack De-obfuscator Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -18,148 +18,156 @@
     <header class="flex items-center justify-between border-b border-gray-800 pb-4">
       <div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-          STEJ CyberCrypt :: Bletchley Auto-Crack Engine
+          STEJ CyberCrypt :: Dynamic Stack De-obfuscator
         </h1>
-        <p class="text-xs text-gray-400 mt-1">Simulasi Pemecah Sandi Otomatis (Deep Pipeline Fixed) - STEJ Project</p>
+        <p class="text-xs text-gray-400 mt-1">Sistem Pembongkar Rantai 100+ Lapis Dinamis - STEJ Project</p>
       </div>
-      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">COLOSSUS v2.1</span>
+      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">STACK PIPELINE v3.0</span>
     </header>
 
-    <!-- Control Panel -->
+    <!-- Control Panel / Stack Builder -->
     <div class="glass-card p-4 rounded-xl space-y-4">
       <div class="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <span class="text-xs font-bold text-gray-300 uppercase block">Status Mesin Colossus:</span>
-          <p class="text-xs text-gray-400 mt-0.5">Algoritma anti-loop diaktifkan agar tidak terjebak teks terbalik.</p>
+          <span class="text-xs font-bold text-gray-300 uppercase block">Antrean Rantai Pembongkaran (Stack Dinamis):</span>
+          <p class="text-xs text-gray-400 mt-0.5">Tambahkan fungsi unchain sesuai urutan kebalikan enkripsi. Bisa menumpuk hingga 100+ lapis.</p>
         </div>
-        <button id="crackBtn" onclick="runBletchleyAutoCrack()" class="px-6 py-3 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-gray-950 shadow-lg shadow-emerald-900/40 transition-all transform active:scale-95">
-          ⚡ JALANKAN BLETCHLEY AUTO-CRACK
+        <div class="flex space-x-2">
+          <button onclick="clearStack()" class="px-4 py-2 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-red-400 border border-red-500/30">
+            Reset Stack (0)
+          </button>
+          <button onclick="runDynamicPipeline()" class="px-5 py-2 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-gray-950 shadow-lg shadow-emerald-900/40 transition-all">
+            ▶ EKSEKUSI PIPELINE
+          </button>
+        </div>
+      </div>
+
+      <!-- Tombol Penambah Lapisan Unchain -->
+      <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-800">
+        <button onclick="pushStack('base64')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-900 hover:bg-gray-800 text-cyan-300 border border-cyan-500/30">
+          + Un-Base64
+        </button>
+        <button onclick="pushStack('rot13')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-900 hover:bg-gray-800 text-purple-300 border border-purple-500/30">
+          + Un-ROT13
+        </button>
+        <button onclick="pushStack('reverse')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-900 hover:bg-gray-800 text-emerald-300 border border-emerald-500/30">
+          + Un-Reverse
+        </button>
+        <button onclick="pushStack('hex')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-900 hover:bg-gray-800 text-amber-300 border border-amber-500/30">
+          + Un-Hex
         </button>
       </div>
 
-      <!-- Log Status -->
-      <div id="bletchleyLog" class="p-3 rounded bg-gray-950 border border-gray-800 text-xs font-mono text-emerald-400 h-24 overflow-y-auto space-y-1">
-        <div>[SYSTEM READY] Masukkan sandi bertingkat di bawah...</div>
+      <!-- Visualisasi Stack yang Aktif -->
+      <div class="flex items-center space-x-2 pt-2 border-t border-gray-800 overflow-x-auto pb-2">
+        <span class="text-xs font-semibold text-gray-400 whitespace-nowrap">Urutan Stack (<span id="stackCount">0</span> Lapisan):</span>
+        <div id="stackVisualizer" class="flex items-center gap-1">
+          <span class="text-xs px-2 py-0.5 rounded bg-gray-900 text-gray-500 italic">Stack kosong. Tambahkan lapisan di atas.</span>
+        </div>
       </div>
     </div>
 
     <!-- Workspace -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="glass-card p-4 rounded-xl space-y-2">
-        <span class="text-xs font-bold text-gray-300 uppercase block">Input Sandi Bertingkat (Multi-Encrypted)</span>
-        <textarea id="rawInput" class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-emerald-500 resize-none" placeholder="Paste kode atau pesan sandi bertingkat di sini..."></textarea>
+        <span class="text-xs font-bold text-gray-300 uppercase block">Input Teks Sandi Bertingkat</span>
+        <textarea id="rawInput" oninput="runDynamicPipeline()" class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-emerald-500 resize-none" placeholder="Paste teks alien bertingkat di sini..."></textarea>
       </div>
       
       <div class="glass-card p-4 rounded-xl space-y-2">
         <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-gray-300 uppercase">Hasil Pecahan (Decrypted / Cleaned)</span>
+          <span class="text-xs font-bold text-gray-300 uppercase">Hasil Preview (Dilihat Sampai Ketemu)</span>
           <button onclick="copyOutput()" class="text-xs text-emerald-400 hover:underline">Salin Hasil</button>
         </div>
-        <textarea id="outputResult" readonly class="w-full h-80 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="// Hasil tebakan otomatis mesin akan muncul di sini..."></textarea>
+        <textarea id="outputResult" readonly class="w-full h-80 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="// Hasil terjemahan dinamis akan langsung muncul di sini secara real-time..."></textarea>
       </div>
     </div>
   </div>
 
   <script>
-    function logMsg(msg) {
-      const log = document.getElementById('bletchleyLog');
-      log.innerHTML += `<div>> ${msg}</div>`;
-      log.scrollTop = log.scrollHeight;
+    // Array Stack Dinamis untuk menampung hingga 100+ lapisan
+    let unchainStack = [];
+
+    function pushStack(method) {
+      if (unchainStack.length >= 100) {
+        alert("Batas maksimal 100 lapis tercapai!");
+        return;
+      }
+      unchainStack.push(method);
+      updateStackVisualizer();
+      runDynamicPipeline();
     }
 
-    function decryptStep(text, type) {
+    function clearStack() {
+      unchainStack = [];
+      updateStackVisualizer();
+      runDynamicPipeline();
+    }
+
+    function updateStackVisualizer() {
+      const container = document.getElementById('stackVisualizer');
+      document.getElementById('stackCount').innerText = unchainStack.length;
+
+      if (unchainStack.length === 0) {
+        container.innerHTML = `<span class="text-xs px-2 py-0.5 rounded bg-gray-900 text-gray-500 italic">Stack kosong. Tambahkan lapisan di atas.</span>`;
+        return;
+      }
+
+      container.innerHTML = unchainStack.map((method, idx) => 
+        `<span class="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono whitespace-nowrap">
+           ${idx + 1}.${method.toUpperCase()} 
+           <button onclick="removeStackItem(${idx})" class="ml-1 text-red-400 hover:text-red-300 font-bold">×</button>
+         </span>`
+      ).join(' <span class="text-gray-600">➔</span> ');
+    }
+
+    function removeStackItem(index) {
+      unchainStack.splice(index, 1);
+      updateStackVisualizer();
+      runDynamicPipeline();
+    }
+
+    function executeStep(text, method) {
+      if (!text) return "";
       try {
-        if (type === 'hex') {
-          return text.replace(/\\x([0-9a-fA-F]{2})/g, (m, hex) => String.fromCharCode(parseInt(hex, 16)));
-        } else if (type === 'base64') {
+        if (method === 'base64') {
           return decodeURIComponent(escape(atob(text)));
-        } else if (type === 'reverse') {
-          return text.split('').reverse().join('');
-        } else if (type === 'rot13') {
+        } else if (method === 'rot13') {
           return text.replace(/[a-zA-Z]/g, function(c){
             return String.fromCharCode((c <= "Z" ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
           });
+        } else if (method === 'reverse') {
+          return text.split('').reverse().join('');
+        } else if (method === 'hex') {
+          return text.replace(/\\x([0-9a-fA-F]{2})/g, (m, hex) => String.fromCharCode(parseInt(hex, 16)));
         }
       } catch (e) {
-        return null;
+        return "[GAGAL PADA LAPISAN: " + method.toUpperCase() + "]";
       }
       return text;
     }
 
-    function generatePermutations(arr, len) {
-      if (len === 1) return arr.map(el => [el]);
-      let result = [];
-      arr.forEach(el => {
-        let rest = generatePermutations(arr, len - 1);
-        rest.forEach(perm => {
-          result.push([el, ...perm]);
-        });
-      });
-      return result;
-    }
-
-    async function runBletchleyAutoCrack() {
-      let cipherText = document.getElementById('rawInput').value.trim();
-      if (!cipherText) return alert("Masukkan sandi terlebih dahulu!");
-
-      const btn = document.getElementById('crackBtn');
-      btn.disabled = true;
-      btn.classList.add('opacity-50', 'cursor-not-allowed');
-
-      document.getElementById('bletchleyLog').innerHTML = "";
-      logMsg("Menginisialisasi ulang Bletchley Engine (Anti-Loop Filter)...");
-      
-      const availableMethods = ['hex', 'base64', 'reverse', 'rot13'];
-      let successFound = false;
-
-      // Coba dari kedalaman 1 sampai 4 lapisan
-      for (let depth = 1; depth <= 4; depth++) {
-        logMsg(`Memindai kombinasi lapisan kedalaman [ Depth: ${depth} ]...`);
-        let permutations = generatePermutations(availableMethods, depth);
-
-        await new Promise(r => setTimeout(r, 30));
-
-        for (let perm of permutations) {
-          let tempText = cipherText;
-          let failed = false;
-
-          for (let method of perm) {
-            let res = decryptStep(tempText, method);
-            if (res === null || res === tempText) { // Cegah loop buntu
-              failed = true;
-              break;
-            }
-            tempText = res;
-          }
-
-          if (!failed) {
-            // Validasi ketat: Pastikan hasil akhir benar-benar berbeda dari input awal 
-            // dan tidak mengandung karakter sampah biner
-            if (tempText !== cipherText && tempText.length > 0 && !/[^\x20-\x7E\n\r\t]/.test(tempText)) {
-              document.getElementById('outputResult').value = tempText;
-              logMsg(`[SUCCESS] Kunci ditemukan! Urutan dekripsi: [ ${perm.join(' ➔ ').toUpperCase()} ]`);
-              successFound = true;
-              break;
-            }
-          }
-        }
-        if (successFound) break;
+    // Eksekusi Pipeline secara Dinamis sesuai Stack yang disusun user
+    function runDynamicPipeline() {
+      let currentText = document.getElementById('rawInput').value;
+      if (!currentText) {
+        document.getElementById('outputResult').value = "";
+        return;
       }
 
-      if (!successFound) {
-        logMsg("[WARNING] Gagal menemukan pola otomatis. Pastikan format enkripsinya valid.");
-        document.getElementById('outputResult').value = "[GAGAL] Mesin tidak menemukan kombinasi yang valid.";
+      // Loop berantai melewati seluruh lapis stack secara berurutan
+      for (let i = 0; i < unchainStack.length; i++) {
+        currentText = executeStep(currentText, unchainStack[i]);
       }
 
-      btn.disabled = false;
-      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      document.getElementById('outputResult').value = currentText;
     }
 
     function copyOutput() {
       const out = document.getElementById('outputResult');
       if(!out.value) return;
       navigator.clipboard.writeText(out.value);
-      alert("Hasil auto-crack berhasil disalin!");
+      alert("Hasil stack berhasil disalin!");
     }
   </script>
 </body>
