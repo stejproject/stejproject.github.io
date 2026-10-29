@@ -83,34 +83,57 @@
     }
 
     function executeStep(text, method) {
-      if (!text) return "";
+      if (!text) return null;
       try {
         if (method === 'base64') {
-          return decodeURIComponent(escape(atob(text)));
+          // Hanya coba jika terlihat seperti base64
+          if (!/^[A-Za-z0-9+/]+=*$/.test(text) || text.length % 4 !== 0) return null;
+          const decoded = decodeURIComponent(escape(atob(text)));
+          // Jika hasil decode sama persis (atau gagal meaningful), anggap gagal
+          if (decoded === text) return null;
+          return decoded;
         } else if (method === 'rot13') {
+          if (!/[a-zA-Z]/.test(text)) return null;
           return text.replace(/[a-zA-Z]/g, function(c){
             return String.fromCharCode((c <= "Z" ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
           });
         } else if (method === 'reverse') {
+          if (text.length < 2) return null;
           return text.split('').reverse().join('');
         } else if (method === 'hex') {
-          return text.replace(/\\x([0-9a-fA-F]{2})/g, (m, hex) => String.fromCharCode(parseInt(hex, 16)));
+          // Hanya berhasil jika ada minimal satu \xHH
+          if (!/\\x[0-9a-fA-F]{2}/.test(text)) return null;
+          const decoded = text.replace(/\\x([0-9a-fA-F]{2})/g, (m, hex) => String.fromCharCode(parseInt(hex, 16)));
+          if (decoded === text) return null;
+          return decoded;
         }
       } catch (e) {
         return null;
       }
-      return text;
+      return null;
     }
 
     function isHumanReadable(text) {
       if (!text || text.length === 0) return false;
-      if (/[^\x20-\x7E\n\r\t]/.test(text)) return false;
+      // Tolak karakter kontrol (kecuali tab, newline, carriage return)
+      if (/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(text)) return false;
       
-      const hasSpaces = text.includes(' ');
-      const hasAlphabet = /[a-zA-Z]/.test(text);
+      // Hitung rasio karakter yang "masuk akal" (huruf, angka, spasi, tanda baca umum, termasuk unicode)
+      const printableRatio = (text.match(/[\p{L}\p{N}\p{P}\p{Z}\n\r\t]/gu) || []).length / text.length;
+      if (printableRatio < 0.85) return false;
       
-      // Filter tambahan: pastikan tidak terjebak pada hasil setengah matang (seperti teks kebalik murni tanpa spasi wajar)
-      return hasAlphabet && (hasSpaces || text.length < 15);
+      const hasAlphabet = /[\p{L}]/u.test(text);
+      if (!hasAlphabet) return false;
+      
+      // Untuk teks pendek, longgar saja
+      if (text.length < 12) return true;
+      
+      const hasSpaces = /\s/.test(text);
+      if (!hasSpaces) return false;
+      
+      // Hanya terima jika mengandung kata-kata umum (EN + ID) agar tidak terjebak hasil setengah matang (reverse/rot13)
+      const commonWords = /\b(the|and|for|are|but|not|you|all|can|had|her|was|one|our|out|day|get|has|him|his|how|man|new|now|old|see|two|way|who|boy|did|its|let|put|say|she|too|use|yang|dan|untuk|dari|dengan|adalah|ini|itu|akan|bisa|sudah|atau|juga|pada|ke|di|proyek|bisnis|stej|hello|world|project|secret|message|teks|pesan|kode|core|function|console|log|test|data|user|admin|password|key)\b/i;
+      return commonWords.test(text);
     }
 
     function generateCombinations(methods, depth) {
@@ -142,10 +165,25 @@
       document.getElementById('aiLog').innerHTML = "";
       logAi("AI Master Agent diaktifkan. Menganalisis pesan & meracik kunci...");
 
-      const methods = ['base64', 'hex', 'reverse', 'rot13'];
+      const viz = document.getElementById('aiStackVisualizer');
       let foundSolution = false;
       let winningChain = [];
       let finalDecryptedText = "";
+
+      // Jika sudah human-readable sejak awal, tidak perlu dekripsi
+      if (isHumanReadable(cipherText)) {
+        logAi("[INFO] Teks masukan sudah bersih / human-readable. Tidak perlu dekripsi.");
+        foundSolution = true;
+        finalDecryptedText = cipherText;
+        winningChain = [];
+        viz.innerHTML = `<span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 italic">Sudah bersih (0 lapis)</span>`;
+        document.getElementById('outputResult').value = finalDecryptedText;
+        logAi(`[SELESAI] Pesan asli bersih terpampang sempurna.`);
+        resetControls();
+        return;
+      }
+
+      const methods = ['base64', 'hex', 'reverse', 'rot13'];
       let currentDepth = 1;
 
       // AI meracik kunci dan mengeksekusi dekripsi secara paralel lapis demi lapis
@@ -153,7 +191,7 @@
         logAi(`Meracik & menguji kunci di Kedalaman [ Depth: ${currentDepth} Lapis ]...`);
         let combinations = generateCombinations(methods, currentDepth);
 
-        await new Promise(r => setTimeout(r, 10));
+        await new Promise(r => setTimeout(r, 5));
 
         for (let chain of combinations) {
           if (!isRunning) break;
@@ -181,7 +219,6 @@
         currentDepth++;
       }
 
-      const viz = document.getElementById('aiStackVisualizer');
       if (foundSolution) {
         logAi(`[BERHASIL] AI sukses meracik kunci ${winningChain.length} lapis dan mendekripsi pesan!`);
         viz.innerHTML = winningChain.map((m, idx) => 
@@ -195,6 +232,7 @@
       } else {
         logAi(`[GAGAL / DIHENTIKAN] Kunci tidak ditemukan atau proses dihentikan.`);
         viz.innerHTML = `<span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 italic">Kunci gagal diracik.</span>`;
+        document.getElementById('outputResult').value = "";
       }
 
       resetControls();
