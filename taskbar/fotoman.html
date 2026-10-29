@@ -162,7 +162,7 @@ recBtn.addEventListener('click', async () => {
         // Ambil visual dari kanvas yang telah diacak anti-AI
         const canvasStream = viewfinder.captureStream(30); 
 
-        // FIX: Mengambil indeks pertama [0] dari array track audio secara valid
+        // FIX SINTAKSIS: Mengambil indeks pertama [0] dari array sebelum di-clone
         if (microphoneStream && microphoneStream.getAudioTracks().length > 0) {
             const audioTrack = microphoneStream.getAudioTracks()[0].clone();
             canvasStream.addTrack(audioTrack);
