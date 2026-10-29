@@ -43,7 +43,7 @@
           <span class="text-xs font-bold text-gray-300 uppercase">Tambah Lapisan Enkripsi Teks (Klik tombol untuk menumpuk):</span>
           <button onclick="resetTextLayers()" class="text-xs text-red-400 hover:underline">Reset Lapisan</button>
         </div>
-        
+
         <!-- Action Buttons -->
         <div class="flex flex-wrap gap-2">
           <button onclick="applyTextLayer('hex')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-amber-300 border border-amber-500/30">
@@ -91,7 +91,7 @@
           <span class="text-xs font-bold text-gray-300 uppercase">Tambah Lapisan Obfuskasi Kode:</span>
           <button onclick="resetCodeLayers()" class="text-xs text-red-400 hover:underline">Reset Lapisan</button>
         </div>
-        
+
         <div class="flex flex-wrap gap-2">
           <button onclick="applyCodeLayer('rename')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-orange-300 border border-orange-500/30">
             + Rename Variable (_0x1a)
@@ -241,10 +241,24 @@
 
       codeLayerStack.forEach(layer => {
         if (layer === 'rename') {
-          currentCode = currentCode.replace(/function\s+([a-zA-Z0-9_]+)/g, () => `function _0x${Math.floor(Math.random()*0xffffff).toString(16)}`)
-                                   .replace(/let\s+([a-zA-Z0-9_]+)/g, () => `let _0x${Math.floor(Math.random()*0xffffff).toString(16)}`);
+          // Kumpulkan identifier yang dideklarasikan lalu ganti semua kemunculannya secara konsisten
+          const nameMap = {};
+          const makeName = () => '_0x' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+          
+          // Tangkap deklarasi function & let/const/var
+          currentCode = currentCode.replace(/(function|let|const|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g, (m, keyword, name) => {
+            if (!nameMap[name]) nameMap[name] = makeName();
+            return keyword + ' ' + nameMap[name];
+          });
+          
+          // Ganti semua sisa kemunculan identifier yang sudah di-map (word boundary)
+          Object.keys(nameMap).forEach(oldName => {
+            const re = new RegExp('\\b' + oldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
+            currentCode = currentCode.replace(re, nameMap[oldName]);
+          });
         } else if (layer === 'stringHex') {
-          currentCode = currentCode.replace(/"([^"]*)"/g, (m, p1) => `"${p1.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')}"`);
+          currentCode = currentCode.replace(/"([^"]*)"/g, (m, p1) => `"${p1.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')}"`)
+                                   .replace(/'([^']*)'/g, (m, p1) => `'${p1.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')}'`);
         } else if (layer === 'b64Wrapper') {
           const b64 = btoa(unescape(encodeURIComponent(currentCode)));
           currentCode = `(function(_0x1a2b,_0x3c4d){var _0x5e6f=function(_0x7a8b){return decodeURIComponent(escape(atob(_0x7a8b)));};eval(_0x5e6f("${b64}"));})();`;
