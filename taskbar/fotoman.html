@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kamera Anti-AI & Perekam Video</title>
+    <title>Kamera Anti-AI Pro & RAW Reader</title>
+    <!-- Pustaka UTIF.js CDN untuk membaca biner file RAW DNG secara instan di browser -->
+    <script src="https://jsdelivr.net"></script>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -19,8 +21,9 @@
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
         }
-        .camera-box {
+        .camera-box, .preview-box {
             position: relative;
             width: 100%;
             max-width: 500px;
@@ -30,12 +33,10 @@
             overflow: hidden;
             aspect-ratio: 4/3;
         }
-        /* PERISAI ANTI-AI: Filter CSS untuk merusak pembacaan pola wajah oleh AI */
         video, canvas {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: contrast(160%) brightness(95%) saturate(140%) blur(0.5px);
         }
         .controls {
             margin-top: 15px;
@@ -44,7 +45,7 @@
             gap: 10px;
             flex-wrap: wrap;
         }
-        button {
+        button, input[type="file"]::-webkit-file-upload-button {
             background-color: #00adb5;
             color: white;
             border: none;
@@ -57,32 +58,42 @@
         button:hover { background-color: #007a80; }
         button:disabled { background-color: #555; cursor: not-allowed; }
         #stop-btn { background-color: #ff4444; }
-        #stop-btn:hover { background-color: #cc0000; }
         .status {
             margin-top: 15px;
             color: #00adb5;
             font-weight: bold;
-            min-height: 20px;
+        }
+        .reader-section {
+            border-top: 2px dashed #333;
+            padding-top: 20px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Perisai Kamera Anti-AI & Perekam</h2>
-    <p>Ambil Foto Terproteksi atau Rekam Video langsung dari Browser.</p>
-    
+    <h2>📸 Perisai Kamera Anti-AI & Perekam</h2>
     <div class="camera-box">
         <video id="webcam" autoplay playsinline muted></video>
         <canvas id="capture-canvas" style="display:none;"></canvas>
     </div>
-    
     <div class="status" id="status">Mengaktifkan kamera...</div>
-    
     <div class="controls">
-        <button id="snap-btn" disabled>Ambil Foto Anti-AI</button>
+        <button id="snap-btn" disabled>Ambil Foto RAW DNG</button>
         <button id="rec-btn" disabled>Mulai Rekam Video</button>
         <button id="stop-btn" style="display:none;">Stop Rekam</button>
+    </div>
+
+    <!-- AREA FITUR BARU: PEMBACA FILE RAW -->
+    <div class="reader-section">
+        <h3>🔍 Pratinjau File RAW (.dng)</h3>
+        <p>Pilih file .dng yang tadi Anda unduh untuk melihat isinya langsung di sini.</p>
+        <input type="file" id="raw-file-input" accept=".dng,.raw,.tiff"><br><br>
+        <div class="preview-box">
+            <canvas id="raw-viewer-canvas"></canvas>
+        </div>
+        <div class="status" id="viewer-status">Belum ada file RAW yang dimuat.</div>
     </div>
 </div>
 
@@ -95,11 +106,17 @@ const recBtn = document.getElementById('rec-btn');
 const stopBtn = document.getElementById('stop-btn');
 const statusDiv = document.getElementById('status');
 
+// Element Fitur Reader Baru
+const rawInput = document.getElementById('raw-file-input');
+const viewerCanvas = document.getElementById('raw-viewer-canvas');
+const viewerCtx = viewerCanvas.getContext('2d');
+const viewerStatus = document.getElementById('viewer-status');
+
 let mediaRecorder;
 let recordedChunks = [];
 let streamSource = null;
 
-// 1. Mengaktifkan Kamera & Mikrofon Sejak Awal (Sangat Ringan di CPU)
+// 1. Mengaktifkan Kamera & Mikrofon
 navigator.mediaDevices.getUserMedia({ 
     video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" }, 
     audio: true 
@@ -107,7 +124,7 @@ navigator.mediaDevices.getUserMedia({
 .then((stream) => {
     streamSource = stream;
     video.srcObject = stream;
-    statusDiv.innerText = "Kamera Aktif. Siap menangkap RAW DNG Terproteksi.";
+    statusDiv.innerText = "Kamera Siap. Tangkap RAW DNG Terproteksi.";
     snapBtn.disabled = false;
     recBtn.disabled = false;
 })
@@ -117,47 +134,34 @@ navigator.mediaDevices.getUserMedia({
 
 // 2. FITUR FOTO: Mengunci Frame Kamera, Menyuntik Perisai Anti-AI, & Eksport ke RAW DNG Valid
 snapBtn.addEventListener('click', () => {
-    statusDiv.innerText = "Membekukan frame dan merakit struktur biner RAW DNG...";
-    
+    statusDiv.innerText = "Merakit struktur biner RAW DNG...";
     const width = video.videoWidth;
     const height = video.videoHeight;
     
-    if (width === 0 || height === 0) {
-        statusDiv.innerText = "Gagal: Kamera belum siap.";
-        return;
-    }
-
-    // Kunci frame video aktif ke dalam canvas internal
     canvas.width = width;
     canvas.height = height;
     ctx.drawImage(video, 0, 0, width, height);
     
-    // Ambil matriks piksel frame tersebut
     const imgDataObj = ctx.getImageData(0, 0, width, height);
     const imageData = imgDataObj.data;
-    
-    // Suntikkan Adversarial Noise Skala Mikro pembobol AI
     const noiseStrength = 12; 
+
     for (let i = 0; i < imageData.length; i += 4) {
-        imageData[i]     = Math.min(255, Math.max(0, imageData[i] + (Math.random() - 0.5) * noiseStrength));     // R
-        imageData[i + 1] = Math.min(255, Math.max(0, imageData[i + 1] + (Math.random() - 0.5) * noiseStrength)); // G
-        imageData[i + 2] = Math.min(255, Math.max(0, imageData[i + 2] + (Math.random() - 0.5) * noiseStrength)); // B
+        imageData[i]     = Math.min(255, Math.max(0, imageData[i] + (Math.random() - 0.5) * noiseStrength)); 
+        imageData[i + 1] = Math.min(255, Math.max(0, imageData[i + 1] + (Math.random() - 0.5) * noiseStrength)); 
+        imageData[i + 2] = Math.min(255, Math.max(0, imageData[i + 2] + (Math.random() - 0.5) * noiseStrength)); 
     }
 
-    // Mulai alokasi memori biner RAW DNG (Uncompressed RGB TIFF)
     const pixelDataSize = width * height * 3; 
     const headerAndIfdSize = 250; 
-    
     const buffer = new ArrayBuffer(headerAndIfdSize + pixelDataSize);
     const view = new DataView(buffer);
     const uint8View = new Uint8Array(buffer);
 
-    // Tulis Header TIFF standar (Little Endian)
     view.setUint16(0, 0x4949, true); 
     view.setUint16(2, 42, true);     
     view.setUint32(4, 8, true);      
 
-    // Tulis Total Entri Direktori Metadata (9 Tag Struktur Wajib DNG)
     let offset = 8;
     view.setUint16(offset, 9, true); 
     offset += 2;
@@ -170,34 +174,31 @@ snapBtn.addEventListener('click', () => {
         offset += 12;
     };
 
-    // Alokasikan alamat offset terpisah khusus array BitsPerSample untuk mencegah file korup
     const bitsPerSampleOffset = 180; 
     view.setUint16(bitsPerSampleOffset, 8, true);
     view.setUint16(bitsPerSampleOffset + 2, 8, true);
     view.setUint16(bitsPerSampleOffset + 4, 8, true);
 
-    writeTag(256, 4, 1, width);               // ImageWidth
-    writeTag(257, 4, 1, height);              // ImageLength
-    writeTag(258, 3, 3, bitsPerSampleOffset);  // BitsPerSample (8,8,8 bit)
-    writeTag(259, 3, 1, 1);                   // Compression: None
-    writeTag(262, 3, 1, 2);                   // PhotometricInterpretation: RGB
-    writeTag(273, 4, 1, headerAndIfdSize);    // StripOffsets: Awal data gambar dimulai
-    writeTag(277, 3, 1, 3);                   // SamplesPerPixel: 3 (RGB)
-    writeTag(278, 4, 1, height);              // RowsPerStrip
-    writeTag(279, 4, 1, pixelDataSize);       // StripByteCounts
+    writeTag(256, 4, 1, width);               
+    writeTag(257, 4, 1, height);              
+    writeTag(258, 3, 3, bitsPerSampleOffset);  
+    writeTag(259, 3, 1, 1);                   
+    writeTag(262, 3, 1, 2);                   
+    writeTag(273, 4, 1, headerAndIfdSize);    
+    writeTag(277, 3, 1, 3);                   
+    writeTag(278, 4, 1, height);              
+    writeTag(279, 4, 1, pixelDataSize);       
 
-    view.setUint32(offset, 0, true); // Penutup struktur metadata
+    view.setUint32(offset, 0, true); 
 
-    // Salin piksel olahan perisai anti-AI ke area biner gambar RAW
     let pixelOffset = headerAndIfdSize;
     for (let i = 0; i < imageData.length; i += 4) {
-        uint8View[pixelOffset]     = imageData[i];     // Red
-        uint8View[pixelOffset + 1] = imageData[i + 1]; // Green
-        uint8View[pixelOffset + 2] = imageData[i + 2]; // Blue
+        uint8View[pixelOffset]     = imageData[i];     
+        uint8View[pixelOffset + 1] = imageData[i + 1]; 
+        uint8View[pixelOffset + 2] = imageData[i + 2]; 
         pixelOffset += 3;
     }
 
-    // Trigger unduhan file .dng resmi
     const dngBlob = new Blob([buffer], { type: 'image/x-adobe-dng' });
     const url = URL.createObjectURL(dngBlob);
     const a = document.createElement('a');
@@ -207,62 +208,75 @@ snapBtn.addEventListener('click', () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
-    statusDiv.innerText = "Foto RAW DNG Sukses Diekspor & Diunduh!";
+    statusDiv.innerText = "Foto RAW DNG Sukses Diekspor!";
 });
 
-// 3. FITUR VIDEO: Merekam Aliran Kamera Murni dengan Audio Secara Stabil & Ringan
+// 3. LOGIKA BARU: MEMBACA & MENAMPILKAN FILE RAW (.DNG) LANGSUNG DI LAYAR WIDGET
+rawInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    viewerStatus.innerText = "Membaca data biner RAW...";
+    const reader = new FileReader();
+    
+    reader.onload = function (event) {
+        try {
+            const arrayBuffer = event.target.result;
+            
+            // Dekode buffer menggunakan UTIF.js library
+            const ifds = UTIF.decode(arrayBuffer); // Mengurai struktur IFD TIFF/DNG
+            UTIF.decodeImage(arrayBuffer, ifds[0]); // Ekstraksi piksel murni
+            
+            // Konversi data piksel sensor mentah ke format 8-bit RGBA agar bisa digambar canvas
+            const rgbaData = UTIF.toRGBA8(ifds[0]); 
+            
+            const imgWidth = ifds[0].t256[0]; // Ambil lebar dari Tag 256
+            const imgHeight = ifds[0].t257[0]; // Ambil tinggi dari Tag 257
+            
+            viewerCanvas.width = imgWidth;
+            viewerCanvas.height = imgHeight;
+            
+            const viewerImgData = viewerCtx.createImageData(imgWidth, imgHeight);
+            viewerImgData.data.set(rgbaData);
+            viewerCtx.putImageData(viewerImgData, 0, 0);
+            
+            viewerStatus.innerText = `Sukses! Berhasil memuat RAW (${imgWidth}x${imgHeight}px).`;
+        } catch (error) {
+            viewerStatus.innerText = "Gagal memuat file RAW: Format tidak valid.";
+            console.error(error);
+        }
+    };
+    
+    reader.readAsArrayBuffer(file);
+});
+
+// 4. FITUR VIDEO (Rekam video tetap menggunakan perekaman standar terenkripsi)
 recBtn.addEventListener('click', () => {
     if (!streamSource) return;
-    
     recordedChunks = [];
     statusDiv.innerText = "🔴 SEDANG MEREKAM VIDEO...";
-    
     let options = { mimeType: 'video/webm;codecs=vp8,opus' };
-    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options = { mimeType: 'video/mp4' }; 
-    }
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: 'video/mp4' };
 
-    try {
-        mediaRecorder = new MediaRecorder(streamSource, options);
-        
-        mediaRecorder.ondataavailable = (e) => {
-            if (e.data && e.data.size > 0) recordedChunks.push(e.data);
-        };
-
-        mediaRecorder.onstop = () => {
-            const ext = mediaRecorder.mimeType.includes('mp4') ? 'mp4' : 'webm';
-            const videoBlob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
-            const url = URL.createObjectURL(videoBlob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `video_anti_ai_protected.${ext}`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            statusDiv.innerText = "Video terproteksi sukses diunduh!";
-        };
-
-        mediaRecorder.start(1000);
-        
-        recBtn.style.display = "none";
-        stopBtn.style.display = "inline-block";
-        snapBtn.disabled = true;
-
-    } catch (error) {
-        statusDiv.innerText = "Gagal merekam: " + error.message;
-    }
+    mediaRecorder = new MediaRecorder(streamSource, options);
+    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+        const ext = mediaRecorder.mimeType.includes('mp4') ? 'mp4' : 'webm';
+        const videoBlob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
+        const url = URL.createObjectURL(videoBlob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `video_anti_ai_protected.${ext}`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        statusDiv.innerText = "Video terproteksi sukses diunduh!";
+    };
+    mediaRecorder.start(1000);
+    recBtn.style.display = "none"; stopBtn.style.display = "inline-block"; snapBtn.disabled = true;
 });
 
 stopBtn.addEventListener('click', () => {
     if (mediaRecorder && mediaRecorder.state !== "inactive") {
         mediaRecorder.stop();
-        recBtn.style.display = "inline-block";
-        stopBtn.style.display = "none";
-        snapBtn.disabled = false;
+        recBtn.style.display = "inline-block"; stopBtn.style.display = "none"; snapBtn.disabled = false;
     }
 });
 </script>
