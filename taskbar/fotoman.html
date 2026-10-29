@@ -97,19 +97,20 @@ const statusDiv = document.getElementById('status');
 
 let mediaRecorder;
 let recordedChunks = [];
-let localStream;
+let videoStream;      // Menyimpan stream kamera murni
+let microphoneStream; // Menyimpan stream mikrofon (hanya aktif saat merekam)
 let isRecording = false;
 const noiseStrength = 8; // Kekuatan perisai anti-AI
 
-// 1. Mengaktifkan Kamera HP/Laptop
-navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: true })
+// 1. Mengaktifkan Kamera SAJA di Awal (Tanpa Audio)
+navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: false })
     .then((stream) => {
-        localStream = stream;
+        videoStream = stream;
         video.srcObject = stream;
-        statusDiv.innerText = "Kamera aktif. Melindungi pratinjau wajah...";
+        statusDiv.innerText = "Kamera aktif (Mikrofon mati). Melindungi pratinjau wajah...";
         snapBtn.disabled = false;
         recBtn.disabled = false;
-        
+
         // Mulai render frame video dengan suntikan cloaking secara real-time
         requestAnimationFrame(renderFrame);
     })
@@ -122,14 +123,12 @@ function renderFrame() {
     if (video.readyState === video.HAVE_CURRENT_DATA) {
         viewfinder.width = video.videoWidth;
         viewfinder.height = video.videoHeight;
-        
-        // Gambar frame kamera asli ke canvas
+
         ctx.drawImage(video, 0, 0, viewfinder.width, viewfinder.height);
-        
-        // Ambil piksel dan acak untuk mengelabui AI pembaca wajah
+
         const imageData = ctx.getImageData(0, 0, viewfinder.width, viewfinder.height);
         const data = imageData.data;
-        
+
         for (let i = 0; i < data.length; i += 4) {
             data[i]     = Math.min(255, Math.max(0, data[i] + (Math.random() - 0.5) * noiseStrength));     // R
             data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + (Math.random() - 0.5) * noiseStrength)); // G
@@ -142,24 +141,30 @@ function renderFrame() {
 
 // 3. FITUR FOTO: Mengonversi Frame Menjadi File RAW DNG Terproteksi
 snapBtn.addEventListener('click', () => {
-    statusDiv.innerText = "Merakit struktur biner RAW DNG...";
-    
+    statusDiv.innerText = "Membekukan frame dan merakit struktur RAW DNG...";
+
     const width = viewfinder.width;
     const height = viewfinder.height;
-    const pixelDataSize = width * height * 3;
-    const headerAndIfdSize = 200; 
+    
+    if (width === 0 || height === 0) {
+        statusDiv.innerText = "Gagal: Kamera belum siap.";
+        return;
+    }
+
+    const imgDataObj = ctx.getImageData(0, 0, width, height);
+    const imageData = imgDataObj.data;
+
+    const pixelDataSize = width * height * 3; 
+    const headerAndIfdSize = 250; 
     
     const buffer = new ArrayBuffer(headerAndIfdSize + pixelDataSize);
     const view = new DataView(buffer);
     const uint8View = new Uint8Array(buffer);
-    const imageData = ctx.getImageData(0, 0, width, height).data;
 
-    // TIFF Header
     view.setUint16(0, 0x4949, true); 
     view.setUint16(2, 42, true);     
     view.setUint32(4, 8, true);      
 
-    // IFD Directory (9 Entri Data Murni)
     let offset = 8;
     view.setUint16(offset, 9, true); 
     offset += 2;
@@ -172,19 +177,23 @@ snapBtn.addEventListener('click', () => {
         offset += 12;
     };
 
-    writeTag(256, 4, 1, width);              
-    writeTag(257, 4, 1, height);             
-    writeTag(258, 3, 3, 0x00080008);         
-    writeTag(259, 3, 1, 1);                  
-    writeTag(262, 3, 1, 2);                  
-    writeTag(273, 4, 1, headerAndIfdSize);   
-    writeTag(277, 3, 1, 3);                  
-    writeTag(278, 4, 1, height);             
-    writeTag(279, 4, 1, pixelDataSize);      
+    const bitsPerSampleOffset = 180; 
+    view.setUint16(bitsPerSampleOffset, 8, true);
+    view.setUint16(bitsPerSampleOffset + 2, 8, true);
+    view.setUint16(bitsPerSampleOffset + 4, 8, true);
 
-    view.setUint32(offset, 0, true);
+    writeTag(256, 4, 1, width);               
+    writeTag(257, 4, 1, height);              
+    writeTag(258, 3, 3, bitsPerSampleOffset);  
+    writeTag(259, 3, 1, 1);                   
+    writeTag(262, 3, 1, 2);                   
+    writeTag(273, 4, 1, headerAndIfdSize);    
+    writeTag(277, 3, 1, 3);                   
+    writeTag(278, 4, 1, height);              
+    writeTag(279, 4, 1, pixelDataSize);       
 
-    // Salin piksel yang sudah di-cloak ke kontainer RAW
+    view.setUint32(offset, 0, true); 
+
     let pixelOffset = headerAndIfdSize;
     for (let i = 0; i < imageData.length; i += 4) {
         uint8View[pixelOffset]     = imageData[i];     
@@ -198,37 +207,56 @@ snapBtn.addEventListener('click', () => {
     statusDiv.innerText = "Foto RAW DNG berhasil diunduh!";
 });
 
-// 4. FITUR VIDEO: Merekam Aliran Canvas Yang Sudah Terproteksi Anti-AI
-recBtn.addEventListener('click', () => {
+// 4. FITUR VIDEO: Aktifkan Mikrofon Hanya Saat Tombol Rekam Ditekan
+recBtn.addEventListener('click', async () => {
     recordedChunks = [];
-    // Rekam dari canvas (yang sudah ter-cloak), bukan dari kamera mentah
-    const canvasStream = viewfinder.captureStream(30); 
-    
-    // Masukkan audio asli dari mic ke rekaman canvas
-    if (localStream.getAudioTracks().length > 0) {
-        canvasStream.addTrack(localStream.getAudioTracks()[0]);
+    statusDiv.innerText = "Meminta akses mikrofon...";
+
+    try {
+        // Minta akses ke mikrofon secara terpisah tepat saat rekaman dimulai
+        microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        
+        // Ambil aliran gambar dari canvas terlindungi
+        const canvasStream = viewfinder.captureStream(30); 
+
+        // Masukkan trek audio mikrofon ke dalam rekaman canvas
+        if (microphoneStream.getAudioTracks().length > 0) {
+            const audioTrack = microphoneStream.getAudioTracks()[0];
+            canvasStream.addTrack(audioTrack);
+        }
+
+        mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm;codecs=vp8,opus' });
+
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+            downloadFile(videoBlob, "video_protected.webm");
+            statusDiv.innerText = "Video terproteksi berhasil diunduh!";
+            
+            // PENTING: Matikan total lampu/daya mikrofon setelah rekaman selesai
+            if (microphoneStream) {
+                microphoneStream.getTracks().forEach(track => track.stop());
+                console.log("Mikrofon berhasil dimatikan kembali.");
+            }
+        };
+
+        mediaRecorder.start();
+        isRecording = true;
+        statusDiv.innerText = "🔴 SEDANG MEREKAM VIDEO & SUARA MIKROFON...";
+        recBtn.style.display = "none";
+        stopBtn.style.display = "inline-block";
+        snapBtn.disabled = true;
+
+    } catch (err) {
+        statusDiv.innerText = "Gagal mengaktifkan mikrofon: " + err.message;
+        console.error(err);
     }
-
-    mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm;codecs=vp8,opus' });
-    
-    mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) recordedChunks.push(e.data);
-    };
-
-    mediaRecorder.onstop = () => {
-        const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
-        downloadFile(videoBlob, "video_protected.webm");
-        statusDiv.innerText = "Video terproteksi berhasil diunduh!";
-    };
-
-    mediaRecorder.start();
-    isRecording = true;
-    statusDiv.innerText = "🔴 SEDANG MEREKAM VIDEO ANTI-AI...";
-    recBtn.style.display = "none";
-    stopBtn.style.display = "inline-block";
-    snapBtn.disabled = true;
 });
 
+// 5. Menghentikan Rekaman
 stopBtn.addEventListener('click', () => {
     if (isRecording) {
         mediaRecorder.stop();
