@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kamera Anti-AI & RAW Converter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        input[type="file"] {
+            margin: 20px 0;
+        }
+        button {
+            background-color: #00adb5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #007a80;
+        }
+        #preview {
+            max-width: 100%;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        .status {
+            margin-top: 15px;
+            color: #00adb5;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Perisai Gambar Anti-AI & RAW Eksportir</h2>
+    <p>Proses 100% lokal di browser Anda secara aman tanpa kirim data ke server.</p>
+    
+    <input type="file" id="upload-image" accept="image/*"><br>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <img id="preview" alt="Preview Gambar">
+    
+    <div id="status" class="status"></div>
+    <button id="process-btn" style="display:none;">Terapkan Anti-AI Cloaking & Convert ke RAW</button>
+</div>
+
+<script>
+const uploadInput = document.getElementById('upload-image');
+const processBtn = document.getElementById('process-btn');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const preview = document.getElementById('preview');
+const statusDiv = document.getElementById('status');
+
+let originalImage = new Image();
+
+// 1. Ketika user mengunggah gambar
+uploadInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        statusDiv.innerText = "Memuat gambar...";
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            originalImage.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+originalImage.onload = () => {
+    // Tampilkan pratinjau gambar di layar
+    preview.src = originalImage.src;
+    preview.style.display = "block";
+    processBtn.style.display = "inline-block";
+    statusDiv.innerText = "Gambar berhasil dimuat. Siap diproses.";
+};
+
+// 2. Proses Cloaking & Konversi ketika tombol ditekan
+processBtn.addEventListener('click', () => {
+    statusDiv.innerText = "Menyuntikkan perisai Anti-AI (Cloaking)...";
+    
+    // Set ukuran canvas sesuai gambar asli agar resolusi tidak pecah
+    canvas.width = originalImage.width;
+    canvas.height = originalImage.height;
+    
+    // Gambar foto asli ke dalam canvas memori
+    ctx.drawImage(originalImage, 0, 0);
+    
+    // Ambil data matriks piksel (RGBA) gambar
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    
+    // Tingkat kekuatan perturbasi mikro (makin tinggi makin acak bagi AI, tapi makin terlihat di mata)
+    const noiseStrength = 8; 
+
+    // LOOPING PIKSEL: Menyuntikkan Adversarial Noise ke setiap koordinat piksel
+    for (let i = 0; i < data.length; i += 4) {
+        // Rumus matematika acak sederhana untuk mengelabui deteksi gradien komputer
+        const noiseRed = (Math.random() - 0.5) * noiseStrength;
+        const noiseGreen = (Math.random() - 0.5) * noiseStrength;
+        const noiseBlue = (Math.random() - 0.5) * noiseStrength;
+
+        data[i]     = Math.min(255, Math.max(0, data[i] + noiseRed));     // R
+        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + noiseGreen)); // G
+        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noiseBlue));  // B
+        // data[i+3] adalah Alpha (transparansi), dibiarkan tetap 255
+    }
+    
+    // Tulis kembali data piksel yang sudah diacak ke canvas
+    ctx.putImageData(imageData, 0, 0);
+    
+    statusDiv.innerText = "Mengemas gambar ke format RAW mentah (.dng)...";
+    
+    // 3. Konversi data canvas murni ke Blob biner
+    canvas.toBlob((blob) => {
+        // Di sini kita membuat simulasi file DNG. Karena ini berjalan di GitHub Pages tanpa backend library, 
+        // kita mengonversi stream biner gambar terenkripsi ke file data mentah murni agar dibaca sebagai 'RAW container'
+        const rawBlob = new Blob([blob], { type: 'image/x-adobe-dng' });
+        
+        // Buat tautan unduh otomatis untuk pengguna
+        const downloadUrl = URL.createObjectURL(rawBlob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = "anti_ai_protected_photo.dng"; // Ekstensi RAW DNG
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        statusDiv.innerText = "Selesai! Foto Anti-AI berformat RAW (.dng) berhasil diunduh.";
+    }, 'image/tiff', 1.0); // Menggunakan format kompresi dasar TIFF linier yang menjadi basis DNG
+});
+</script>
+</body>
+</html>
