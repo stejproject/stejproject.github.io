@@ -3,276 +3,269 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STEJ CyberCrypt - Modular Multi-Layer Obfuscator</title>
+  <title>STEJ Strong Obfuscator (Educational)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
     .code-font { font-family: 'Fira Code', monospace; }
-    .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-card { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
   </style>
 </head>
 <body class="min-h-screen p-6">
   <div class="max-w-6xl mx-auto space-y-6">
-    <!-- Header -->
     <header class="flex items-center justify-between border-b border-gray-800 pb-4">
       <div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-red-500 via-orange-400 to-amber-300 bg-clip-text text-transparent">
-          STEJ CyberCrypt :: Multi-Layer Obfuscator
+          STEJ Strong Obfuscator
         </h1>
-        <p class="text-xs text-gray-400 mt-1">Sistem Enkripsi Bertingkat (Chaining / Modular Layer) - STEJ Project</p>
+        <p class="text-xs text-gray-400 mt-1">XOR + String Encryption + ROT47 + HEX + Polymorphic + Simple CFF (Educational)</p>
       </div>
-      <span class="px-3 py-1 text-xs rounded-full bg-red-500/10 text-red-400 border border-red-500/20 font-mono">CHAINING ENGINE</span>
+      <span class="px-3 py-1 text-xs rounded-full bg-red-500/10 text-red-400 border border-red-500/20 font-mono">STRONG v1.0</span>
     </header>
 
-    <!-- Navigation Tabs -->
-    <div class="flex space-x-3 border-b border-gray-800 pb-3">
-      <button onclick="switchTab('text')" id="tabTextBtn" class="px-5 py-2.5 text-xs font-bold rounded-lg bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-900/30 transition-all">
-        🔤 Multi-Layer Teks / Pesan
-      </button>
-      <button onclick="switchTab('code')" id="tabCodeBtn" class="px-5 py-2.5 text-xs font-bold rounded-lg bg-gray-900 text-gray-400 hover:text-white border border-gray-800 transition-all">
-        💻 Multi-Layer Kode (JS/CSS)
-      </button>
-    </div>
-
-    <!-- TAB 1: TEXT MULTI-LAYER OBFUSCATOR -->
-    <div id="textSection" class="space-y-4">
-      <!-- Controls & Layer Buttons -->
-      <div class="glass-card p-4 rounded-xl space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-gray-300 uppercase">Tambah Lapisan Enkripsi Teks (Klik tombol untuk menumpuk):</span>
-          <button onclick="resetTextLayers()" class="text-xs text-red-400 hover:underline">Reset Lapisan</button>
+    <div class="glass-card p-4 rounded-xl space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="text-xs font-bold text-gray-300 uppercase block mb-1">XOR Key (wajib)</label>
+          <input id="xorKey" type="text" value="STEJ-SECRET-2026" class="w-full bg-gray-950 text-amber-300 code-font text-xs p-2.5 rounded-lg border border-gray-800 focus:outline-none focus:border-red-500" placeholder="Masukkan kunci XOR...">
         </div>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-wrap gap-2">
-          <button onclick="applyTextLayer('hex')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-amber-300 border border-amber-500/30">
-            + Tambah Hex (\x48)
-          </button>
-          <button onclick="applyTextLayer('base64')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-cyan-500/30">
-            + Tambah Base64
-          </button>
-          <button onclick="applyTextLayer('reverse')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-emerald-300 border border-emerald-500/30">
-            + Tambah Reverse Text
-          </button>
-          <button onclick="applyTextLayer('rot13')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-purple-300 border border-purple-500/30">
-            + Tambah ROT13 Cipher
-          </button>
+        <div>
+          <label class="text-xs font-bold text-gray-300 uppercase block mb-1">Mode</label>
+          <select id="mode" class="w-full bg-gray-950 text-gray-200 text-xs p-2.5 rounded-lg border border-gray-800 focus:outline-none focus:border-red-500">
+            <option value="text">Text / Pesan</option>
+            <option value="code">JavaScript Code</option>
+          </select>
         </div>
-
-        <!-- Active Layers Badge Display -->
-        <div class="flex items-center space-x-2 pt-2 border-t border-gray-800">
-          <span class="text-xs font-semibold text-gray-400">Urutan Lapisan Aktif:</span>
-          <div id="activeTextLayers" class="flex flex-wrap gap-1">
-            <span class="text-xs px-2 py-0.5 rounded bg-gray-900 text-gray-500 italic">Belum ada lapisan (Teks Asli)</span>
-          </div>
+        <div class="flex items-end">
+          <button onclick="runObfuscate()" class="w-full px-4 py-2.5 text-xs font-bold rounded-lg bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 text-white shadow-lg shadow-red-900/30 transition-all">
+            🔒 OBFUSKASI SEKARANG
+          </button>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="glass-card p-4 rounded-xl space-y-2">
-          <span class="text-xs font-bold text-gray-300 uppercase block">Input Teks Awal</span>
-          <textarea id="rawTextInput" oninput="reprocessTextLayers()" class="w-full h-80 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-red-500 resize-none" placeholder="Ketik pesan awal di sini..."></textarea>
-        </div>
-        <div class="glass-card p-4 rounded-xl space-y-2">
-          <div class="flex justify-between items-center">
-            <span class="text-xs font-bold text-gray-300 uppercase">Hasil Akhir (Multi-Encrypted)</span>
-            <button onclick="copyOutput('textOutput')" class="text-xs text-amber-400 hover:underline">Salin Hasil</button>
-          </div>
-          <textarea id="textOutput" readonly class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="Hasil enkripsi bertingkat akan muncul di sini..."></textarea>
-        </div>
+      <div class="flex flex-wrap gap-3 text-xs text-gray-400">
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optXor" checked class="accent-red-500"> XOR Core</label>
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optRot47" checked class="accent-red-500"> ROT47</label>
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optHex" checked class="accent-red-500"> HEX</label>
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optPoly" checked class="accent-red-500"> Polymorphic Names</label>
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optCff" checked class="accent-red-500"> Control Flow Flatten (code)</label>
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optJunk" checked class="accent-red-500"> Junk / Dead Code</label>
       </div>
     </div>
 
-    <!-- TAB 2: CODE MULTI-LAYER OBFUSCATOR -->
-    <div id="codeSection" class="space-y-4 hidden">
-      <div class="glass-card p-4 rounded-xl space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-gray-300 uppercase">Tambah Lapisan Obfuskasi Kode:</span>
-          <button onclick="resetCodeLayers()" class="text-xs text-red-400 hover:underline">Reset Lapisan</button>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="glass-card p-4 rounded-xl space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-gray-300 uppercase">Input</span>
+          <button onclick="loadSample()" class="text-xs text-red-400 hover:underline">Muat Sample</button>
         </div>
-
-        <div class="flex flex-wrap gap-2">
-          <button onclick="applyCodeLayer('rename')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-orange-300 border border-orange-500/30">
-            + Rename Variable (_0x1a)
-          </button>
-          <button onclick="applyCodeLayer('stringHex')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-amber-300 border border-amber-500/30">
-            + Encode Hex Strings
-          </button>
-          <button onclick="applyCodeLayer('b64Wrapper')" class="px-3 py-2 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-cyan-500/30">
-            + Wrap Base64 Eval Engine
-          </button>
-        </div>
-
-        <div class="flex items-center space-x-2 pt-2 border-t border-gray-800">
-          <span class="text-xs font-semibold text-gray-400">Urutan Lapisan Aktif:</span>
-          <div id="activeCodeLayers" class="flex flex-wrap gap-1">
-            <span class="text-xs px-2 py-0.5 rounded bg-gray-900 text-gray-500 italic">Belum ada lapisan</span>
-          </div>
-        </div>
+        <textarea id="input" class="w-full h-96 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-red-500 resize-none" placeholder="Masukkan teks atau kode JavaScript..."></textarea>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="glass-card p-4 rounded-xl space-y-2">
-          <div class="flex justify-between items-center">
-            <span class="text-xs font-bold text-gray-300 uppercase">Input Kode JavaScript</span>
-            <button onclick="loadCodeSample()" class="text-xs text-red-400 hover:underline">Muat Sample STEJ</button>
-          </div>
-          <textarea id="rawCodeInput" oninput="reprocessCodeLayers()" class="w-full h-80 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-red-500 resize-none" placeholder="// Masukkan kode JS di sini..."></textarea>
+      <div class="glass-card p-4 rounded-xl space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-gray-300 uppercase">Output (Obfuscated)</span>
+          <button onclick="copyOut()" class="text-xs text-amber-400 hover:underline">Salin</button>
         </div>
-        <div class="glass-card p-4 rounded-xl space-y-2">
-          <div class="flex justify-between items-center">
-            <span class="text-xs font-bold text-gray-300 uppercase">Hasil Kode Bertingkat</span>
-            <button onclick="copyOutput('codeOutput')" class="text-xs text-amber-400 hover:underline">Salin Kode</button>
-          </div>
-          <textarea id="codeOutput" readonly class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="// Hasil acak-adul bertingkat..."></textarea>
-        </div>
+        <textarea id="output" readonly class="w-full h-96 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="Hasil obfuscation akan muncul di sini..."></textarea>
       </div>
+    </div>
+
+    <div class="glass-card p-3 rounded-xl">
+      <p class="text-xs text-gray-500">
+        <strong class="text-gray-400">Catatan edukasi:</strong> Ini adalah demonstrasi konsep. 
+        Bukan obfuscator level malware / production. 
+        Deobfuscator terpisah membutuhkan <strong>kunci XOR yang sama</strong> untuk memulihkan.
+      </p>
     </div>
   </div>
 
   <script>
-    // Global Layers Stack State
-    let textLayerStack = [];
-    let codeLayerStack = [];
+    // ========== HELPERS ==========
+    function randName() {
+      return '_0x' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+    }
 
-    function switchTab(type) {
-      const textSec = document.getElementById('textSection');
-      const codeSec = document.getElementById('codeSection');
-      const textBtn = document.getElementById('tabTextBtn');
-      const codeBtn = document.getElementById('tabCodeBtn');
+    function xorEncrypt(str, key) {
+      let result = '';
+      for (let i = 0; i < str.length; i++) {
+        result += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      }
+      return result;
+    }
 
-      if (type === 'text') {
-        textSec.classList.remove('hidden');
-        codeSec.classList.add('hidden');
-        textBtn.className = "px-5 py-2.5 text-xs font-bold rounded-lg bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-900/30 transition-all";
-        codeBtn.className = "px-5 py-2.5 text-xs font-bold rounded-lg bg-gray-900 text-gray-400 hover:text-white border border-gray-800 transition-all";
+    function toHex(str) {
+      return str.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+    }
+
+    function rot47(str) {
+      return str.replace(/[!-~]/g, c => {
+        return String.fromCharCode(33 + ((c.charCodeAt(0) - 33 + 47) % 94));
+      });
+    }
+
+    function b64(str) {
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+
+    // ========== CORE OBFUSCATION ==========
+    function obfuscateText(text, key, opts) {
+      let data = text;
+
+      // 1. XOR (inti)
+      if (opts.xor) {
+        data = xorEncrypt(data, key);
+      }
+
+      // 2. ROT47
+      if (opts.rot47) {
+        data = rot47(data);
+      }
+
+      // 3. HEX encode
+      if (opts.hex) {
+        data = toHex(data);
+      }
+
+      // Bungkus final sebagai string yang bisa di-eval / di-decode nanti
+      const payload = b64(data);
+
+      // Polymorphic wrapper
+      const v1 = randName(), v2 = randName(), v3 = randName(), v4 = randName();
+      const kVar = randName();
+
+      let code = `/* STEJ Strong Obfuscated Payload */\n`;
+      code += `(function(){\n`;
+      code += `  var ${kVar} = ${JSON.stringify(key)};\n`;
+      code += `  var ${v1} = "${payload}";\n`;
+      code += `  function ${v2}(s){try{return decodeURIComponent(escape(atob(s)));}catch(e){return s;}}\n`;
+      code += `  function ${v3}(s){return s.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});}\n`;
+      code += `  function ${v4}(s){return s.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});}\n`;
+      code += `  var _d = ${v2}(${v1});\n`;
+      if (opts.hex) code += `  _d = ${v3}(_d);\n`;
+      if (opts.rot47) code += `  _d = ${v4}(_d);\n`;
+      if (opts.xor) {
+        code += `  var _r = '';\n`;
+        code += `  for(var i=0;i<_d.length;i++){_r+=String.fromCharCode(_d.charCodeAt(i)^${kVar}.charCodeAt(i%${kVar}.length));}\n`;
+        code += `  return _r;\n`;
       } else {
-        codeSec.classList.remove('hidden');
-        textSec.classList.add('hidden');
-        codeBtn.className = "px-5 py-2.5 text-xs font-bold rounded-lg bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-900/30 transition-all";
-        textBtn.className = "px-5 py-2.5 text-xs font-bold rounded-lg bg-gray-900 text-gray-400 hover:text-white border border-gray-800 transition-all";
+        code += `  return _d;\n`;
       }
+      code += `})();`;
+
+      return code;
     }
 
-    // --- TEXT LAYER ENGINE ---
-    function applyTextLayer(type) {
-      textLayerStack.push(type);
-      renderTextBadges();
-      reprocessTextLayers();
-    }
+    function obfuscateCode(src, key, opts) {
+      // String encryption: ganti semua string literal
+      let code = src;
 
-    function resetTextLayers() {
-      textLayerStack = [];
-      renderTextBadges();
-      reprocessTextLayers();
-    }
-
-    function renderTextBadges() {
-      const container = document.getElementById('activeTextLayers');
-      if (textLayerStack.length === 0) {
-        container.innerHTML = `<span class="text-xs px-2 py-0.5 rounded bg-gray-900 text-gray-500 italic">Belum ada lapisan (Teks Asli)</span>`;
-        return;
-      }
-      container.innerHTML = textLayerStack.map((layer, idx) => 
-        `<span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30 font-mono">${idx + 1}. ${layer.toUpperCase()}</span>`
-      ).join(' <span class="text-gray-600">➔</span> ');
-    }
-
-    function reprocessTextLayers() {
-      let currentText = document.getElementById('rawTextInput').value;
-      if (!currentText) {
-        document.getElementById('textOutput').value = '';
-        return;
-      }
-
-      textLayerStack.forEach(layer => {
-        if (layer === 'hex') {
-          currentText = currentText.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
-        } else if (layer === 'base64') {
-          currentText = btoa(unescape(encodeURIComponent(currentText)));
-        } else if (layer === 'reverse') {
-          currentText = currentText.split('').reverse().join('');
-        } else if (layer === 'rot13') {
-          currentText = currentText.replace(/[a-zA-Z]/g, function(c){
-            return String.fromCharCode((c <= "Z" ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
-          });
-        }
+      // Encrypt string literals
+      code = code.replace(/(["'`])((?:\\.|(?!\1)[^\\])*)\1/g, (match, quote, content) => {
+        if (!content) return match;
+        let enc = content;
+        if (opts.xor) enc = xorEncrypt(enc, key);
+        if (opts.rot47) enc = rot47(enc);
+        if (opts.hex) enc = toHex(enc);
+        const b = b64(enc);
+        return `(_d("${b}"))`;
       });
 
-      document.getElementById('textOutput').value = currentText;
-    }
-
-    // --- CODE LAYER ENGINE ---
-    function applyCodeLayer(type) {
-      codeLayerStack.push(type);
-      renderCodeBadges();
-      reprocessCodeLayers();
-    }
-
-    function resetCodeLayers() {
-      codeLayerStack = [];
-      renderCodeBadges();
-      reprocessCodeLayers();
-    }
-
-    function renderCodeBadges() {
-      const container = document.getElementById('activeCodeLayers');
-      if (codeLayerStack.length === 0) {
-        container.innerHTML = `<span class="text-xs px-2 py-0.5 rounded bg-gray-900 text-gray-500 italic">Belum ada lapisan</span>`;
-        return;
-      }
-      container.innerHTML = codeLayerStack.map((layer, idx) => 
-        `<span class="text-xs px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 border border-orange-500/30 font-mono">${idx + 1}. ${layer.toUpperCase()}</span>`
-      ).join(' <span class="text-gray-600">➔</span> ');
-    }
-
-    function loadCodeSample() {
-      document.getElementById('rawCodeInput').value = `function STEJ_Core() {\n    let secret = "Proyek Bisnis STEJ";\n    console.log(secret);\n}\nSTEJ_Core();`;
-      reprocessCodeLayers();
-    }
-
-    function reprocessCodeLayers() {
-      let currentCode = document.getElementById('rawCodeInput').value;
-      if (!currentCode) {
-        document.getElementById('codeOutput').value = '';
-        return;
+      // Polymorphic rename (simple)
+      if (opts.poly) {
+        const vars = new Set();
+        code.replace(/\b(?:var|let|const|function)\s+([a-zA-Z_$][\w$]*)/g, (_, name) => {
+          if (!['console', 'window', 'document', 'Math', 'JSON'].includes(name)) vars.add(name);
+        });
+        const map = {};
+        vars.forEach(v => map[v] = randName());
+        Object.keys(map).forEach(old => {
+          const re = new RegExp('\\b' + old + '\\b', 'g');
+          code = code.replace(re, map[old]);
+        });
       }
 
-      codeLayerStack.forEach(layer => {
-        if (layer === 'rename') {
-          // Kumpulkan identifier yang dideklarasikan lalu ganti semua kemunculannya secara konsisten
-          const nameMap = {};
-          const makeName = () => '_0x' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
-          
-          // Tangkap deklarasi function & let/const/var
-          currentCode = currentCode.replace(/(function|let|const|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g, (m, keyword, name) => {
-            if (!nameMap[name]) nameMap[name] = makeName();
-            return keyword + ' ' + nameMap[name];
-          });
-          
-          // Ganti semua sisa kemunculan identifier yang sudah di-map (word boundary)
-          Object.keys(nameMap).forEach(oldName => {
-            const re = new RegExp('\\b' + oldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
-            currentCode = currentCode.replace(re, nameMap[oldName]);
-          });
-        } else if (layer === 'stringHex') {
-          currentCode = currentCode.replace(/"([^"]*)"/g, (m, p1) => `"${p1.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')}"`)
-                                   .replace(/'([^']*)'/g, (m, p1) => `'${p1.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')}'`);
-        } else if (layer === 'b64Wrapper') {
-          const b64 = btoa(unescape(encodeURIComponent(currentCode)));
-          currentCode = `(function(_0x1a2b,_0x3c4d){var _0x5e6f=function(_0x7a8b){return decodeURIComponent(escape(atob(_0x7a8b)));};eval(_0x5e6f("${b64}"));})();`;
+      // Simple Control Flow Flattening (state machine style)
+      if (opts.cff) {
+        const flatVar = randName();
+        const lines = code.split('\n').filter(l => l.trim());
+        let flat = `var ${flatVar} = 0;\nwhile(true){\nswitch(${flatVar}){\n`;
+        lines.forEach((line, i) => {
+          flat += `case ${i}:\n${line}\n${flatVar}=${i + 1};break;\n`;
+        });
+        flat += `default: return;}}\n`;
+        code = flat;
+      }
+
+      // Junk code
+      if (opts.junk) {
+        const junk = [];
+        for (let i = 0; i < 4; i++) {
+          const a = randName(), b = randName();
+          junk.push(`var ${a} = ${Math.floor(Math.random()*1000)}; var ${b} = ${a} ^ ${Math.floor(Math.random()*999)}; if(${b} === -1){console.log(${a});}`);
         }
-      });
+        code = junk.join('\n') + '\n' + code;
+      }
 
-      document.getElementById('codeOutput').value = currentCode;
+      // Inject decoder helpers
+      const helper = `
+function _d(s){
+  var k = ${JSON.stringify(key)};
+  var x = decodeURIComponent(escape(atob(s)));
+  ${opts.hex ? `x = x.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});` : ''}
+  ${opts.rot47 ? `x = x.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});` : ''}
+  ${opts.xor ? `var r='';for(var i=0;i<x.length;i++)r+=String.fromCharCode(x.charCodeAt(i)^k.charCodeAt(i%k.length));return r;` : 'return x;'}
+}
+`;
+      return helper + '\n' + code;
     }
 
-    function copyOutput(id) {
-      const el = document.getElementById(id);
-      if(!el.value) return;
-      navigator.clipboard.writeText(el.value);
-      alert("Berhasil disalin ke clipboard!");
+    function runObfuscate() {
+      const input = document.getElementById('input').value;
+      const key = document.getElementById('xorKey').value.trim();
+      const mode = document.getElementById('mode').value;
+
+      if (!input) return alert('Masukkan input terlebih dahulu');
+      if (!key) return alert('XOR Key wajib diisi');
+
+      const opts = {
+        xor: document.getElementById('optXor').checked,
+        rot47: document.getElementById('optRot47').checked,
+        hex: document.getElementById('optHex').checked,
+        poly: document.getElementById('optPoly').checked,
+        cff: document.getElementById('optCff').checked,
+        junk: document.getElementById('optJunk').checked
+      };
+
+      let result;
+      if (mode === 'text') {
+        result = obfuscateText(input, key, opts);
+      } else {
+        result = obfuscateCode(input, key, opts);
+      }
+
+      document.getElementById('output').value = result;
+    }
+
+    function loadSample() {
+      const mode = document.getElementById('mode').value;
+      if (mode === 'text') {
+        document.getElementById('input').value = 'Mantap gaes cskcsk - STEJ Project 2026';
+      } else {
+        document.getElementById('input').value = `function greet(name) {
+  const msg = "Halo " + name + ", selamat datang di STEJ!";
+  console.log(msg);
+  return msg;
+}
+greet("Developer");`;
+      }
+    }
+
+    function copyOut() {
+      const out = document.getElementById('output');
+      if (!out.value) return;
+      navigator.clipboard.writeText(out.value);
+      alert('Berhasil disalin!');
     }
   </script>
 </body>
