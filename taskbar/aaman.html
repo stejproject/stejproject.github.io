@@ -3,551 +3,161 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STEJ CyberCrypt - AI Smart Key & Decryption Engine (Bombe-style)</title>
+  <title>STEJ Strong Deobfuscator (Educational)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
     .code-font { font-family: 'Fira Code', monospace; }
-    .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .method-chip { transition: all 0.15s; }
-    .method-chip.active { box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.5); }
-    #aiLog::-webkit-scrollbar { width: 6px; }
-    #aiLog::-webkit-scrollbar-track { background: #111827; }
-    #aiLog::-webkit-scrollbar-thumb { background: #065f46; border-radius: 3px; }
+    .glass-card { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
   </style>
 </head>
 <body class="min-h-screen p-6">
   <div class="max-w-6xl mx-auto space-y-6">
-    <!-- Header -->
     <header class="flex items-center justify-between border-b border-gray-800 pb-4">
       <div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-          STEJ CyberCrypt :: AI Smart Key & Decryption
+          STEJ Strong Deobfuscator
         </h1>
-        <p class="text-xs text-gray-400 mt-1">Bombe-style Multi-Layer Key Search Engine - STEJ Project</p>
+        <p class="text-xs text-gray-400 mt-1">Pulihkan payload yang di-obfuscate dengan Strong Obfuscator (butuh kunci XOR yang sama)</p>
       </div>
-      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">BOMBE AI v9.0</span>
+      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">DEOBF v1.0</span>
     </header>
 
-    <!-- Method Selection & Priority -->
-    <div class="glass-card p-4 rounded-xl space-y-3">
-      <div class="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <span class="text-xs font-bold text-gray-300 uppercase block">Metode yang Diaktifkan (klik untuk toggle + urutkan prioritas):</span>
-          <p class="text-xs text-gray-500 mt-0.5">Urutan dari kiri = prioritas lebih tinggi. AI akan lebih dulu mencoba metode yang cocok dengan ciri teks.</p>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="selectAllMethods(true)" class="text-xs text-emerald-400 hover:underline">Pilih Semua</button>
-          <button onclick="selectAllMethods(false)" class="text-xs text-gray-400 hover:underline">Kosongkan</button>
-          <button onclick="resetMethodOrder()" class="text-xs text-amber-400 hover:underline">Reset Urutan</button>
-        </div>
-      </div>
-      <div id="methodChips" class="flex flex-wrap gap-2"></div>
-      <div class="text-xs text-gray-500 pt-1 border-t border-gray-800">
-        Prioritas saat ini: <span id="priorityPreview" class="text-emerald-400 font-mono"></span>
-      </div>
-    </div>
-
-    <!-- Control Panel -->
     <div class="glass-card p-4 rounded-xl space-y-4">
-      <div class="flex items-center justify-between flex-wrap gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <span class="text-xs font-bold text-gray-300 uppercase block">Panel Kontrol AI Master (Bombe Engine):</span>
-          <p class="text-xs text-gray-400 mt-0.5">AI menganalisis ciri teks → prioritaskan metode → cari kunci rantai terpendek → dekripsi.</p>
+          <label class="text-xs font-bold text-gray-300 uppercase block mb-1">XOR Key (harus sama)</label>
+          <input id="xorKey" type="text" value="STEJ-SECRET-2026" class="w-full bg-gray-950 text-amber-300 code-font text-xs p-2.5 rounded-lg border border-gray-800 focus:outline-none focus:border-emerald-500" placeholder="Kunci XOR...">
         </div>
-        <div class="flex space-x-2">
-          <button id="aiBtn" onclick="runAiSmartDecryption()" class="px-6 py-3 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-gray-950 shadow-lg shadow-emerald-900/40 transition-all transform active:scale-95">
-            🧠 CARI KUNCI & DEKRIPSI
-          </button>
-          <button id="stopBtn" onclick="stopAiDecryption()" disabled class="px-5 py-3 text-xs font-bold rounded-lg bg-red-600/50 text-gray-400 cursor-not-allowed transition-all">
-            🛑 BERHENTI
-          </button>
+        <div>
+          <label class="text-xs font-bold text-gray-300 uppercase block mb-1">Layer yang dipakai saat obfuscate</label>
+          <div class="flex flex-wrap gap-3 text-xs text-gray-400 mt-2">
+            <label class="flex items-center gap-1.5"><input type="checkbox" id="optXor" checked class="accent-emerald-500"> XOR</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" id="optRot47" checked class="accent-emerald-500"> ROT47</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" id="optHex" checked class="accent-emerald-500"> HEX</label>
+          </div>
         </div>
-      </div>
-
-      <!-- Live AI Status / Log (lebih tinggi untuk detail) -->
-      <div id="aiLog" class="p-3 rounded bg-gray-950 border border-gray-800 text-xs font-mono text-emerald-400 h-48 overflow-y-auto space-y-0.5">
-        <div>[AI READY] Pilih metode di atas, paste teks sandi, lalu klik tombol untuk memulai pencarian kunci ala Bombe...</div>
-      </div>
-
-      <!-- Visualisasi Kunci Rantai -->
-      <div class="flex items-center space-x-2 pt-2 border-t border-gray-800">
-        <span class="text-xs font-semibold text-gray-400 whitespace-nowrap">Kunci Rantai Ditemukan:</span>
-        <div id="aiStackVisualizer" class="flex items-center gap-1 overflow-x-auto pb-1">
-          <span class="text-xs px-2 py-0.5 rounded bg-gray-900 text-gray-500 italic">Menunggu...</span>
+        <div class="flex items-end">
+          <button onclick="runDeobfuscate()" class="w-full px-4 py-2.5 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-gray-950 shadow-lg shadow-emerald-900/30 transition-all">
+            🔓 DEOBFUSKASI
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Workspace -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="glass-card p-4 rounded-xl space-y-2">
-        <span class="text-xs font-bold text-gray-300 uppercase block">Input Teks Sandi Multi-Lapis</span>
-        <textarea id="rawInput" class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-emerald-500 resize-none" placeholder="Paste teks sandi multi-lapis di sini..."></textarea>
+        <span class="text-xs font-bold text-gray-300 uppercase block">Input (Obfuscated Code / Payload)</span>
+        <textarea id="input" class="w-full h-96 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-emerald-500 resize-none" placeholder="Paste hasil dari Strong Obfuscator di sini..."></textarea>
       </div>
-      
       <div class="glass-card p-4 rounded-xl space-y-2">
         <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-gray-300 uppercase">Hasil Akhir (Cleaned Output)</span>
-          <button onclick="copyOutput()" class="text-xs text-emerald-400 hover:underline">Salin Hasil</button>
+          <span class="text-xs font-bold text-gray-300 uppercase">Output (Recovered)</span>
+          <button onclick="copyOut()" class="text-xs text-emerald-400 hover:underline">Salin</button>
         </div>
-        <textarea id="outputResult" readonly class="w-full h-80 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="// Hasil teks bersih akan muncul di sini..."></textarea>
+        <textarea id="output" readonly class="w-full h-96 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="Hasil pemulihan akan muncul di sini..."></textarea>
       </div>
+    </div>
+
+    <div class="glass-card p-3 rounded-xl space-y-2">
+      <p class="text-xs text-gray-400 font-semibold">Cara pakai:</p>
+      <ol class="text-xs text-gray-500 list-decimal list-inside space-y-1">
+        <li>Paste kode hasil Strong Obfuscator ke kotak kiri</li>
+        <li>Pastikan <strong>XOR Key</strong> sama persis dengan saat obfuscate</li>
+        <li>Centang layer yang dipakai (XOR / ROT47 / HEX)</li>
+        <li>Klik DEOBFUSKASI</li>
+      </ol>
+      <p class="text-xs text-gray-600 mt-2">Catatan: Control Flow Flattening & Junk code tidak di-reverse otomatis (hanya payload string yang dipulihkan).</p>
     </div>
   </div>
 
   <script>
-    let isRunning = false;
-
-    // ===================== METHOD REGISTRY =====================
-    // Setiap metode punya: id, label, color, detect (untuk prioritas), decode
-    const METHOD_DEFS = {
-      hex: {
-        label: 'HEX (\\xHH)',
-        color: 'amber',
-        detect: (t) => (/\\x[0-9a-fA-F]{2}/.test(t) ? 0.95 : 0),
-        decode: (t) => {
-          if (!/\\x[0-9a-fA-F]{2}/.test(t)) return null;
-          const r = t.replace(/\\x([0-9a-fA-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
-          return r === t ? null : r;
-        }
-      },
-      unicode: {
-        label: 'Unicode (\\uXXXX)',
-        color: 'violet',
-        detect: (t) => (/\\u[0-9a-fA-F]{4}/.test(t) ? 0.93 : 0),
-        decode: (t) => {
-          if (!/\\u[0-9a-fA-F]{4}/.test(t)) return null;
-          const r = t.replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
-          return r === t ? null : r;
-        }
-      },
-      base64: {
-        label: 'Base64',
-        color: 'cyan',
-        detect: (t) => {
-          if (!/^[A-Za-z0-9+/]+=*$/.test(t) || t.length < 4 || t.length % 4 !== 0) return 0;
-          // bonus jika ada padding atau panjang cukup
-          return t.includes('=') ? 0.90 : 0.75;
-        },
-        decode: (t) => {
-          if (!/^[A-Za-z0-9+/]+=*$/.test(t) || t.length % 4 !== 0) return null;
-          try {
-            const r = decodeURIComponent(escape(atob(t)));
-            return (r && r !== t) ? r : null;
-          } catch { return null; }
-        }
-      },
-      url: {
-        label: 'URL Decode',
-        color: 'sky',
-        detect: (t) => (/%[0-9a-fA-F]{2}/.test(t) ? 0.88 : 0),
-        decode: (t) => {
-          if (!/%[0-9a-fA-F]{2}/.test(t)) return null;
-          try {
-            const r = decodeURIComponent(t.replace(/\+/g, ' '));
-            return r === t ? null : r;
-          } catch { return null; }
-        }
-      },
-      binary: {
-        label: 'Binary (8-bit)',
-        color: 'rose',
-        detect: (t) => {
-          const cleaned = t.replace(/[\s]/g, '');
-          if (!/^[01]+$/.test(cleaned) || cleaned.length % 8 !== 0 || cleaned.length < 8) return 0;
-          return 0.85;
-        },
-        decode: (t) => {
-          const cleaned = t.replace(/[\s]/g, '');
-          if (!/^[01]+$/.test(cleaned) || cleaned.length % 8 !== 0) return null;
-          let r = '';
-          for (let i = 0; i < cleaned.length; i += 8) {
-            r += String.fromCharCode(parseInt(cleaned.substr(i, 8), 2));
-          }
-          return r || null;
-        }
-      },
-      reverse: {
-        label: 'Reverse',
-        color: 'emerald',
-        detect: (t) => (!isHumanReadable(t) && t.length > 3 ? 0.35 : 0),
-        decode: (t) => t.length < 2 ? null : t.split('').reverse().join('')
-      },
-      rot13: {
-        label: 'ROT13',
-        color: 'purple',
-        detect: (t) => (!isHumanReadable(t) && /[a-zA-Z]/.test(t) ? 0.30 : 0),
-        decode: (t) => {
-          if (!/[a-zA-Z]/.test(t)) return null;
-          return t.replace(/[a-zA-Z]/g, c => {
-            const base = c <= 'Z' ? 65 : 97;
-            return String.fromCharCode((c.charCodeAt(0) - base + 13) % 26 + base);
-          });
-        }
-      },
-      atbash: {
-        label: 'Atbash',
-        color: 'orange',
-        detect: (t) => (!isHumanReadable(t) && /[a-zA-Z]/.test(t) ? 0.28 : 0),
-        decode: (t) => {
-          if (!/[a-zA-Z]/.test(t)) return null;
-          return t.replace(/[a-zA-Z]/g, c => {
-            const base = c <= 'Z' ? 65 : 97;
-            return String.fromCharCode(base + 25 - (c.charCodeAt(0) - base));
-          });
-        }
-      },
-      rot47: {
-        label: 'ROT47',
-        color: 'lime',
-        detect: (t) => (!isHumanReadable(t) && /[!-~]/.test(t) ? 0.25 : 0),
-        decode: (t) => {
-          return t.replace(/[!-~]/g, c => {
-            return String.fromCharCode(33 + ((c.charCodeAt(0) - 33 + 47) % 94));
-          });
-        }
+    function xorDecrypt(str, key) {
+      let result = '';
+      for (let i = 0; i < str.length; i++) {
+        result += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
       }
-    };
-
-    // State urutan & aktif
-    let methodOrder = ['hex', 'unicode', 'base64', 'url', 'binary', 'reverse', 'rot13', 'atbash', 'rot47'];
-    let enabledMethods = new Set(methodOrder);
-
-    // ===================== UI METHODS =====================
-    function renderMethodChips() {
-      const container = document.getElementById('methodChips');
-      container.innerHTML = methodOrder.map((id, idx) => {
-        const m = METHOD_DEFS[id];
-        const active = enabledMethods.has(id);
-        const colorMap = {
-          amber: 'border-amber-500/40 text-amber-300',
-          violet: 'border-violet-500/40 text-violet-300',
-          cyan: 'border-cyan-500/40 text-cyan-300',
-          sky: 'border-sky-500/40 text-sky-300',
-          rose: 'border-rose-500/40 text-rose-300',
-          emerald: 'border-emerald-500/40 text-emerald-300',
-          purple: 'border-purple-500/40 text-purple-300',
-          orange: 'border-orange-500/40 text-orange-300',
-          lime: 'border-lime-500/40 text-lime-300'
-        };
-        return `<button onclick="toggleMethod('${id}')" 
-          class="method-chip px-3 py-1.5 text-xs font-semibold rounded border ${active ? colorMap[m.color] + ' bg-gray-800/80 active' : 'border-gray-700 text-gray-500 bg-gray-900/50'}">
-          <span class="opacity-60 mr-1">${idx + 1}.</span>${m.label}
-        </button>`;
-      }).join('');
-      updatePriorityPreview();
+      return result;
     }
 
-    function toggleMethod(id) {
-      if (enabledMethods.has(id)) enabledMethods.delete(id);
-      else enabledMethods.add(id);
-      renderMethodChips();
+    function fromHex(str) {
+      return str.replace(/\\x([0-9a-fA-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
     }
 
-    function selectAllMethods(on) {
-      if (on) methodOrder.forEach(id => enabledMethods.add(id));
-      else enabledMethods.clear();
-      renderMethodChips();
+    function rot47(str) {
+      // ROT47 is involution (same function to encode/decode)
+      return str.replace(/[!-~]/g, c => {
+        return String.fromCharCode(33 + ((c.charCodeAt(0) - 33 + 47) % 94));
+      });
     }
 
-    function resetMethodOrder() {
-      methodOrder = ['hex', 'unicode', 'base64', 'url', 'binary', 'reverse', 'rot13', 'atbash', 'rot47'];
-      enabledMethods = new Set(methodOrder);
-      renderMethodChips();
+    function tryExtractPayload(code) {
+      // Cari string base64 panjang di dalam kode
+      const matches = code.match(/["'`]([A-Za-z0-9+/=]{20,})["'`]/g);
+      if (!matches || matches.length === 0) return null;
+
+      // Ambil yang paling panjang (kemungkinan payload)
+      let best = '';
+      matches.forEach(m => {
+        const clean = m.slice(1, -1);
+        if (clean.length > best.length) best = clean;
+      });
+      return best;
     }
 
-    function updatePriorityPreview() {
-      const active = methodOrder.filter(id => enabledMethods.has(id));
-      document.getElementById('priorityPreview').textContent = active.length
-        ? active.map(id => METHOD_DEFS[id].label).join(' → ')
-        : '(tidak ada metode aktif)';
-    }
+    function runDeobfuscate() {
+      const input = document.getElementById('input').value.trim();
+      const key = document.getElementById('xorKey').value.trim();
 
-    // ===================== CORE HELPERS =====================
-    function logAi(msg, type = 'info') {
-      const log = document.getElementById('aiLog');
-      const colors = {
-        info: 'text-emerald-400',
-        try: 'text-cyan-400',
-        success: 'text-emerald-300 font-semibold',
-        fail: 'text-amber-400',
-        depth: 'text-teal-300'
-      };
-      log.innerHTML += `<div class="${colors[type] || colors.info}">> ${msg}</div>`;
-      log.scrollTop = log.scrollHeight;
-    }
+      if (!input) return alert('Masukkan kode/payload obfuscated');
+      if (!key) return alert('XOR Key wajib diisi');
 
-    // Skor seberapa "bersih / readable" sebuah teks (0 ~ 1)
-    function readabilityScore(text) {
-      if (!text || text.length === 0) return 0;
-      if (/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(text)) return 0;
+      const useXor = document.getElementById('optXor').checked;
+      const useRot47 = document.getElementById('optRot47').checked;
+      const useHex = document.getElementById('optHex').checked;
 
-      let score = 0.05;
+      try {
+        // 1. Coba ekstrak payload base64 dari kode
+        let payload = tryExtractPayload(input);
 
-      // Penalti keras untuk sisa encoding
-      if (/\\x[0-9a-fA-F]{2}/.test(text)) score -= 0.8;
-      if (/\\u[0-9a-fA-F]{4}/.test(text)) score -= 0.8;
-      if (/%[0-9a-fA-F]{2}/.test(text)) score -= 0.6;
-      if (/%[A-Za-z0-9]{2}/.test(text)) score -= 0.45;
-      if (/^[01\s]+$/.test(text) && text.replace(/\s/g, '').length >= 8) score -= 0.85;
-      if (/^[A-Za-z0-9+/=]+$/.test(text) && text.length > 16 && !/\s/.test(text)) score -= 0.5;
-
-      // Penalti kuat densitas simbol (ciri khas ROT47 / garbage)
-      const symbolCount = (text.match(/[^a-zA-Z0-9\s\.,!?\-_'"]/g) || []).length;
-      const symbolRatio = symbolCount / Math.max(1, text.length);
-      if (symbolRatio > 0.12) score -= symbolRatio * 1.4;
-      if (symbolRatio > 0.22) score -= 0.35;
-
-      const letterRatio = (text.match(/[a-zA-Z]/g) || []).length / Math.max(1, text.length);
-      score += letterRatio * 0.35;
-
-      if (/[\p{L}]/u.test(text)) score += 0.12;
-      if (/\s/.test(text)) score += 0.18;
-      if (text.length >= 6 && text.length < 600) score += 0.08;
-
-      // Bonus hanya jika ada kata umum
-      const common = /\b(the|and|for|are|but|not|you|all|can|had|her|was|one|our|out|day|get|has|him|his|how|man|new|now|old|see|two|way|who|yang|dan|untuk|dari|dengan|adalah|ini|itu|akan|bisa|sudah|atau|juga|pada|proyek|bisnis|stej|hello|world|project|secret|message|teks|pesan|kode|core|function|console|log|test|data|user|admin|password|key|sample|code|file|path|name|value|true|false|null|return|const|let|var|this|from|with|that|have|been|will|would|could|should|about|which|their|there|what|when|where|your|into|than|them|then|these|some|only|over|such|after|most|also|back|just|like|make|many|more|other|same|time|very|well|work|aku|kamu|dia|mereka|kita|kami|saya|apa|siapa|dimana|bagaimana|mengapa|kalau|karena|tetapi|namun|sedang|telah|masih|belum|sangat|sekali|hanya|juga|sudah|nanti|sekarang|mantap|gaes|banget|dong|sih|nih|lah|kok|yah|deh|aja|gitu|gimana|kenapa|berapa|kapan|bagus|jelek|cepat|lambat|besar|kecil|baik|buruk|benar|salah|mungkin|pasti|boleh|harus|mau|ingin|perlu|tidak|bukan|pernah|selalu|kadang|sering|jarang|cskcsk|gas|wkwk|haha|hehe|lol)\b/gi;
-      const matches = text.match(common);
-      if (matches && matches.length > 0) {
-        score += Math.min(0.45, matches.length * 0.09);
-      } else if (text.length > 12) {
-        score -= 0.28; // teks panjang tanpa kata umum = curiga
-      }
-
-      const rare = (text.match(/[qxjzv]/gi) || []).length;
-      if (rare >= 2) score -= 0.06 * Math.min(rare, 6);
-
-      return Math.max(0, Math.min(1, score));
-    }
-
-    function isHumanReadable(text) {
-      if (/\\x[0-9a-fA-F]{2}/.test(text)) return false;
-      if (/\\u[0-9a-fA-F]{4}/.test(text)) return false;
-      if (/%[0-9a-fA-F]{2}/.test(text)) return false;
-      if ((text.match(/[a-zA-Z]/g) || []).length < 4) return false;
-      // Ambang lebih ketat + harus punya skor tinggi
-      return readabilityScore(text) >= 0.65;
-    }
-
-    // ===================== BOMBE ENGINE =====================
-    async function runAiSmartDecryption() {
-      const cipherText = document.getElementById('rawInput').value.trim();
-      if (!cipherText) return alert('Masukkan teks sandi terlebih dahulu!');
-
-      const activeMethods = methodOrder.filter(id => enabledMethods.has(id));
-      if (activeMethods.length === 0) return alert('Aktifkan minimal 1 metode!');
-
-      isRunning = true;
-      const startBtn = document.getElementById('aiBtn');
-      const stopBtn = document.getElementById('stopBtn');
-      startBtn.disabled = true;
-      startBtn.classList.add('opacity-50', 'cursor-not-allowed');
-      stopBtn.disabled = false;
-      stopBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-red-600/50');
-      stopBtn.classList.add('bg-red-600', 'hover:bg-red-500', 'text-white', 'shadow-lg', 'shadow-red-900/40');
-
-      document.getElementById('aiLog').innerHTML = '';
-      document.getElementById('outputResult').value = '';
-      document.getElementById('aiStackVisualizer').innerHTML = '<span class="text-xs px-2 py-0.5 rounded bg-gray-900 text-gray-500 italic">Mencari...</span>';
-
-      logAi('Bombe Engine diaktifkan. Menganalisis ciri-ciri teks masukan...', 'info');
-      logAi(`Metode aktif (prioritas): ${activeMethods.map(id => METHOD_DEFS[id].label).join(' → ')}`, 'info');
-
-      // Cek apakah sudah readable
-      if (isHumanReadable(cipherText)) {
-        logAi('Teks sudah human-readable. Tidak perlu dekripsi.', 'success');
-        finishSuccess([], cipherText);
-        return;
-      }
-
-      // Score initial detection untuk info
-      const scores = activeMethods.map(id => ({
-        id,
-        score: METHOD_DEFS[id].detect(cipherText)
-      })).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
-
-      if (scores.length) {
-        logAi('Deteksi awal ciri teks: ' + scores.map(s => `${METHOD_DEFS[s.id].label}(${(s.score * 100).toFixed(0)}%)`).join(', '), 'info');
-      } else {
-        logAi('Tidak ada ciri encoding yang kuat terdeteksi. Akan mencoba metode generik (reverse/rot/dll).', 'info');
-      }
-
-      // BFS search — tidak ada hard limit ketat, hanya dibatasi tombol Stop
-      const maxDepth = 12;
-      let queue = [{ text: cipherText, chain: [] }];
-      let visited = new Set([cipherText]);
-      let found = false;
-      let winningChain = [];
-      let finalText = '';
-      let candidatesTried = 0;
-
-      // Simpan kandidat terbaik (fallback kalau tidak pernah mencapai ambang readable)
-      let bestCandidate = { text: cipherText, chain: [], score: readabilityScore(cipherText) };
-
-      for (let depth = 1; depth <= maxDepth && isRunning && !found; depth++) {
-        const levelSize = queue.length;
-        if (levelSize === 0) break;
-
-        logAi(`── Depth ${depth} | antrean: ${levelSize} kandidat ──`, 'depth');
-
-        for (let i = 0; i < levelSize && isRunning && !found; i++) {
-          const { text, chain } = queue.shift();
-
-          // Urutkan metode berdasarkan score deteksi terhadap teks SAAT INI + prioritas user
-          const ranked = activeMethods
-            .map(id => ({
-              id,
-              score: METHOD_DEFS[id].detect(text),
-              priority: activeMethods.indexOf(id)
-            }))
-            .filter(m => m.score > 0 || ['reverse', 'rot13', 'atbash', 'rot47'].includes(m.id))
-            .sort((a, b) => {
-              if (Math.abs(a.score - b.score) > 0.05) return b.score - a.score;
-              return a.priority - b.priority;
-            });
-
-          for (const { id, score } of ranked) {
-            if (!isRunning) break;
-
-            const next = METHOD_DEFS[id].decode(text);
-            if (next === null || visited.has(next)) continue;
-
-            candidatesTried++;
-            const newChain = [...chain, id];
-            const chainStr = newChain.map(m => METHOD_DEFS[m].label).join(' → ');
-            const rScore = readabilityScore(next);
-
-            // Update best candidate
-            if (rScore > bestCandidate.score) {
-              bestCandidate = { text: next, chain: newChain, score: rScore };
-            }
-
-            // Log percobaan (dibatasi agar tidak banjir di depth tinggi)
-            if (depth <= 4 || score > 0.55 || rScore > 0.55) {
-              logAi(`Coba [${chainStr}]  (score: ${(rScore * 100).toFixed(0)}%)`, 'try');
-            }
-
-            // Terima jika score melewati ambang
-            if (isHumanReadable(next)) {
-              // Coba satu langkah tambahan (reverse / rot13 / atbash) dan ambil yang skor tertinggi
-              let bestNext = next;
-              let bestNextChain = newChain;
-              let bestNextScore = rScore;
-
-              for (const extra of ['reverse', 'rot13', 'atbash']) {
-                if (!enabledMethods.has(extra)) continue;
-                const extraResult = METHOD_DEFS[extra].decode(next);
-                if (!extraResult) continue;
-                const extraScore = readabilityScore(extraResult);
-
-                // Hanya ambil jika skor benar-benar lebih baik
-                if (extraScore > bestNextScore + 0.015) {
-                  bestNext = extraResult;
-                  bestNextChain = [...newChain, extra];
-                  bestNextScore = extraScore;
-                }
-              }
-
-              logAi(`✓ BERHASIL dengan kunci: ${bestNextChain.map(m => METHOD_DEFS[m].label).join(' → ')}  (score ${(bestNextScore*100).toFixed(0)}%)`, 'success');
-              found = true;
-              winningChain = bestNextChain;
-              finalText = bestNext;
-              break;
-            }
-
-            visited.add(next);
-            // Batasi lebar antrean supaya tidak meledak
-            if (queue.length < 800) {
-              queue.push({ text: next, chain: newChain });
-            }
+        // Kalau tidak ketemu, anggap seluruh input adalah payload base64
+        if (!payload) {
+          // Coba langsung treat as base64
+          if (/^[A-Za-z0-9+/=]+$/.test(input.replace(/\s/g, ''))) {
+            payload = input.replace(/\s/g, '');
+          } else {
+            document.getElementById('output').value = '// Gagal menemukan payload Base64 di dalam kode.\n// Pastikan ini hasil dari STEJ Strong Obfuscator.';
+            return;
           }
         }
 
-        await new Promise(r => setTimeout(r, 10));
-      }
+        // 2. Base64 decode
+        let data = decodeURIComponent(escape(atob(payload)));
 
-      if (found) {
-        finishSuccess(winningChain, finalText);
-        logAi(`Total kandidat diuji: ${candidatesTried} | Depth final: ${winningChain.length}`, 'info');
-      } else if (!isRunning) {
-        logAi(`[DIHENTIKAN] Proses dihentikan oleh user.`, 'fail');
-        // Tetap tampilkan kandidat terbaik yang sempat ditemukan
-        if (bestCandidate.chain.length > 0) {
-          logAi(`Kandidat terbaik sejauh ini (score ${(bestCandidate.score * 100).toFixed(0)}%): ${bestCandidate.chain.map(m => METHOD_DEFS[m].label).join(' → ')}`, 'info');
-          finishSuccess(bestCandidate.chain, bestCandidate.text, true);
-        } else {
-          document.getElementById('aiStackVisualizer').innerHTML =
-            `<span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 italic">Dihentikan</span>`;
-          resetControls();
+        // 3. Reverse layers (urutan terbalik dari obfuscate)
+        if (useHex) {
+          data = fromHex(data);
         }
-      } else {
-        // Tidak pernah mencapai ambang readable → kembalikan kandidat terbaik
-        logAi(`Tidak mencapai skor readable sempurna. Mengembalikan kandidat terbaik (score ${(bestCandidate.score * 100).toFixed(0)}%).`, 'info');
-        if (bestCandidate.chain.length > 0) {
-          logAi(`Kunci terbaik: ${bestCandidate.chain.map(m => METHOD_DEFS[m].label).join(' → ')}`, 'info');
-          finishSuccess(bestCandidate.chain, bestCandidate.text, true);
-        } else {
-          // Sama sekali tidak ada transformasi berguna
-          logAi('Tidak ada transformasi yang memperbaiki teks. Hasil dikembalikan apa adanya.', 'info');
-          finishSuccess([], cipherText, true);
+        if (useRot47) {
+          data = rot47(data);
         }
-        logAi(`Total kandidat diuji: ${candidatesTried}`, 'info');
-      }
-    }
-
-    function finishSuccess(chain, text, isPartial = false) {
-      const viz = document.getElementById('aiStackVisualizer');
-      if (chain.length === 0) {
-        viz.innerHTML = `<span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 italic">Sudah bersih (0 lapis)</span>`;
-      } else {
-        const badgeClass = isPartial
-          ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-          : 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40';
-        viz.innerHTML = chain.map((id, idx) =>
-          `<span class="text-xs px-2 py-1 rounded ${badgeClass} border font-mono whitespace-nowrap">
-             ${idx + 1}.${METHOD_DEFS[id].label}
-           </span>`
-        ).join(' <span class="text-gray-500">➔</span> ');
-        if (isPartial) {
-          viz.innerHTML += ` <span class="text-xs text-amber-400/80 italic ml-1">(kandidat terbaik)</span>`;
+        if (useXor) {
+          data = xorDecrypt(data, key);
         }
+
+        document.getElementById('output').value = data;
+      } catch (e) {
+        document.getElementById('output').value = '// Error saat deobfuscate:\n// ' + e.message + '\n\nPastikan kunci XOR dan layer yang dipilih sudah benar.';
       }
-      document.getElementById('outputResult').value = text;
-      if (!isPartial) {
-        logAi('Pesan asli berhasil dipulihkan.', 'success');
-      } else {
-        logAi('Hasil kandidat terbaik ditampilkan. Bisa dicoba lagi dengan metode berbeda atau depth lebih dalam.', 'info');
-      }
-      resetControls();
     }
 
-    function stopAiDecryption() {
-      isRunning = false;
-      logAi('Menghentikan pencarian kunci...', 'fail');
-    }
-
-    function resetControls() {
-      isRunning = false;
-      const startBtn = document.getElementById('aiBtn');
-      const stopBtn = document.getElementById('stopBtn');
-      startBtn.disabled = false;
-      startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-      stopBtn.disabled = true;
-      stopBtn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-red-600/50');
-      stopBtn.classList.remove('bg-red-600', 'hover:bg-red-500', 'text-white', 'shadow-lg', 'shadow-red-900/40');
-    }
-
-    function copyOutput() {
-      const out = document.getElementById('outputResult');
+    function copyOut() {
+      const out = document.getElementById('output');
       if (!out.value) return;
       navigator.clipboard.writeText(out.value);
-      alert('Hasil berhasil disalin!');
+      alert('Berhasil disalin!');
     }
-
-    // Init
-    renderMethodChips();
   </script>
 </body>
 </html>
