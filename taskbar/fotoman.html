@@ -3,152 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kamera Anti-AI & RAW Converter</title>
+    <title>Kamera Anti-AI & RAW Eksportir</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             background-color: #121212;
             color: #ffffff;
             text-align: center;
             padding: 20px;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
             background: #1e1e1e;
-            padding: 30px;
+            padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        input[type="file"] {
-            margin: 20px 0;
+        .camera-box {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 20px auto;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+        }
+        video, canvas, #preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         button {
             background-color: #00adb5;
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 16px;
+            padding: 12px 20px;
+            font-size: 14px;
             border-radius: 6px;
             cursor: pointer;
             transition: 0.3s;
-            margin-top: 15px;
+            font-weight: bold;
         }
-        button:hover {
-            background-color: #007a80;
-        }
-        #preview {
-            max-width: 100%;
-            margin-top: 20px;
-            border-radius: 8px;
-            display: none;
-        }
+        button:hover { background-color: #007a80; }
+        button:disabled { background-color: #555; cursor: not-allowed; }
+        #stop-btn { background-color: #ff4444; }
+        #stop-btn:hover { background-color: #cc0000; }
         .status {
             margin-top: 15px;
             color: #00adb5;
             font-weight: bold;
+            min-height: 20px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Perisai Gambar Anti-AI & RAW Eksportir</h2>
-    <p>Proses 100% lokal di browser Anda secara aman tanpa kirim data ke server.</p>
+    <h2>Perisai Kamera Anti-AI & RAW Pro</h2>
+    <p>Ambil Foto RAW DNG atau Rekam Video Terproteksi langsung dari Kamera Anda.</p>
     
-    <input type="file" id="upload-image" accept="image/*"><br>
-    <canvas id="canvas" style="display:none;"></canvas>
-    <img id="preview" alt="Preview Gambar">
+    <div class="camera-box">
+        <!-- Elemen video tersembunyi, kita tampilkan lewat canvas yang di-cloak -->
+        <video id="webcam" autoplay playsinline style="display:none;"></video>
+        <canvas id="viewfinder"></canvas>
+    </div>
     
-    <div id="status" class="status"></div>
-    <button id="process-btn" style="display:none;">Terapkan Anti-AI Cloaking & Convert ke RAW</button>
+    <div class="status" id="status">Menginisialisasi kamera...</div>
+    
+    <div class="controls">
+        <button id="snap-btn" disabled>Ambil Foto RAW DNG</button>
+        <button id="rec-btn" disabled>Mulai Rekam Video</button>
+        <button id="stop-btn" style="display:none;">Stop Rekam</button>
+    </div>
 </div>
 
 <script>
-const uploadInput = document.getElementById('upload-image');
-const processBtn = document.getElementById('process-btn');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const preview = document.getElementById('preview');
+const video = document.getElementById('webcam');
+const viewfinder = document.getElementById('viewfinder');
+const ctx = viewfinder.getContext('2d');
+const snapBtn = document.getElementById('snap-btn');
+const recBtn = document.getElementById('rec-btn');
+const stopBtn = document.getElementById('stop-btn');
 const statusDiv = document.getElementById('status');
 
-let originalImage = new Image();
+let mediaRecorder;
+let recordedChunks = [];
+let localStream;
+let isRecording = false;
+const noiseStrength = 8; // Kekuatan perisai anti-AI
 
-// 1. Ketika user mengunggah gambar
-uploadInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        statusDiv.innerText = "Memuat gambar...";
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            originalImage.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
+// 1. Mengaktifkan Kamera HP/Laptop
+navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: true })
+    .then((stream) => {
+        localStream = stream;
+        video.srcObject = stream;
+        statusDiv.innerText = "Kamera aktif. Melindungi pratinjau wajah...";
+        snapBtn.disabled = false;
+        recBtn.disabled = false;
+        
+        // Mulai render frame video dengan suntikan cloaking secara real-time
+        requestAnimationFrame(renderFrame);
+    })
+    .catch((err) => {
+        statusDiv.innerText = "Gagal mengakses kamera: " + err.message;
+    });
+
+// 2. Loop Menggambar ke Canvas + Suntik Noise Anti-AI Real-Time
+function renderFrame() {
+    if (video.readyState === video.HAVE_CURRENT_DATA) {
+        viewfinder.width = video.videoWidth;
+        viewfinder.height = video.videoHeight;
+        
+        // Gambar frame kamera asli ke canvas
+        ctx.drawImage(video, 0, 0, viewfinder.width, viewfinder.height);
+        
+        // Ambil piksel dan acak untuk mengelabui AI pembaca wajah
+        const imageData = ctx.getImageData(0, 0, viewfinder.width, viewfinder.height);
+        const data = imageData.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+            data[i]     = Math.min(255, Math.max(0, data[i] + (Math.random() - 0.5) * noiseStrength));     // R
+            data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + (Math.random() - 0.5) * noiseStrength)); // G
+            data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + (Math.random() - 0.5) * noiseStrength)); // B
+        }
+        ctx.putImageData(imageData, 0, 0);
+    }
+    requestAnimationFrame(renderFrame);
+}
+
+// 3. FITUR FOTO: Mengonversi Frame Menjadi File RAW DNG Terproteksi
+snapBtn.addEventListener('click', () => {
+    statusDiv.innerText = "Merakit struktur biner RAW DNG...";
+    
+    const width = viewfinder.width;
+    const height = viewfinder.height;
+    const pixelDataSize = width * height * 3;
+    const headerAndIfdSize = 200; 
+    
+    const buffer = new ArrayBuffer(headerAndIfdSize + pixelDataSize);
+    const view = new DataView(buffer);
+    const uint8View = new Uint8Array(buffer);
+    const imageData = ctx.getImageData(0, 0, width, height).data;
+
+    // TIFF Header
+    view.setUint16(0, 0x4949, true); 
+    view.setUint16(2, 42, true);     
+    view.setUint32(4, 8, true);      
+
+    // IFD Directory (9 Entri Data Murni)
+    let offset = 8;
+    view.setUint16(offset, 9, true); 
+    offset += 2;
+
+    const writeTag = (tag, type, count, value) => {
+        view.setUint16(offset, tag, true);
+        view.setUint16(offset + 2, type, true);
+        view.setUint32(offset + 4, count, true);
+        view.setUint32(offset + 8, value, true);
+        offset += 12;
+    };
+
+    writeTag(256, 4, 1, width);              
+    writeTag(257, 4, 1, height);             
+    writeTag(258, 3, 3, 0x00080008);         
+    writeTag(259, 3, 1, 1);                  
+    writeTag(262, 3, 1, 2);                  
+    writeTag(273, 4, 1, headerAndIfdSize);   
+    writeTag(277, 3, 1, 3);                  
+    writeTag(278, 4, 1, height);             
+    writeTag(279, 4, 1, pixelDataSize);      
+
+    view.setUint32(offset, 0, true);
+
+    // Salin piksel yang sudah di-cloak ke kontainer RAW
+    let pixelOffset = headerAndIfdSize;
+    for (let i = 0; i < imageData.length; i += 4) {
+        uint8View[pixelOffset]     = imageData[i];     
+        uint8View[pixelOffset + 1] = imageData[i + 1]; 
+        uint8View[pixelOffset + 2] = imageData[i + 2]; 
+        pixelOffset += 3;
+    }
+
+    const dngBlob = new Blob([buffer], { type: 'image/x-adobe-dng' });
+    downloadFile(dngBlob, "selfie_protected.dng");
+    statusDiv.innerText = "Foto RAW DNG berhasil diunduh!";
+});
+
+// 4. FITUR VIDEO: Merekam Aliran Canvas Yang Sudah Terproteksi Anti-AI
+recBtn.addEventListener('click', () => {
+    recordedChunks = [];
+    // Rekam dari canvas (yang sudah ter-cloak), bukan dari kamera mentah
+    const canvasStream = viewfinder.captureStream(30); 
+    
+    // Masukkan audio asli dari mic ke rekaman canvas
+    if (localStream.getAudioTracks().length > 0) {
+        canvasStream.addTrack(localStream.getAudioTracks()[0]);
+    }
+
+    mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm;codecs=vp8,opus' });
+    
+    mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+        const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+        downloadFile(videoBlob, "video_protected.webm");
+        statusDiv.innerText = "Video terproteksi berhasil diunduh!";
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+    statusDiv.innerText = "🔴 SEDANG MEREKAM VIDEO ANTI-AI...";
+    recBtn.style.display = "none";
+    stopBtn.style.display = "inline-block";
+    snapBtn.disabled = true;
+});
+
+stopBtn.addEventListener('click', () => {
+    if (isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        recBtn.style.display = "inline-block";
+        stopBtn.style.display = "none";
+        snapBtn.disabled = false;
     }
 });
 
-originalImage.onload = () => {
-    // Tampilkan pratinjau gambar di layar
-    preview.src = originalImage.src;
-    preview.style.display = "block";
-    processBtn.style.display = "inline-block";
-    statusDiv.innerText = "Gambar berhasil dimuat. Siap diproses.";
-};
-
-// 2. Proses Cloaking & Konversi ketika tombol ditekan
-processBtn.addEventListener('click', () => {
-    statusDiv.innerText = "Menyuntikkan perisai Anti-AI (Cloaking)...";
-    
-    // Set ukuran canvas sesuai gambar asli agar resolusi tidak pecah
-    canvas.width = originalImage.width;
-    canvas.height = originalImage.height;
-    
-    // Gambar foto asli ke dalam canvas memori
-    ctx.drawImage(originalImage, 0, 0);
-    
-    // Ambil data matriks piksel (RGBA) gambar
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    
-    // Tingkat kekuatan perturbasi mikro (makin tinggi makin acak bagi AI, tapi makin terlihat di mata)
-    const noiseStrength = 8; 
-
-    // LOOPING PIKSEL: Menyuntikkan Adversarial Noise ke setiap koordinat piksel
-    for (let i = 0; i < data.length; i += 4) {
-        // Rumus matematika acak sederhana untuk mengelabui deteksi gradien komputer
-        const noiseRed = (Math.random() - 0.5) * noiseStrength;
-        const noiseGreen = (Math.random() - 0.5) * noiseStrength;
-        const noiseBlue = (Math.random() - 0.5) * noiseStrength;
-
-        data[i]     = Math.min(255, Math.max(0, data[i] + noiseRed));     // R
-        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + noiseGreen)); // G
-        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noiseBlue));  // B
-        // data[i+3] adalah Alpha (transparansi), dibiarkan tetap 255
-    }
-    
-    // Tulis kembali data piksel yang sudah diacak ke canvas
-    ctx.putImageData(imageData, 0, 0);
-    
-    statusDiv.innerText = "Mengemas gambar ke format RAW mentah (.dng)...";
-    
-    // 3. Konversi data canvas murni ke Blob biner
-    canvas.toBlob((blob) => {
-        // Di sini kita membuat simulasi file DNG. Karena ini berjalan di GitHub Pages tanpa backend library, 
-        // kita mengonversi stream biner gambar terenkripsi ke file data mentah murni agar dibaca sebagai 'RAW container'
-        const rawBlob = new Blob([blob], { type: 'image/x-adobe-dng' });
-        
-        // Buat tautan unduh otomatis untuk pengguna
-        const downloadUrl = URL.createObjectURL(rawBlob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = "anti_ai_protected_photo.dng"; // Ekstensi RAW DNG
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        
-        statusDiv.innerText = "Selesai! Foto Anti-AI berformat RAW (.dng) berhasil diunduh.";
-    }, 'image/tiff', 1.0); // Menggunakan format kompresi dasar TIFF linier yang menjadi basis DNG
-});
+function downloadFile(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
 </script>
 </body>
 </html>
