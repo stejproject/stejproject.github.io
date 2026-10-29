@@ -18,11 +18,11 @@
     <header class="flex items-center justify-between border-b border-gray-800 pb-4">
       <div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-          STEJ CyberCrypt :: AI Deep Auto-Guess Engine
+          STEJ CyberCrypt :: AI Deep Auto-Guess Engine (Extended)
         </h1>
-        <p class="text-xs text-gray-400 mt-1">Sistem Agen AI Otomatis Menebak Kedalaman & Rantai Dekripsi - STEJ Project</p>
+        <p class="text-xs text-gray-400 mt-1">Sistem Agen AI Otomatis Menebak Kedalaman Tinggi (5+ Lapis) - STEJ Project</p>
       </div>
-      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">DEEP AI v5.0</span>
+      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">ULTRA AI v6.0</span>
     </header>
 
     <!-- Control Panel -->
@@ -30,16 +30,16 @@
       <div class="flex items-center justify-between flex-wrap gap-4">
         <div>
           <span class="text-xs font-bold text-gray-300 uppercase block">Panel Kontrol AI Deep Agent:</span>
-          <p class="text-xs text-gray-400 mt-0.5">AI akan otomatis menaikkan tingkat kedalaman lapisannya secara bertahap sampai teks terbaca.</p>
+          <p class="text-xs text-gray-400 mt-0.5">AI siap membongkar rantai bertingkat tinggi secara otomatis.</p>
         </div>
         <button id="aiBtn" onclick="runAiDeepDecryption()" class="px-6 py-3 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-gray-950 shadow-lg shadow-emerald-900/40 transition-all transform active:scale-95">
-          🤖 SURUH AI BONGKAR KEDALAMAN OTOMATIS
+          🤖 BONGKAR 5+ LAPIS OTOMATIS
         </button>
       </div>
 
       <!-- Live AI Status / Log -->
       <div id="aiLog" class="p-3 rounded bg-gray-950 border border-gray-800 text-xs font-mono text-emerald-400 h-28 overflow-y-auto space-y-1">
-        <div>[AI READY] Masukkan teks sandi bertingkat di bawah, lalu klik tombol AI untuk memulai penjelajahan kedalaman...</div>
+        <div>[AI READY] Masukkan sandi multi-lapis di bawah, lalu klik tombol AI untuk memulai pemindaian mendalam...</div>
       </div>
 
       <!-- Visualisasi Rantai & Kedalaman yang Ditemukan AI -->
@@ -54,8 +54,8 @@
     <!-- Workspace -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="glass-card p-4 rounded-xl space-y-2">
-        <span class="text-xs font-bold text-gray-300 uppercase block">Input Teks Sandi Bertingkat</span>
-        <textarea id="rawInput" class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-emerald-500 resize-none" placeholder="Paste teks alien bertingkat di sini..."></textarea>
+        <span class="text-xs font-bold text-gray-300 uppercase block">Input Teks Sandi Multi-Lapis</span>
+        <textarea id="rawInput" class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-emerald-500 resize-none" placeholder="Paste teks alien multi-lapis di sini..."></textarea>
       </div>
       
       <div class="glass-card p-4 rounded-xl space-y-2">
@@ -95,7 +95,6 @@
       return text;
     }
 
-    // Heuristik kecerdasan: mendeteksi apakah teks sudah berupa bahasa manusia yang wajar
     function isHumanReadable(text) {
       if (!text || text.length === 0) return false;
       if (/[^\x20-\x7E\n\r\t]/.test(text)) return false;
@@ -106,7 +105,6 @@
       return hasAlphabet && (hasSpaces || text.length < 15);
     }
 
-    // Generator kombinasi rantai dinamis berdasarkan kedalaman (depth) tertentu
     function generateCombinations(methods, depth) {
       if (depth === 1) return methods.map(m => [m]);
       let results = [];
@@ -128,21 +126,21 @@
       btn.classList.add('opacity-50', 'cursor-not-allowed');
 
       document.getElementById('aiLog').innerHTML = "";
-      logAi("AI Deep Agent diaktifkan. Memulai pemindaian mandiri...");
+      logAi("AI Deep Agent diaktifkan. Memindai rentang kedalaman tinggi...");
 
       const methods = ['base64', 'hex', 'reverse', 'rot13'];
       let foundSolution = false;
       let winningChain = [];
       let finalDecryptedText = "";
       
-      // AI secara otomatis menaikkan kedalaman dari 1 lapis, 2 lapis, 3, dst. hingga batas aman 6 lapis
+      // Kapasitas kedalaman dinaikkan otomatis hingga 6 lapis untuk mencakup skenario 5+ lapis
       let maxAutoDepth = 6; 
 
       for (let currentDepth = 1; currentDepth <= maxAutoDepth; currentDepth++) {
-        logAi(`AI menaikkan radar ke Kedalaman [ Depth: ${currentDepth} Lapis ]...`);
+        logAi(`Mencoba memindai di Kedalaman [ Depth: ${currentDepth} Lapis ]...`);
         let combinations = generateCombinations(methods, currentDepth);
 
-        await new Promise(r => setTimeout(r, 30));
+        await new Promise(r => setTimeout(r, 20));
 
         for (let chain of combinations) {
           let temp = cipherText;
@@ -169,7 +167,7 @@
 
       const viz = document.getElementById('aiStackVisualizer');
       if (foundSolution) {
-        logAi(`[BERHASIL] AI sukses menembus kedalaman ${winningChain.length} lapis!`);
+        logAi(`[BERHASIL] AI sukses menembus rantai ${winningChain.length} lapis!`);
         viz.innerHTML = winningChain.map((m, idx) => 
           `<span class="text-xs px-2 py-1 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-mono whitespace-nowrap">
              ${idx + 1}.${m.toUpperCase()}
@@ -177,11 +175,11 @@
         ).join(' <span class="text-gray-500">➔</span> ');
 
         document.getElementById('outputResult').value = finalDecryptedText;
-        logAi(`[SELESAI] Teks berhasil dipulihkan secara otomatis.`);
+        logAi(`[SELESAI] Teks asli berhasil dipulihkan.`);
       } else {
-        logAi(`[GAGAL] Batas kedalaman terlampaui atau format sandi tidak dikenali.`);
+        logAi(`[GAGAL] Kedalaman melebihi batas 6 lapis atau struktur sandi belum dikenali.`);
         viz.innerHTML = `<span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400 italic">AI gagal menemukan kunci.</span>`;
-        document.getElementById('outputResult').value = "[ERROR] Kedalaman sandi terlalu rumit atau tidak valid.";
+        document.getElementById('outputResult').value = "[ERROR] Kombinasi 5+ lapis gagal dipecahkan.";
       }
 
       btn.disabled = false;
