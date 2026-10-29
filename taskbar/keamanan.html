@@ -20,13 +20,13 @@
         <h1 class="text-2xl font-bold bg-gradient-to-r from-red-500 via-orange-400 to-amber-300 bg-clip-text text-transparent">
           STEJ CyberCrypt :: Universal Obfuscator
         </h1>
-        <p class="text-xs text-gray-400 mt-1">Modul Enkripsi Ganda: Teks Rahasia & Kode Program (STEJ Project)</p>
+        <p class="text-xs text-gray-400 mt-1">Sistem Pengacak Teks & Kode Program (STEJ Project)</p>
       </div>
-      <span class="px-3 py-1 text-xs rounded-full bg-red-500/10 text-red-400 border border-red-500/20 font-mono">SECURE SUITE v2.0</span>
+      <span class="px-3 py-1 text-xs rounded-full bg-red-500/10 text-red-400 border border-red-500/20 font-mono">LOCKER ENGINE</span>
     </header>
 
-    <!-- Mode Selector Tab -->
-    <div class="flex space-x-3">
+    <!-- Navigasi Mode -->
+    <div class="flex space-x-3 border-b border-gray-800 pb-3">
       <button onclick="switchTab('text')" id="tabTextBtn" class="px-5 py-2.5 text-xs font-bold rounded-lg bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-900/30 transition-all">
         🔤 Obfuscate Teks / Pesan
       </button>
@@ -36,56 +36,71 @@
     </div>
 
     <!-- TAB 1: TEXT OBFUSCATOR -->
-    <div id="textSection" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="glass-card p-4 rounded-xl space-y-3">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-gray-300 uppercase">Input Teks / Pesan Asli</span>
-          <select id="textMode" class="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-gray-200">
+    <div id="textSection" class="space-y-4">
+      <div class="glass-card p-4 rounded-xl flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <span class="text-xs font-bold text-gray-300 uppercase">Metode Encoding Teks:</span>
+          <select id="textMode" class="bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-xs text-gray-200">
             <option value="base64">Base64 Encode</option>
-            <option value="hex">Hexadecimal</option>
-            <option value="reverse">Reverse & Shuffle</option>
+            <option value="hex">Hexadecimal (\x48\x61...)</option>
+            <option value="reverse">Reversed Text</option>
           </select>
         </div>
-        <textarea id="rawTextInput" class="w-full h-80 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-red-500 resize-none" placeholder="Tulis catatan, pesan rahasia, atau teks biasa di sini..."></textarea>
-        <button onclick="processTextObfuscate()" class="w-full py-2.5 text-xs font-bold rounded-lg bg-red-600 hover:bg-red-500 text-white transition-all">
-          Obfuscate Teks 🔒
+        <button onclick="processText()" class="px-6 py-2.5 text-xs font-bold rounded-lg bg-red-600 hover:bg-red-500 text-white transition-all shadow-lg shadow-red-900/30">
+          LOCK & OBFUSCATE TEKS 🔒
         </button>
       </div>
 
-      <div class="glass-card p-4 rounded-xl space-y-3">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-gray-300 uppercase">Hasil Obfuscated Text</span>
-          <button onclick="copyTextOutput()" class="text-xs text-amber-400 hover:underline">Salin Hasil</button>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-card p-4 rounded-xl space-y-2">
+          <span class="text-xs font-bold text-gray-300 uppercase block">Input Teks Asli</span>
+          <textarea id="rawTextInput" class="w-full h-80 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-red-500 resize-none" placeholder="Ketik catatan, deskripsi proyek, atau pesan rahasia di sini..."></textarea>
         </div>
-        <textarea id="obfuscatedTextOutput" readonly class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="Hasil sandi teks akan muncul di sini..."></textarea>
+        <div class="glass-card p-4 rounded-xl space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-gray-300 uppercase">Hasil Obfuscated Text</span>
+            <button onclick="copyOutput('textOutput')" class="text-xs text-amber-400 hover:underline">Salin Hasil</button>
+          </div>
+          <textarea id="textOutput" readonly class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="Hasil pengacakan teks akan muncul di sini..."></textarea>
+        </div>
       </div>
     </div>
 
-    <!-- TAB 2: CODE OBFUSCATOR (Hidden by default) -->
-    <div id="codeSection" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
-      <div class="glass-card p-4 rounded-xl space-y-3">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-gray-300 uppercase">Input Kode JavaScript / CSS</span>
-          <button onclick="loadCodeSample()" class="text-xs text-red-400 hover:underline">Muat Contoh Kode</button>
+    <!-- TAB 2: CODE OBFUSCATOR -->
+    <div id="codeSection" class="space-y-4 hidden">
+      <div class="glass-card p-4 rounded-xl flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <span class="text-xs font-bold text-gray-300 uppercase">Tingkat Pengacakan Kode:</span>
+          <select id="codeMode" class="bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-xs text-gray-200">
+            <option value="medium">Ringan (Variable Renaming + Hex String)</option>
+            <option value="extreme">Ekstrem (Base64 Wrapper + Eval)</option>
+          </select>
         </div>
-        <textarea id="rawCodeInput" class="w-full h-80 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-red-500 resize-none" placeholder="// Masukkan kode bersih di sini..."></textarea>
-        <button onclick="processCodeObfuscate()" class="w-full py-2.5 text-xs font-bold rounded-lg bg-orange-600 hover:bg-orange-500 text-white transition-all">
-          Obfuscate Kode 🔒
+        <button onclick="processCode()" class="px-6 py-2.5 text-xs font-bold rounded-lg bg-orange-600 hover:bg-orange-500 text-white transition-all shadow-lg shadow-orange-900/30">
+          LOCK & OBFUSCATE KODE 🔒
         </button>
       </div>
 
-      <div class="glass-card p-4 rounded-xl space-y-3">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-gray-300 uppercase">Hasil Obfuscated Code</span>
-          <button onclick="copyCodeOutput()" class="text-xs text-amber-400 hover:underline">Salin Kode</button>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-card p-4 rounded-xl space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-gray-300 uppercase">Input Kode JavaScript</span>
+            <button onclick="loadCodeSample()" class="text-xs text-red-400 hover:underline">Muat Sample STEJ</button>
+          </div>
+          <textarea id="rawCodeInput" class="w-full h-80 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-red-500 resize-none" placeholder="// Masukkan kode JS bersih di sini..."></textarea>
         </div>
-        <textarea id="obfuscatedCodeOutput" readonly class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="Hasil kode acak-adul akan muncul di sini..."></textarea>
+        <div class="glass-card p-4 rounded-xl space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-gray-300 uppercase">Hasil Obfuscated Code</span>
+            <button onclick="copyOutput('codeOutput')" class="text-xs text-amber-400 hover:underline">Salin Kode</button>
+          </div>
+          <textarea id="codeOutput" readonly class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="// Hasil acak-adul kode akan muncul di sini..."></textarea>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Tab Switching Logic
     function switchTab(type) {
       const textSec = document.getElementById('textSection');
       const codeSec = document.getElementById('codeSection');
@@ -105,54 +120,47 @@
       }
     }
 
-    // Text Obfuscation Handler
-    function processTextObfuscate() {
-      const text = document.getElementById('rawTextInput').value;
+    function processText() {
+      const input = document.getElementById('rawTextInput').value;
       const mode = document.getElementById('textMode').value;
-      if (!text) return alert("Masukkan teks terlebih dahulu!");
+      if (!input) return alert("Masukkan teks terlebih dahulu!");
 
       let result = "";
-      if (mode === 'base64') {
-        result = btoa(unescape(encodeURIComponent(text)));
-      } else if (mode === 'hex') {
-        result = text.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
-      } else if (mode === 'reverse') {
-        result = text.split('').reverse().join('').split('').map(c => c.charCodeAt(0).toString(36)).join('-');
-      }
+      if (mode === 'base64') result = btoa(unescape(encodeURIComponent(input)));
+      else if (mode === 'hex') result = input.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+      else if (mode === 'reverse') result = input.split('').reverse().join('');
 
-      document.getElementById('obfuscatedTextOutput').value = result;
+      document.getElementById('textOutput').value = result;
     }
 
-    // Code Obfuscation Handler
     function loadCodeSample() {
-      document.getElementById('rawCodeInput').value = `function tampilkanPesan() {\n    let pesan = "Selamat Datang di STEJ Project";\n    console.log(pesan);\n}\ntampilkanPesan();`;
+      document.getElementById('rawCodeInput').value = `function jalankanSimulasi(proyek) {\n    let status = "Aktif";\n    console.log("Status Proyek " + proyek + ": " + status);\n    return true;\n}\njalankanSimulasi("STEJ CyberCrypt");`;
     }
 
-    function processCodeObfuscate() {
+    function processCode() {
       const code = document.getElementById('rawCodeInput').value;
+      const mode = document.getElementById('codeMode').value;
       if (!code) return alert("Masukkan kode JavaScript terlebih dahulu!");
 
-      // Simulasi Obfuscation: Minify + Variable Renaming + String Hex
-      let result = code.replace(/function\s+([a-zA-Z0-9_]+)/g, () => `function _0x${Math.floor(Math.random()*0xffffff).toString(16)}`)
-                       .replace(/let\s+([a-zA-Z0-9_]+)/g, () => `let _0x${Math.floor(Math.random()*0xffffff).toString(16)}`)
-                       .replace(/"([^"]*)"/g, (m, p1) => `"${p1.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')}"`)
-                       .replace(/\s+/g, ' ');
+      let result = "";
+      if (mode === 'medium') {
+        result = code.replace(/function\s+([a-zA-Z0-9_]+)/g, () => `function _0x${Math.floor(Math.random()*0xffffff).toString(16)}`)
+                     .replace(/let\s+([a-zA-Z0-9_]+)/g, () => `let _0x${Math.floor(Math.random()*0xffffff).toString(16)}`)
+                     .replace(/"([^"]*)"/g, (m, p1) => `"${p1.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')}"`)
+                     .replace(/\s+/g, ' ');
+      } else if (mode === 'extreme') {
+        const b64 = btoa(unescape(encodeURIComponent(code)));
+        result = `(function(_0x1a2b,_0x3c4d){var _0x5e6f=function(_0x7a8b){return decodeURIComponent(escape(atob(_0x7a8b)));};eval(_0x5e6f("${b64}"));})();`;
+      }
 
-      document.getElementById('obfuscatedCodeOutput').value = result;
+      document.getElementById('codeOutput').value = result;
     }
 
-    function copyTextOutput() {
-      const out = document.getElementById('obfuscatedTextOutput');
-      if(!out.value) return;
-      navigator.clipboard.writeText(out.value);
-      alert("Teks sandi berhasil disalin!");
-    }
-
-    function copyCodeOutput() {
-      const out = document.getElementById('obfuscatedCodeOutput');
-      if(!out.value) return;
-      navigator.clipboard.writeText(out.value);
-      alert("Kode obfuskasi berhasil disalin!");
+    function copyOutput(id) {
+      const el = document.getElementById(id);
+      if(!el.value) return;
+      navigator.clipboard.writeText(el.value);
+      alert("Berhasil disalin ke clipboard!");
     }
   </script>
 </body>
