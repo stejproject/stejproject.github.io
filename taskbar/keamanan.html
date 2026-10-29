@@ -130,13 +130,23 @@
       // Bungkus final sebagai string yang bisa di-eval / di-decode nanti
       const payload = b64(data);
 
+      // Encode the key itself so it never appears as plaintext
+      // Key is stored as HEX of ROT47(key)
+      const encodedKey = b64(toHex(rot47(key)));
+
       // Polymorphic wrapper
       const v1 = randName(), v2 = randName(), v3 = randName(), v4 = randName();
-      const kVar = randName();
+      const v5 = randName(), kVar = randName(), kDec = randName();
 
       let code = `/* STEJ Strong Obfuscated Payload */\n`;
       code += `(function(){\n`;
-      code += `  var ${kVar} = ${JSON.stringify(key)};\n`;
+      // Key is hidden: Base64 → HEX decode → ROT47
+      code += `  function ${kDec}(s){\n`;
+      code += `    var t = decodeURIComponent(escape(atob(s)));\n`;
+      code += `    t = t.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});\n`;
+      code += `    return t.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});\n`;
+      code += `  }\n`;
+      code += `  var ${kVar} = ${kDec}("${encodedKey}");\n`;
       code += `  var ${v1} = "${payload}";\n`;
       code += `  function ${v2}(s){try{return decodeURIComponent(escape(atob(s)));}catch(e){return s;}}\n`;
       code += `  function ${v3}(s){return s.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});}\n`;
@@ -207,10 +217,16 @@
         code = junk.join('\n') + '\n' + code;
       }
 
-      // Inject decoder helpers
+      // Inject decoder helpers — key is also encoded (not plaintext)
+      const encodedKey = b64(toHex(rot47(key)));
       const helper = `
 function _d(s){
-  var k = ${JSON.stringify(key)};
+  function _kd(s){
+    var t = decodeURIComponent(escape(atob(s)));
+    t = t.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});
+    return t.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});
+  }
+  var k = _kd("${encodedKey}");
   var x = decodeURIComponent(escape(atob(s)));
   ${opts.hex ? `x = x.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});` : ''}
   ${opts.rot47 ? `x = x.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});` : ''}
