@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STEJ CyberCrypt - Bletchley Auto-Crack De-obfuscator</title>
+  <title>STEJ CyberCrypt - Bletchley Auto-Crack Engine (Optimized)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -20,26 +20,26 @@
         <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
           STEJ CyberCrypt :: Bletchley Auto-Crack Engine
         </h1>
-        <p class="text-xs text-gray-400 mt-1">Simulasi Pemecah Sandi Otomatis (Automatic Cryptanalysis) - STEJ Project</p>
+        <p class="text-xs text-gray-400 mt-1">Simulasi Pemecah Sandi Otomatis (Optimized Pipeline) - STEJ Project</p>
       </div>
-      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">BLETCHLEY PARK MODE</span>
+      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">BLITZ MODE</span>
     </header>
 
     <!-- Control Panel -->
     <div class="glass-card p-4 rounded-xl space-y-4">
       <div class="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <span class="text-xs font-bold text-gray-300 uppercase block">Mode Pemecahan Sandi:</span>
-          <p class="text-xs text-gray-400 mt-0.5">Mesin akan menebak urutan lapis demi lapis secara otomatis sampai teks terbaca.</p>
+          <span class="text-xs font-bold text-gray-300 uppercase block">Status Mesin Colossus:</span>
+          <p class="text-xs text-gray-400 mt-0.5">Mesin mendeteksi kombinasi secara asinkron agar tidak membuat browser macet.</p>
         </div>
-        <button onclick="runBletchleyAutoCrack()" class="px-6 py-3 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-gray-950 shadow-lg shadow-emerald-900/40 transition-all transform active:scale-95">
+        <button id="crackBtn" onclick="runBletchleyAutoCrack()" class="px-6 py-3 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-gray-950 shadow-lg shadow-emerald-900/40 transition-all transform active:scale-95">
           ⚡ JALANKAN BLETCHLEY AUTO-CRACK
         </button>
       </div>
 
       <!-- Log Status -->
-      <div id="bletchleyLog" class="p-3 rounded bg-gray-950 border border-gray-800 text-xs font-mono text-emerald-400 h-20 overflow-y-auto">
-        [SYSTEM READY] Masukkan sandi bertingkat di bawah, lalu klik "Jalankan Bletchley Auto-Crack" untuk menebak urutan enkripsinya secara otomatis...
+      <div id="bletchleyLog" class="p-3 rounded bg-gray-950 border border-gray-800 text-xs font-mono text-emerald-400 h-24 overflow-y-auto space-y-1">
+        <div>[SYSTEM READY] Masukkan sandi bertingkat di bawah, lalu klik tombol untuk mulai memecahkan sandi...</div>
       </div>
     </div>
 
@@ -67,7 +67,6 @@
       log.scrollTop = log.scrollHeight;
     }
 
-    // Fungsi dasar dekripsi satuan
     function decryptStep(text, type) {
       try {
         if (type === 'hex') {
@@ -82,12 +81,11 @@
           });
         }
       } catch (e) {
-        return null; // Gagal decode
+        return null;
       }
       return text;
     }
 
-    // Generator Permutasi Sederhana untuk Brute-Force Urutan Lapisan
     function generatePermutations(arr, len) {
       if (len === 1) return arr.map(el => [el]);
       let result = [];
@@ -100,21 +98,27 @@
       return result;
     }
 
-    function runBletchleyAutoCrack() {
+    async function runBletchleyAutoCrack() {
       let cipherText = document.getElementById('rawInput').value.trim();
       if (!cipherText) return alert("Masukkan sandi terlebih dahulu!");
 
-      document.getElementById('bletchleyLog.innerHTML'] = "";
-      logMsg("Menginisialisasi Bletchley Engine...");
-      logMsg("Menganalisis pola karakter sandi...");
+      const btn = document.getElementById('crackBtn');
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
 
+      document.getElementById('bletchleyLog').innerHTML = "";
+      logMsg("Menginisialisasi Bletchley Engine...");
+      
       const availableMethods = ['hex', 'base64', 'reverse', 'rot13'];
       let successFound = false;
 
-      // Coba kombinasi panjang rantai dari 1 sampai 3 lapisan
+      // Cek dari kedalaman 1 sampai 3 lapisan secara bertahap
       for (let depth = 1; depth <= 3; depth++) {
-        logMsg(`Mencoba kedalaman rantai ${depth} lapisan...`);
+        logMsg(`Memindai kombinasi lapisan kedalaman [ Depth: ${depth} ]...`);
         let permutations = generatePermutations(availableMethods, depth);
+
+        // Beri jeda sejenak agar UI browser sempat bernapas (tidak nge-lag)
+        await new Promise(r => setTimeout(r, 50));
 
         for (let perm of permutations) {
           let tempText = cipherText;
@@ -130,11 +134,10 @@
           }
 
           if (!failed) {
-            // Heuristic Check: Apakah hasilnya cukup masuk akal / terbaca?
-            // Cek apakah ada huruf normal atau kata kunci umum
-            if (tempText.length > 0 && !/[^\x20-\x7E]/.test(tempText.substring(0, 20))) {
+            // Heuristic Check sederhana: pastikan tidak ada karakter biner aneh di awal
+            if (tempText.length > 0 && !/[^\x20-\x7E\n\r\t]/.test(tempText.substring(0, 30))) {
               document.getElementById('outputResult').value = tempText;
-              logMsg(`[SUCCESS] Ditemukan urutan yang valid: [ ${perm.join(' ➔ ').toUpperCase()} ]`);
+              logMsg(`[SUCCESS] Kunci ditemukan! Urutan: [ ${perm.join(' ➔ ').toUpperCase()} ]`);
               successFound = true;
               break;
             }
@@ -144,9 +147,12 @@
       }
 
       if (!successFound) {
-        logMsg("[WARNING] Mesin gagal menebak secara otomatis. Coba lakukan unchain manual.");
-        document.getElementById('outputResult').value = "[GAGAL] Mesin tidak dapat menemukan pola dekripsi yang cocok.";
+        logMsg("[WARNING] Gagal menemukan pola otomatis yang valid. Coba pastikan format sandinya.");
+        document.getElementById('outputResult').value = "[GAGAL] Mesin tidak menemukan kecocokan kombinasi.";
       }
+
+      btn.disabled = false;
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
     }
 
     function copyOutput() {
