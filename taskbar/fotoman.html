@@ -100,9 +100,9 @@ let recordedChunks = [];
 let videoStream;      
 let microphoneStream; 
 let isRecording = false;
-const noiseStrength = 10; // Kekuatan perisai acak mikro (bisa dinaikkan jika kurang aman)
+const noiseStrength = 10; // Kekuatan perisai acak mikro anti-AI
 
-// 1. Aktifkan Kamera SAJA di Awal (Mikrofon tetap Mati)
+// 1. Aktifkan Kamera SAJA di Awal (Mikrofon Tetap Mati untuk Privasi)
 navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: false })
     .then((stream) => {
         videoStream = stream;
@@ -116,7 +116,7 @@ navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio:
         statusDiv.innerText = "Gagal mengakses kamera: " + err.message;
     });
 
-// 2. Mengacak Piksel Pratinjau Kamera secara Real-Time (Anti-Scraping AI)
+// 2. Mengacak Piksel Pratinjau Kamera secara Real-Time (Anti-AI Cloaking)
 function renderFrame() {
     if (video.readyState === video.HAVE_CURRENT_DATA) {
         viewfinder.width = video.videoWidth;
@@ -136,11 +136,10 @@ function renderFrame() {
     requestAnimationFrame(renderFrame);
 }
 
-// 3. FITUR FOTO: Menggunakan PNG Ultra-HD + Cloaking (Anti-Gagal & Ringan)
+// 3. FITUR FOTO: Mengunduh Hasil Cuplikan PNG Terproteksi (Anti-Gagal)
 snapBtn.addEventListener('click', () => {
     statusDiv.innerText = "Mengunci frame terproteksi...";
     
-    // Langsung konversi kanvas ter-cloak saat ini ke file gambar resmi browser
     viewfinder.toBlob((blob) => {
         if (blob) {
             downloadFile(blob, "selfie_anti_ai.png");
@@ -151,39 +150,46 @@ snapBtn.addEventListener('click', () => {
     }, 'image/png');
 });
 
-// 4. FITUR VIDEO: Merekam Video + Aktifkan Suara Mikrofon Hanya Saat Merekam
+// 4. FITUR VIDEO: Merekam Video Canvas + Mengaktifkan Suara Mikrofon
 recBtn.addEventListener('click', async () => {
     recordedChunks = [];
-    statusDiv.innerText = "Mengaktifkan mikrofon...";
+    statusDiv.innerText = "Meminta izin mikrofon...";
 
     try {
-        // Nyalakan mikrofon tepat saat tombol rekam diklik
+        // Aktifkan perekaman suara tepat saat tombol rekam diklik
         microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         
-        // Tangkap visual dari kanvas yang sudah diacak
+        // Ambil visual dari kanvas yang telah diacak anti-AI
         const canvasStream = viewfinder.captureStream(30); 
 
-        // Gabungkan trek audio ke dalam rekaman video
+        // FIX: Mengambil indeks pertama [0] dari array track audio secara valid
         if (microphoneStream && microphoneStream.getAudioTracks().length > 0) {
-            canvasStream.addTrack(microphoneStream.getAudioTracks()[0]);
+            const audioTrack = microphoneStream.getAudioTracks()[0].clone();
+            canvasStream.addTrack(audioTrack);
         }
 
-        // Gunakan WebM (VP8/Opus) yang kompatibel penuh di hampir semua browser modern
-        mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm;codecs=vp8,opus' });
+        // Tentukan jenis video terbaik yang didukung browser Anda secara otomatis
+        let options = { mimeType: 'video/webm;codecs=vp8,opus' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+            options = { mimeType: 'video/mp4' }; // Fallback untuk iOS/Safari
+        }
+
+        mediaRecorder = new MediaRecorder(canvasStream, options);
 
         mediaRecorder.ondataavailable = (e) => {
             if (e.data.size > 0) recordedChunks.push(e.data);
         };
 
         mediaRecorder.onstop = () => {
-            const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
-            downloadFile(videoBlob, "video_anti_ai.webm");
+            const ext = mediaRecorder.mimeType.includes('mp4') ? 'mp4' : 'webm';
+            const videoBlob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
+            downloadFile(videoBlob, `video_anti_ai.${ext}`);
             statusDiv.innerText = "Video terproteksi sukses diunduh!";
             
-            // MATIKAN TOTAL MIKROFON setelah rekaman video berhenti
+            // Matikan total mic setelah selesai merekam demi privasi
             if (microphoneStream) {
                 microphoneStream.getTracks().forEach(track => track.stop());
-                console.log("Mikrofon dimatikan untuk privasi.");
+                console.log("Mikrofon dinonaktifkan.");
             }
         };
 
@@ -195,13 +201,14 @@ recBtn.addEventListener('click', async () => {
         snapBtn.disabled = true;
 
     } catch (err) {
-        statusDiv.innerText = "Gagal mengaktifkan perekaman suara: " + err.message;
+        statusDiv.innerText = "Gagal merekam suara: " + err.message;
+        console.error(err);
     }
 });
 
 // 5. Menghentikan Rekaman Video
 stopBtn.addEventListener('click', () => {
-    if (isRecording && mediaRecorder.state !== "inactive") {
+    if (isRecording && mediaRecorder && mediaRecorder.state !== "inactive") {
         mediaRecorder.stop();
         isRecording = false;
         recBtn.style.display = "inline-block";
