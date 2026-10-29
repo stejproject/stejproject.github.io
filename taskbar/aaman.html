@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STEJ CyberCrypt - AI Deep Auto-Guess De-obfuscator</title>
+  <title>STEJ CyberCrypt - AI Infinite Depth De-obfuscator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -18,28 +18,33 @@
     <header class="flex items-center justify-between border-b border-gray-800 pb-4">
       <div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-          STEJ CyberCrypt :: AI Deep Auto-Guess Engine (Extended)
+          STEJ CyberCrypt :: AI Infinite Depth Engine
         </h1>
-        <p class="text-xs text-gray-400 mt-1">Sistem Agen AI Otomatis Menebak Kedalaman Tinggi (5+ Lapis) - STEJ Project</p>
+        <p class="text-xs text-gray-400 mt-1">Sistem Pemecah Sandi Tanpa Batas Kedalaman (Manual Stop Control) - STEJ Project</p>
       </div>
-      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">ULTRA AI v6.0</span>
+      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">INFINITE AI v7.0</span>
     </header>
 
     <!-- Control Panel -->
     <div class="glass-card p-4 rounded-xl space-y-4">
       <div class="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <span class="text-xs font-bold text-gray-300 uppercase block">Panel Kontrol AI Deep Agent:</span>
-          <p class="text-xs text-gray-400 mt-0.5">AI siap membongkar rantai bertingkat tinggi secara otomatis.</p>
+          <span class="text-xs font-bold text-gray-300 uppercase block">Panel Kontrol AI Infinite Agent:</span>
+          <p class="text-xs text-gray-400 mt-0.5">AI akan terus merembes menaikkan kedalaman lapisannya sampai ketemu atau kamu klik Berhenti.</p>
         </div>
-        <button id="aiBtn" onclick="runAiDeepDecryption()" class="px-6 py-3 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-gray-950 shadow-lg shadow-emerald-900/40 transition-all transform active:scale-95">
-          🤖 BONGKAR 5+ LAPIS OTOMATIS
-        </button>
+        <div class="flex space-x-2">
+          <button id="aiBtn" onclick="startInfiniteDecryption()" class="px-6 py-3 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-gray-950 shadow-lg shadow-emerald-900/40 transition-all transform active:scale-95">
+            🤖 MULAI PENCARIAN TANPA BATAS
+          </button>
+          <button id="stopBtn" onclick="stopInfiniteDecryption()" disabled class="px-5 py-3 text-xs font-bold rounded-lg bg-red-600/50 text-gray-400 cursor-not-allowed transition-all">
+            🛑 BERHENTI
+          </button>
+        </div>
       </div>
 
       <!-- Live AI Status / Log -->
       <div id="aiLog" class="p-3 rounded bg-gray-950 border border-gray-800 text-xs font-mono text-emerald-400 h-28 overflow-y-auto space-y-1">
-        <div>[AI READY] Masukkan sandi multi-lapis di bawah, lalu klik tombol AI untuk memulai pemindaian mendalam...</div>
+        <div>[AI READY] Masukkan teks sandi multi-lapis di bawah, lalu klik tombol mulai...</div>
       </div>
 
       <!-- Visualisasi Rantai & Kedalaman yang Ditemukan AI -->
@@ -69,6 +74,8 @@
   </div>
 
   <script>
+    let isRunning = false;
+
     function logAi(msg) {
       const log = document.getElementById('aiLog');
       log.innerHTML += `<div>> ${msg}</div>`;
@@ -117,32 +124,40 @@
       return results;
     }
 
-    async function runAiDeepDecryption() {
+    async function startInfiniteDecryption() {
       let cipherText = document.getElementById('rawInput').value.trim();
       if (!cipherText) return alert("Masukkan teks sandi terlebih dahulu!");
 
-      const btn = document.getElementById('aiBtn');
-      btn.disabled = true;
-      btn.classList.add('opacity-50', 'cursor-not-allowed');
+      isRunning = true;
+      const startBtn = document.getElementById('aiBtn');
+      const stopBtn = document.getElementById('stopBtn');
+
+      startBtn.disabled = true;
+      startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      stopBtn.disabled = false;
+      stopBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-red-600/50');
+      stopBtn.classList.add('bg-red-600', 'hover:bg-red-500', 'text-white', 'shadow-lg', 'shadow-red-900/40');
 
       document.getElementById('aiLog').innerHTML = "";
-      logAi("AI Deep Agent diaktifkan. Memindai rentang kedalaman tinggi...");
+      logAi("AI Infinite Agent diaktifkan. Memulai pencarian tanpa batas...");
 
       const methods = ['base64', 'hex', 'reverse', 'rot13'];
       let foundSolution = false;
       let winningChain = [];
       let finalDecryptedText = "";
       
-      // Kapasitas kedalaman dinaikkan otomatis hingga 6 lapis untuk mencakup skenario 5+ lapis
-      let maxAutoDepth = 6; 
+      // Pencarian dimulai dari kedalaman 1 dan terus naik tanpa batas hingga user menekan tombol Berhenti
+      let currentDepth = 1;
 
-      for (let currentDepth = 1; currentDepth <= maxAutoDepth; currentDepth++) {
-        logAi(`Mencoba memindai di Kedalaman [ Depth: ${currentDepth} Lapis ]...`);
+      while (isRunning) {
+        logAi(`Menjelajah di Kedalaman [ Depth: ${currentDepth} Lapis ]...`);
         let combinations = generateCombinations(methods, currentDepth);
 
-        await new Promise(r => setTimeout(r, 20));
+        await new Promise(r => setTimeout(r, 10));
 
         for (let chain of combinations) {
+          if (!isRunning) break;
+
           let temp = cipherText;
           let failed = false;
 
@@ -162,12 +177,13 @@
           }
         }
 
-        if (foundSolution) break;
+        if (foundSolution || !isRunning) break;
+        currentDepth++;
       }
 
       const viz = document.getElementById('aiStackVisualizer');
       if (foundSolution) {
-        logAi(`[BERHASIL] AI sukses menembus rantai ${winningChain.length} lapis!`);
+        logAi(`[BERHASIL] AI sukses menembus rantai ${winningChain.length} lapis di kedalaman ${currentDepth}!`);
         viz.innerHTML = winningChain.map((m, idx) => 
           `<span class="text-xs px-2 py-1 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-mono whitespace-nowrap">
              ${idx + 1}.${m.toUpperCase()}
@@ -177,13 +193,29 @@
         document.getElementById('outputResult').value = finalDecryptedText;
         logAi(`[SELESAI] Teks asli berhasil dipulihkan.`);
       } else {
-        logAi(`[GAGAL] Kedalaman melebihi batas 6 lapis atau struktur sandi belum dikenali.`);
-        viz.innerHTML = `<span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400 italic">AI gagal menemukan kunci.</span>`;
-        document.getElementById('outputResult').value = "[ERROR] Kombinasi 5+ lapis gagal dipecahkan.";
+        logAi(`[DIHENTIKAN] Pencarian dihentikan oleh pengguna.`);
+        viz.innerHTML = `<span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 italic">Pencarian dibatalkan.</span>`;
       }
 
-      btn.disabled = false;
-      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      resetControls();
+    }
+
+    function stopInfiniteDecryption() {
+      isRunning = false;
+      logAi("[INFO] Mengirim sinyal berhenti ke agen AI...");
+    }
+
+    function resetControls() {
+      isRunning = false;
+      const startBtn = document.getElementById('aiBtn');
+      const stopBtn = document.getElementById('stopBtn');
+
+      startBtn.disabled = false;
+      startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      
+      stopBtn.disabled = true;
+      stopBtn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-red-600/50');
+      stopBtn.classList.remove('bg-red-600', 'hover:bg-red-500', 'text-white', 'shadow-lg', 'shadow-red-900/40');
     }
 
     function copyOutput() {
