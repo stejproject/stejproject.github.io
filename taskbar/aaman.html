@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STEJ Strong Deobfuscator (Educational)</title>
+  <title>STEJ Strong Deobfuscator + API</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -19,19 +19,19 @@
         <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
           STEJ Strong Deobfuscator
         </h1>
-        <p class="text-xs text-gray-400 mt-1">Pulihkan payload yang di-obfuscate dengan Strong Obfuscator (butuh kunci XOR yang sama)</p>
+        <p class="text-xs text-gray-400 mt-1">UI + window.STEJ API · Butuh kunci XOR yang sama</p>
       </div>
-      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">DEOBF v1.0</span>
+      <span class="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">DEOBF API v1.1</span>
     </header>
 
     <div class="glass-card p-4 rounded-xl space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="text-xs font-bold text-gray-300 uppercase block mb-1">XOR Key (harus sama)</label>
-          <input id="xorKey" type="text" value="STEJ-SECRET-2026" class="w-full bg-gray-950 text-amber-300 code-font text-xs p-2.5 rounded-lg border border-gray-800 focus:outline-none focus:border-emerald-500" placeholder="Kunci XOR...">
+          <input id="xorKey" type="text" value="STEJ-SECRET-2026" class="w-full bg-gray-950 text-amber-300 code-font text-xs p-2.5 rounded-lg border border-gray-800 focus:outline-none focus:border-emerald-500">
         </div>
         <div>
-          <label class="text-xs font-bold text-gray-300 uppercase block mb-1">Layer yang dipakai saat obfuscate</label>
+          <label class="text-xs font-bold text-gray-300 uppercase block mb-1">Layer saat obfuscate</label>
           <div class="flex flex-wrap gap-3 text-xs text-gray-400 mt-2">
             <label class="flex items-center gap-1.5"><input type="checkbox" id="optXor" checked class="accent-emerald-500"> XOR</label>
             <label class="flex items-center gap-1.5"><input type="checkbox" id="optRot47" checked class="accent-emerald-500"> ROT47</label>
@@ -39,7 +39,7 @@
           </div>
         </div>
         <div class="flex items-end">
-          <button onclick="runDeobfuscate()" class="w-full px-4 py-2.5 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-gray-950 shadow-lg shadow-emerald-900/30 transition-all">
+          <button onclick="runDeobfuscate()" class="w-full px-4 py-2.5 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-gray-950 shadow-lg shadow-emerald-900/30">
             🔓 DEOBFUSKASI
           </button>
         </div>
@@ -48,116 +48,111 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="glass-card p-4 rounded-xl space-y-2">
-        <span class="text-xs font-bold text-gray-300 uppercase block">Input (Obfuscated Code / Payload)</span>
-        <textarea id="input" class="w-full h-96 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-emerald-500 resize-none" placeholder="Paste hasil dari Strong Obfuscator di sini..."></textarea>
+        <span class="text-xs font-bold text-gray-300 uppercase block">Input (Payload / Kode Obfuscated)</span>
+        <textarea id="input" class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-emerald-500 resize-none" placeholder="Paste payload atau full snippet..."></textarea>
       </div>
       <div class="glass-card p-4 rounded-xl space-y-2">
         <div class="flex justify-between items-center">
           <span class="text-xs font-bold text-gray-300 uppercase">Output (Recovered)</span>
           <button onclick="copyOut()" class="text-xs text-emerald-400 hover:underline">Salin</button>
         </div>
-        <textarea id="output" readonly class="w-full h-96 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="Hasil pemulihan akan muncul di sini..."></textarea>
+        <textarea id="output" readonly class="w-full h-80 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="Hasil pemulihan..."></textarea>
       </div>
     </div>
 
-    <div class="glass-card p-3 rounded-xl space-y-2">
-      <p class="text-xs text-gray-400 font-semibold">Cara pakai:</p>
-      <ol class="text-xs text-gray-500 list-decimal list-inside space-y-1">
-        <li>Paste kode hasil Strong Obfuscator ke kotak kiri</li>
-        <li>Pastikan <strong>XOR Key</strong> sama persis dengan saat obfuscate</li>
-        <li>Centang layer yang dipakai (XOR / ROT47 / HEX)</li>
-        <li>Klik DEOBFUSKASI</li>
-      </ol>
-      <p class="text-xs text-gray-600 mt-2">Catatan: Control Flow Flattening & Junk code tidak di-reverse otomatis (hanya payload string yang dipulihkan).</p>
+    <div class="glass-card p-4 rounded-xl">
+      <p class="text-xs font-bold text-gray-300 uppercase mb-2">API (window.STEJ)</p>
+      <pre class="text-xs code-font text-cyan-300 bg-gray-950 p-3 rounded-lg overflow-x-auto">STEJ.deobfuscate(payload, key, opts)  // → plain text
+STEJ.extractPayload(code)             // → ambil base64 dari snippet</pre>
+      <p class="text-xs text-gray-500 mt-2">Host file ini → dapat link deobfuscator terpisah.</p>
     </div>
   </div>
 
   <script>
-    function xorDecrypt(str, key) {
-      let result = '';
-      for (let i = 0; i < str.length; i++) {
-        result += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-      }
-      return result;
-    }
+  (function (global) {
+    'use strict';
 
+    function xor(str, key) {
+      let r = '';
+      for (let i = 0; i < str.length; i++) r += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      return r;
+    }
+    function rot47(str) {
+      return str.replace(/[!-~]/g, c => String.fromCharCode(33 + ((c.charCodeAt(0) - 33 + 47) % 94)));
+    }
     function fromHex(str) {
       return str.replace(/\\x([0-9a-fA-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
     }
-
-    function rot47(str) {
-      // ROT47 is involution (same function to encode/decode)
-      return str.replace(/[!-~]/g, c => {
-        return String.fromCharCode(33 + ((c.charCodeAt(0) - 33 + 47) % 94));
-      });
+    function b64dec(str) {
+      return decodeURIComponent(escape(atob(str)));
     }
 
-    function tryExtractPayload(code) {
-      // Cari string base64 panjang di dalam kode
-      const matches = code.match(/["'`]([A-Za-z0-9+/=]{20,})["'`]/g);
-      if (!matches || matches.length === 0) return null;
+    const DEFAULT = { xor: true, rot47: true, hex: true };
 
-      // Ambil yang paling panjang (kemungkinan payload)
+    function extractPayload(code) {
+      const matches = code.match(/["'`]([A-Za-z0-9+/=]{16,})["'`]/g);
+      if (!matches || !matches.length) return null;
       let best = '';
       matches.forEach(m => {
         const clean = m.slice(1, -1);
         if (clean.length > best.length) best = clean;
       });
-      return best;
+      return best || null;
     }
 
-    function runDeobfuscate() {
+    function deobfuscate(payload, key, opts) {
+      opts = Object.assign({}, DEFAULT, opts || {});
+      if (opts.xor && !key) throw new Error('XOR key required');
+
+      // If full snippet given, extract payload first
+      let data = payload;
+      if (!/^[A-Za-z0-9+/=]+$/.test(payload.replace(/\s/g, ''))) {
+        const extracted = extractPayload(payload);
+        if (extracted) data = extracted;
+      } else {
+        data = payload.replace(/\s/g, '');
+      }
+
+      let text = b64dec(data);
+      if (opts.hex) text = fromHex(text);
+      if (opts.rot47) text = rot47(text);
+      if (opts.xor) text = xor(text, key);
+      return text;
+    }
+
+    global.STEJ = {
+      deobfuscate,
+      extractPayload,
+      version: '1.1-deobf'
+    };
+
+    global.runDeobfuscate = function () {
       const input = document.getElementById('input').value.trim();
       const key = document.getElementById('xorKey').value.trim();
+      if (!input) return alert('Masukkan payload / kode');
+      if (!key) return alert('XOR Key wajib');
 
-      if (!input) return alert('Masukkan kode/payload obfuscated');
-      if (!key) return alert('XOR Key wajib diisi');
-
-      const useXor = document.getElementById('optXor').checked;
-      const useRot47 = document.getElementById('optRot47').checked;
-      const useHex = document.getElementById('optHex').checked;
+      const opts = {
+        xor: document.getElementById('optXor').checked,
+        rot47: document.getElementById('optRot47').checked,
+        hex: document.getElementById('optHex').checked
+      };
 
       try {
-        // 1. Coba ekstrak payload base64 dari kode
-        let payload = tryExtractPayload(input);
-
-        // Kalau tidak ketemu, anggap seluruh input adalah payload base64
-        if (!payload) {
-          // Coba langsung treat as base64
-          if (/^[A-Za-z0-9+/=]+$/.test(input.replace(/\s/g, ''))) {
-            payload = input.replace(/\s/g, '');
-          } else {
-            document.getElementById('output').value = '// Gagal menemukan payload Base64 di dalam kode.\n// Pastikan ini hasil dari STEJ Strong Obfuscator.';
-            return;
-          }
-        }
-
-        // 2. Base64 decode
-        let data = decodeURIComponent(escape(atob(payload)));
-
-        // 3. Reverse layers (urutan terbalik dari obfuscate)
-        if (useHex) {
-          data = fromHex(data);
-        }
-        if (useRot47) {
-          data = rot47(data);
-        }
-        if (useXor) {
-          data = xorDecrypt(data, key);
-        }
-
-        document.getElementById('output').value = data;
+        const result = STEJ.deobfuscate(input, key, opts);
+        document.getElementById('output').value = result;
       } catch (e) {
-        document.getElementById('output').value = '// Error saat deobfuscate:\n// ' + e.message + '\n\nPastikan kunci XOR dan layer yang dipilih sudah benar.';
+        document.getElementById('output').value = 'Error: ' + e.message + '\n\nPastikan kunci & layer sama dengan saat obfuscate.';
       }
-    }
+    };
 
-    function copyOut() {
-      const out = document.getElementById('output');
-      if (!out.value) return;
-      navigator.clipboard.writeText(out.value);
-      alert('Berhasil disalin!');
-    }
+    global.copyOut = function () {
+      const o = document.getElementById('output');
+      if (!o.value) return;
+      navigator.clipboard.writeText(o.value);
+      alert('Disalin!');
+    };
+  })(typeof window !== 'undefined' ? window : this);
   </script>
 </body>
 </html>
