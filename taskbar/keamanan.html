@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STEJ Strong Obfuscator (Educational)</title>
+  <title>STEJ Strong Obfuscator + API</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -17,40 +17,44 @@
     <header class="flex items-center justify-between border-b border-gray-800 pb-4">
       <div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-red-500 via-orange-400 to-amber-300 bg-clip-text text-transparent">
-          STEJ Strong Obfuscator
+          STEJ Strong Obfuscator + API
         </h1>
-        <p class="text-xs text-gray-400 mt-1">XOR + String Encryption + ROT47 + HEX + Polymorphic + Simple CFF (Educational)</p>
+        <p class="text-xs text-gray-400 mt-1">UI + window.STEJ API dalam satu file · Educational</p>
       </div>
-      <span class="px-3 py-1 text-xs rounded-full bg-red-500/10 text-red-400 border border-red-500/20 font-mono">STRONG v1.0</span>
+      <span class="px-3 py-1 text-xs rounded-full bg-red-500/10 text-red-400 border border-red-500/20 font-mono">STRONG API v1.1</span>
     </header>
 
     <div class="glass-card p-4 rounded-xl space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="text-xs font-bold text-gray-300 uppercase block mb-1">XOR Key (wajib)</label>
-          <input id="xorKey" type="text" value="STEJ-SECRET-2026" class="w-full bg-gray-950 text-amber-300 code-font text-xs p-2.5 rounded-lg border border-gray-800 focus:outline-none focus:border-red-500" placeholder="Masukkan kunci XOR...">
+          <input id="xorKey" type="text" value="STEJ-SECRET-2026" class="w-full bg-gray-950 text-amber-300 code-font text-xs p-2.5 rounded-lg border border-gray-800 focus:outline-none focus:border-red-500">
         </div>
         <div>
           <label class="text-xs font-bold text-gray-300 uppercase block mb-1">Mode</label>
           <select id="mode" class="w-full bg-gray-950 text-gray-200 text-xs p-2.5 rounded-lg border border-gray-800 focus:outline-none focus:border-red-500">
             <option value="text">Text / Pesan</option>
             <option value="code">JavaScript Code</option>
+            <option value="payload">Payload only (API style)</option>
           </select>
         </div>
-        <div class="flex items-end">
-          <button onclick="runObfuscate()" class="w-full px-4 py-2.5 text-xs font-bold rounded-lg bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 text-white shadow-lg shadow-red-900/30 transition-all">
-            🔒 OBFUSKASI SEKARANG
+        <div class="flex items-end gap-2">
+          <button onclick="runObfuscate()" class="flex-1 px-4 py-2.5 text-xs font-bold rounded-lg bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 text-white shadow-lg shadow-red-900/30">
+            🔒 OBFUSKASI
+          </button>
+          <button onclick="runDeobfuscate()" class="px-4 py-2.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white">
+            🔓 DEOBF
           </button>
         </div>
       </div>
 
       <div class="flex flex-wrap gap-3 text-xs text-gray-400">
-        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optXor" checked class="accent-red-500"> XOR Core</label>
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optXor" checked class="accent-red-500"> XOR</label>
         <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optRot47" checked class="accent-red-500"> ROT47</label>
         <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optHex" checked class="accent-red-500"> HEX</label>
-        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optPoly" checked class="accent-red-500"> Polymorphic Names</label>
-        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optCff" checked class="accent-red-500"> Control Flow Flatten (code)</label>
-        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optJunk" checked class="accent-red-500"> Junk / Dead Code</label>
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optPoly" checked class="accent-red-500"> Polymorphic</label>
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optCff" class="accent-red-500"> CFF (code)</label>
+        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="optJunk" class="accent-red-500"> Junk Code</label>
       </div>
     </div>
 
@@ -58,191 +62,199 @@
       <div class="glass-card p-4 rounded-xl space-y-2">
         <div class="flex justify-between items-center">
           <span class="text-xs font-bold text-gray-300 uppercase">Input</span>
-          <button onclick="loadSample()" class="text-xs text-red-400 hover:underline">Muat Sample</button>
+          <button onclick="loadSample()" class="text-xs text-red-400 hover:underline">Sample</button>
         </div>
-        <textarea id="input" class="w-full h-96 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-red-500 resize-none" placeholder="Masukkan teks atau kode JavaScript..."></textarea>
+        <textarea id="input" class="w-full h-80 bg-gray-950 text-emerald-400 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none focus:border-red-500 resize-none" placeholder="Teks / kode / payload..."></textarea>
       </div>
       <div class="glass-card p-4 rounded-xl space-y-2">
         <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-gray-300 uppercase">Output (Obfuscated)</span>
+          <span class="text-xs font-bold text-gray-300 uppercase">Output</span>
           <button onclick="copyOut()" class="text-xs text-amber-400 hover:underline">Salin</button>
         </div>
-        <textarea id="output" readonly class="w-full h-96 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="Hasil obfuscation akan muncul di sini..."></textarea>
+        <textarea id="output" readonly class="w-full h-80 bg-gray-950 text-amber-300 code-font p-4 text-xs rounded-lg border border-gray-800 focus:outline-none resize-none" placeholder="Hasil..."></textarea>
       </div>
     </div>
 
-    <div class="glass-card p-3 rounded-xl">
-      <p class="text-xs text-gray-500">
-        <strong class="text-gray-400">Catatan edukasi:</strong> Ini adalah demonstrasi konsep. 
-        Bukan obfuscator level malware / production. 
-        Deobfuscator terpisah membutuhkan <strong>kunci XOR yang sama</strong> untuk memulihkan.
-      </p>
+    <div class="glass-card p-4 rounded-xl space-y-2">
+      <p class="text-xs font-bold text-gray-300 uppercase">API Usage (bisa dipanggil dari luar)</p>
+      <pre class="text-xs code-font text-cyan-300 bg-gray-950 p-3 rounded-lg overflow-x-auto">// Setelah halaman ini di-load / di-hosting:
+const payload = STEJ.obfuscate("pesan rahasia", "kunci-saya");
+const asli    = STEJ.deobfuscate(payload, "kunci-saya");
+const snippet = STEJ.obfuscateToSnippet("pesan rahasia", "kunci-saya");
+
+// Atau load sebagai script dari link:
+// &lt;script src="https://your-host/stej-strong.html"&gt;&lt;/script&gt;  (lebih baik extract .js)
+</pre>
+      <p class="text-xs text-gray-500">File ini self-contained. Hosting ke Netlify / GitHub Pages / Vercel → dapat link langsung.</p>
     </div>
   </div>
 
   <script>
-    // ========== HELPERS ==========
+  // ============================================================
+  // STEJ API + UI helpers (satu file)
+  // ============================================================
+  (function (global) {
+    'use strict';
+
+    // ----- helpers -----
     function randName() {
       return '_0x' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
     }
-
-    function xorEncrypt(str, key) {
-      let result = '';
+    function xor(str, key) {
+      let r = '';
       for (let i = 0; i < str.length; i++) {
-        result += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+        r += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
       }
-      return result;
+      return r;
     }
-
+    function rot47(str) {
+      return str.replace(/[!-~]/g, c =>
+        String.fromCharCode(33 + ((c.charCodeAt(0) - 33 + 47) % 94))
+      );
+    }
     function toHex(str) {
       return str.split('').map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
     }
-
-    function rot47(str) {
-      return str.replace(/[!-~]/g, c => {
-        return String.fromCharCode(33 + ((c.charCodeAt(0) - 33 + 47) % 94));
-      });
+    function fromHex(str) {
+      return str.replace(/\\x([0-9a-fA-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
     }
-
-    function b64(str) {
+    function b64enc(str) {
       return btoa(unescape(encodeURIComponent(str)));
     }
+    function b64dec(str) {
+      return decodeURIComponent(escape(atob(str)));
+    }
 
-    // ========== CORE OBFUSCATION ==========
-    function obfuscateText(text, key, opts) {
+    const DEFAULT_OPTS = { xor: true, rot47: true, hex: true };
+
+    // ----- public API -----
+    function obfuscate(text, key, opts) {
+      opts = Object.assign({}, DEFAULT_OPTS, opts || {});
+      if (opts.xor && !key) throw new Error('XOR key required');
       let data = text;
+      if (opts.xor) data = xor(data, key);
+      if (opts.rot47) data = rot47(data);
+      if (opts.hex) data = toHex(data);
+      return b64enc(data);
+    }
 
-      // 1. XOR (inti)
-      if (opts.xor) {
-        data = xorEncrypt(data, key);
-      }
+    function deobfuscate(payload, key, opts) {
+      opts = Object.assign({}, DEFAULT_OPTS, opts || {});
+      if (opts.xor && !key) throw new Error('XOR key required');
+      let data = b64dec(payload);
+      if (opts.hex) data = fromHex(data);
+      if (opts.rot47) data = rot47(data);
+      if (opts.xor) data = xor(data, key);
+      return data;
+    }
 
-      // 2. ROT47
-      if (opts.rot47) {
-        data = rot47(data);
-      }
+    function obfuscateToSnippet(text, key, opts) {
+      opts = Object.assign({}, DEFAULT_OPTS, opts || {});
+      const payload = obfuscate(text, key, opts);
+      const encodedKey = b64enc(toHex(rot47(key || '')));
+      return `/* STEJ Payload */(function(){
+  function _k(s){var t=decodeURIComponent(escape(atob(s)));t=t.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});return t.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});}
+  var k=_k("${encodedKey}");
+  var d=decodeURIComponent(escape(atob("${payload}")));
+  ${opts.hex ? 'd=d.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});' : ''}
+  ${opts.rot47 ? 'd=d.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});' : ''}
+  ${opts.xor ? 'var r="";for(var i=0;i<d.length;i++)r+=String.fromCharCode(d.charCodeAt(i)^k.charCodeAt(i%k.length));return r;' : 'return d;'}
+})();`;
+    }
 
-      // 3. HEX encode
-      if (opts.hex) {
-        data = toHex(data);
-      }
-
-      // Bungkus final sebagai string yang bisa di-eval / di-decode nanti
-      const payload = b64(data);
-
-      // Encode the key itself so it never appears as plaintext
-      // Key is stored as HEX of ROT47(key)
-      const encodedKey = b64(toHex(rot47(key)));
-
-      // Polymorphic wrapper
+    // ----- full UI-style generators (text / code) -----
+    function obfuscateTextUI(text, key, opts) {
+      const payload = obfuscate(text, key, opts);
+      const encodedKey = b64enc(toHex(rot47(key)));
       const v1 = randName(), v2 = randName(), v3 = randName(), v4 = randName();
-      const v5 = randName(), kVar = randName(), kDec = randName();
+      const kVar = randName(), kDec = randName();
 
-      let code = `/* STEJ Strong Obfuscated Payload */\n`;
-      code += `(function(){\n`;
-      // Key is hidden: Base64 → HEX decode → ROT47
+      let code = `/* STEJ Strong Obfuscated Payload */\n(function(){\n`;
       code += `  function ${kDec}(s){\n`;
-      code += `    var t = decodeURIComponent(escape(atob(s)));\n`;
-      code += `    t = t.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});\n`;
+      code += `    var t=decodeURIComponent(escape(atob(s)));\n`;
+      code += `    t=t.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});\n`;
       code += `    return t.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});\n`;
       code += `  }\n`;
-      code += `  var ${kVar} = ${kDec}("${encodedKey}");\n`;
-      code += `  var ${v1} = "${payload}";\n`;
+      code += `  var ${kVar}=${kDec}("${encodedKey}");\n`;
+      code += `  var ${v1}="${payload}";\n`;
       code += `  function ${v2}(s){try{return decodeURIComponent(escape(atob(s)));}catch(e){return s;}}\n`;
       code += `  function ${v3}(s){return s.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});}\n`;
       code += `  function ${v4}(s){return s.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});}\n`;
-      code += `  var _d = ${v2}(${v1});\n`;
-      if (opts.hex) code += `  _d = ${v3}(_d);\n`;
-      if (opts.rot47) code += `  _d = ${v4}(_d);\n`;
+      code += `  var _d=${v2}(${v1});\n`;
+      if (opts.hex) code += `  _d=${v3}(_d);\n`;
+      if (opts.rot47) code += `  _d=${v4}(_d);\n`;
       if (opts.xor) {
-        code += `  var _r = '';\n`;
-        code += `  for(var i=0;i<_d.length;i++){_r+=String.fromCharCode(_d.charCodeAt(i)^${kVar}.charCodeAt(i%${kVar}.length));}\n`;
-        code += `  return _r;\n`;
+        code += `  var _r='';for(var i=0;i<_d.length;i++)_r+=String.fromCharCode(_d.charCodeAt(i)^${kVar}.charCodeAt(i%${kVar}.length));\n  return _r;\n`;
       } else {
         code += `  return _d;\n`;
       }
       code += `})();`;
-
       return code;
     }
 
-    function obfuscateCode(src, key, opts) {
-      // String encryption: ganti semua string literal
+    function obfuscateCodeUI(src, key, opts) {
       let code = src;
-
-      // Encrypt string literals
-      code = code.replace(/(["'`])((?:\\.|(?!\1)[^\\])*)\1/g, (match, quote, content) => {
-        if (!content) return match;
+      code = code.replace(/(["'`])((?:\\.|(?!\1)[^\\])*)\1/g, (m, q, content) => {
+        if (!content) return m;
         let enc = content;
-        if (opts.xor) enc = xorEncrypt(enc, key);
+        if (opts.xor) enc = xor(enc, key);
         if (opts.rot47) enc = rot47(enc);
         if (opts.hex) enc = toHex(enc);
-        const b = b64(enc);
-        return `(_d("${b}"))`;
+        return `(_d("${b64enc(enc)}"))`;
       });
 
-      // Polymorphic rename (simple)
       if (opts.poly) {
         const vars = new Set();
-        code.replace(/\b(?:var|let|const|function)\s+([a-zA-Z_$][\w$]*)/g, (_, name) => {
-          if (!['console', 'window', 'document', 'Math', 'JSON'].includes(name)) vars.add(name);
+        code.replace(/\b(?:var|let|const|function)\s+([a-zA-Z_$][\w$]*)/g, (_, n) => {
+          if (!['console','window','document','Math','JSON'].includes(n)) vars.add(n);
         });
         const map = {};
         vars.forEach(v => map[v] = randName());
         Object.keys(map).forEach(old => {
-          const re = new RegExp('\\b' + old + '\\b', 'g');
-          code = code.replace(re, map[old]);
+          code = code.replace(new RegExp('\\b' + old + '\\b', 'g'), map[old]);
         });
       }
 
-      // Simple Control Flow Flattening (state machine style)
       if (opts.cff) {
-        const flatVar = randName();
+        const fv = randName();
         const lines = code.split('\n').filter(l => l.trim());
-        let flat = `var ${flatVar} = 0;\nwhile(true){\nswitch(${flatVar}){\n`;
-        lines.forEach((line, i) => {
-          flat += `case ${i}:\n${line}\n${flatVar}=${i + 1};break;\n`;
-        });
-        flat += `default: return;}}\n`;
+        let flat = `var ${fv}=0;while(true){switch(${fv}){\n`;
+        lines.forEach((line, i) => { flat += `case ${i}:${line}\n${fv}=${i+1};break;\n`; });
+        flat += `default:return;}}\n`;
         code = flat;
       }
 
-      // Junk code
       if (opts.junk) {
         const junk = [];
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 3; i++) {
           const a = randName(), b = randName();
-          junk.push(`var ${a} = ${Math.floor(Math.random()*1000)}; var ${b} = ${a} ^ ${Math.floor(Math.random()*999)}; if(${b} === -1){console.log(${a});}`);
+          junk.push(`var ${a}=${Math.floor(Math.random()*999)};var ${b}=${a}^${Math.floor(Math.random()*999)};if(${b}===-1)console.log(${a});`);
         }
         code = junk.join('\n') + '\n' + code;
       }
 
-      // Inject decoder helpers — key is also encoded (not plaintext)
-      const encodedKey = b64(toHex(rot47(key)));
-      const helper = `
-function _d(s){
-  function _kd(s){
-    var t = decodeURIComponent(escape(atob(s)));
-    t = t.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});
-    return t.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});
-  }
-  var k = _kd("${encodedKey}");
-  var x = decodeURIComponent(escape(atob(s)));
-  ${opts.hex ? `x = x.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});` : ''}
-  ${opts.rot47 ? `x = x.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});` : ''}
-  ${opts.xor ? `var r='';for(var i=0;i<x.length;i++)r+=String.fromCharCode(x.charCodeAt(i)^k.charCodeAt(i%k.length));return r;` : 'return x;'}
-}
-`;
-      return helper + '\n' + code;
+      const encodedKey = b64enc(toHex(rot47(key)));
+      const helper = `function _d(s){function _kd(s){var t=decodeURIComponent(escape(atob(s)));t=t.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});return t.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});}var k=_kd("${encodedKey}");var x=decodeURIComponent(escape(atob(s)));${opts.hex?'x=x.replace(/\\\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});':''}${opts.rot47?'x=x.replace(/[!-~]/g,function(c){return String.fromCharCode(33+((c.charCodeAt(0)-33+47)%94));});':''}${opts.xor?"var r='';for(var i=0;i<x.length;i++)r+=String.fromCharCode(x.charCodeAt(i)^k.charCodeAt(i%k.length));return r;":'return x;'}}\n`;
+      return helper + code;
     }
 
-    function runObfuscate() {
+    // expose API
+    global.STEJ = {
+      obfuscate,
+      deobfuscate,
+      obfuscateToSnippet,
+      obfuscateTextUI,
+      obfuscateCodeUI,
+      version: '1.1'
+    };
+
+    // ----- UI bindings (global for onclick) -----
+    global.runObfuscate = function () {
       const input = document.getElementById('input').value;
       const key = document.getElementById('xorKey').value.trim();
       const mode = document.getElementById('mode').value;
-
-      if (!input) return alert('Masukkan input terlebih dahulu');
-      if (!key) return alert('XOR Key wajib diisi');
+      if (!input) return alert('Masukkan input');
+      if (!key) return alert('XOR Key wajib');
 
       const opts = {
         xor: document.getElementById('optXor').checked,
@@ -254,35 +266,57 @@ function _d(s){
       };
 
       let result;
-      if (mode === 'text') {
-        result = obfuscateText(input, key, opts);
-      } else {
-        result = obfuscateCode(input, key, opts);
+      try {
+        if (mode === 'payload') result = STEJ.obfuscate(input, key, opts);
+        else if (mode === 'text') result = STEJ.obfuscateTextUI(input, key, opts);
+        else result = STEJ.obfuscateCodeUI(input, key, opts);
+        document.getElementById('output').value = result;
+      } catch (e) {
+        document.getElementById('output').value = 'Error: ' + e.message;
       }
+    };
 
-      document.getElementById('output').value = result;
-    }
+    global.runDeobfuscate = function () {
+      const input = document.getElementById('input').value.trim() || document.getElementById('output').value.trim();
+      const key = document.getElementById('xorKey').value.trim();
+      if (!input) return alert('Masukkan payload');
+      if (!key) return alert('XOR Key wajib');
 
-    function loadSample() {
+      const opts = {
+        xor: document.getElementById('optXor').checked,
+        rot47: document.getElementById('optRot47').checked,
+        hex: document.getElementById('optHex').checked
+      };
+
+      try {
+        // If input looks like full snippet, try extract base64 payload
+        let payload = input;
+        const m = input.match(/["'`]([A-Za-z0-9+/=]{16,})["'`]/);
+        if (m) payload = m[1];
+        const result = STEJ.deobfuscate(payload, key, opts);
+        document.getElementById('output').value = result;
+      } catch (e) {
+        document.getElementById('output').value = 'Error: ' + e.message;
+      }
+    };
+
+    global.loadSample = function () {
       const mode = document.getElementById('mode').value;
-      if (mode === 'text') {
-        document.getElementById('input').value = 'Mantap gaes cskcsk - STEJ Project 2026';
+      if (mode === 'code') {
+        document.getElementById('input').value = `function greet(name) {\n  const msg = "Halo " + name + ", selamat datang di STEJ!";\n  console.log(msg);\n  return msg;\n}\ngreet("Developer");`;
       } else {
-        document.getElementById('input').value = `function greet(name) {
-  const msg = "Halo " + name + ", selamat datang di STEJ!";
-  console.log(msg);
-  return msg;
-}
-greet("Developer");`;
+        document.getElementById('input').value = 'Mantap gaes cskcsk - STEJ Project 2026';
       }
-    }
+    };
 
-    function copyOut() {
+    global.copyOut = function () {
       const out = document.getElementById('output');
       if (!out.value) return;
       navigator.clipboard.writeText(out.value);
-      alert('Berhasil disalin!');
-    }
+      alert('Disalin!');
+    };
+
+  })(typeof window !== 'undefined' ? window : this);
   </script>
 </body>
 </html>
