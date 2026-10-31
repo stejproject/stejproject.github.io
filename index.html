@@ -82,9 +82,11 @@
   </div>
   <div class="taskbar">
     <div style="text-align: center;">
-      <button class="dot des-icon" onclick="currentSlide(1)" title="Home"><i class="bi bi-house"></i></button>
-      <button class="dot des-icon" onclick="currentSlide(2)" title="Features List"><i class="bi bi-card-list"></i></button>
-      <button class="dot des-icon" onclick="currentSlide(3)" title="Informations"><i class="bi bi-info-circle"></i></button>    </div>
+      <button class="dot des-icon" onclick="currentSlide(1)" title="Home" aria-label="Home"><i class="bi bi-house"></i></button>
+      <button class="dot des-icon" onclick="currentSlide(2)" title="Features List" aria-label="Features List"><i class="bi bi-card-list"></i></button>
+      <button class="dot des-icon" onclick="currentSlide(3)" title="Informations" aria-label="Informations"><i class="bi bi-info-circle"></i></button>
+      <button class="dot des-icon" id="menu-btn" title="settings" aria-label="settings">☰</button>  
+    </div>
   </div>
   <script src="https://stejproject.github.io/sys/js/taskbar.js" async></script>
 
@@ -184,7 +186,6 @@
 
           <!-- KATEGORI 1: Katalog mirip postingan scroll instagram -->
           <header id="topbar">
-            <button id="menu-btn" aria-label="Menu">☰</button>
               <a style="display:none;">Terjemahkan Bahasa/Translate</a>
               <div id="google_translate_element"></div>
               <script>
