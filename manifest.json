@@ -1,9 +1,9 @@
 {
-  "background_color": "#ffffff",
+  "background_color": "#ddae3b",
   "description": "Simple Trusted Elegant and Jenius Projects",
   "dir": "ltr",
   "display": "standalone",
-  "name": "stejproject.apps",
+  "name": "stejproject.portal",
   "orientation": "portrait",
   "scope": "https://stejproject.github.io/",
   "short_name": "stejproject",
