@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Konverter</title>
+    <title>PDF ke Markdown</title>
     <!-- Muat PDF.js dari CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
@@ -71,8 +71,8 @@
 <body>
 
 <div class="container">
-    <h1>Konverter PDF ke Markdown</h1>
-    <p>Pilih file PDF untuk mengekstrak teksnya menjadi format Markdown secara instan di browser Anda.</p>
+    <h1>Konverter PDF ke Markdown + Gambar</h1>
+    <p>Pilih file PDF untuk mengekstrak teks dan gambar ke dalam format Markdown secara instan.</p>
 
     <div class="upload-box" onclick="document.getElementById('pdfFile').click()">
         <p id="file-label">Klik di sini atau seret file PDF ke sini</p>
@@ -87,7 +87,6 @@
 </div>
 
 <script>
-    // Atur worker src untuk PDF.js
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
     const fileInput = document.getElementById('pdfFile');
@@ -105,7 +104,7 @@
 
         fileName = file.name.replace(/\.[^/.]+$/, "") + ".md";
         fileLabel.textContent = `File dipilih: ${file.name}`;
-        statusDiv.textContent = 'Membaca dan memproses PDF...';
+        statusDiv.textContent = 'Membaca dan memproses PDF beserta gambar...';
         outputArea.value = '';
         downloadBtn.style.display = 'none';
 
@@ -119,13 +118,44 @@
             for (let i = 1; i <= pdfDoc.numPages; i++) {
                 statusDiv.textContent = `Memproses halaman ${i} dari ${pdfDoc.numPages}...`;
                 const page = await pdfDoc.getPage(i);
+                
+                // 1. Ambil Teks Halaman
                 const textContent = await page.getTextContent();
-                
-                // Menggabungkan item teks per halaman
                 let pageText = textContent.items.map(item => item.str).join(' ');
-                
-                // Format sederhana menjadi struktur Markdown per halaman
-                fullText += `## Halaman ${i}\n\n${pageText}\n\n---\n\n`;
+
+                fullText += `## Halaman ${i}\n\n${pageText}\n\n`;
+
+                // 2. Ambil Operator Halaman untuk Mendeteksi Gambar (XObject / Images)
+                const operatorList = await page.getOperatorList();
+                let imageCount = 0;
+
+                for (let j = 0; j < operatorList.fnArray.length; j++) {
+                    // 58 adalah kode operator PDF.js untuk menggambar objek gambar (PAINT_IMAGE_XOBJECT / dll)
+                    if (operatorList.fnArray[j] === pdfjsLib.OPS.paintImageXObject || 
+                        operatorList.fnArray[j] === pdfjsLib.OPS.paintInlineImageXObject) {
+                        
+                        const imageName = operatorList.argsArray[j][0];
+                        try {
+                            const imgData = await new Promise((resolve) => {
+                                page.objs.get(imageName, (img) => {
+                                    resolve(img);
+                                });
+                            });
+
+                            if (imgData && imgData.width && imgData.height) {
+                                imageCount++;
+                                const base64Img = canvasImgToBase64(imgData);
+                                if (base64Img) {
+                                    fullText += `![Gambar ${i}.${imageCount}](${base64Img})\n\n`;
+                                }
+                            }
+                        } catch (imgErr) {
+                            console.warn(`Gagal mengekstrak gambar di halaman ${i}:`, imgErr);
+                        }
+                    }
+                }
+
+                fullText += `---\n\n`;
             }
 
             markdownContent = fullText;
@@ -134,9 +164,41 @@
             downloadBtn.style.display = 'inline-block';
         } catch (error) {
             console.error(error);
-            statusDiv.textContent = 'Terjadi kesalahan saat membaca file PDF.';
+            statusDiv.textContent = 'Terjadi kesalahan saat memproses file PDF.';
         }
     });
+
+    // Fungsi bantu untuk mengubah data objek gambar PDF.js menjadi Base64 PNG menggunakan canvas sementara
+    function canvasImgToBase64(imgData) {
+        const canvas = document.createElement('canvas');
+        canvas.width = imgData.width;
+        canvas.height = imgData.height;
+        const ctx = canvas.getContext('2d');
+        
+        let data = imgData.data;
+        // Tangani format warna gambar PDF yang bervariasi
+        if (imgData.kind === pdfjsLib.ImageKind.RGBA_32BPP) {
+            const arr = new Uint8ClampedArray(data.buffer);
+            const imgObj = new ImageData(arr, imgData.width, imgData.height);
+            ctx.putImageData(imgObj, 0, 0);
+        } else {
+            // Konversi manual untuk format grayscale atau RGB standar
+            const arr = new Uint8ClampedArray(imgData.width * imgData.height * 4);
+            let p = 0, q = 0;
+            for (let i = 0; i < imgData.width * imgData.height; i++) {
+                arr[p] = data[q];       // R
+                arr[p + 1] = data[q+1]; // G
+                arr[p + 2] = data[q+2]; // B
+                arr[p + 3] = 255;       // A (Alpha)
+                p += 4;
+                q += 3;
+            }
+            const imgObj = new ImageData(arr, imgData.width, imgData.height);
+            ctx.putImageData(imgObj, 0, 0);
+        }
+        
+        return canvas.toDataURL('image/png');
+    }
 
     function downloadMarkdown() {
         const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8' });
