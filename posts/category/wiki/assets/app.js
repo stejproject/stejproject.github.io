@@ -235,7 +235,7 @@
     });
   }
 
-  function search(q) {
+function search(q) {
     $('search-input').value = q;
     const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
     const res = idx.pages.map(p => {
@@ -249,9 +249,15 @@
       return { p, s };
     }).filter(r => r.s > 0 && terms.every(w => (r.p.title + ' ' + r.p.text + ' ' + r.p.categories.join(' ')).toLowerCase().includes(w)))
       .sort((a, b) => b.s - a.s);
+    
     const exact = lookup(q);
     let html = exact ? `<p>Ada halaman berjudul “${link(exact)}”.</p>` : (q ? `<p>Tidak ada halaman berjudul “${esc(q)}”. <a href="${adminUrl('new') + '?title=' + encodeURIComponent(q)}">Buat halaman ini</a>.</p>` : '');
-    html += res.length ? res.map(({ p }) => `<div class="result">${link(p)}<div class="snip">${esc(p.excerpt)}…</div></div>`).join('') : '<p>Tidak ada hasil.</p>';
+    if (res.length) {
+      html += res.map(({ p }) => `<div class="result">${link(p)}<div class="snip">${esc(p.excerpt)}…</div></div>`).join('');
+    } else {
+      const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+      html += `<p>Tidak ada hasil. <a href="${googleUrl}" target="_blank" rel="noopener noreferrer">Cari langsung di Google</a>.</p>`;
+    }
     render('Hasil pencarian', html, { special: true });
   }
 
