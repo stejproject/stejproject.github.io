@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STR/STEJ // Modul Verifikasi Empiris Ilmiah</title>
+    <title>STR/STEJ // Sintesis Epistemologi & Verifikasi Empiris</title>
     <style>
         :root {
             --bg-color: #0b0f12;
@@ -13,7 +13,9 @@
             --text-muted: #8899a6;
             --accent-green: #10b981;
             --accent-cyan: #06b6d4;
+            --accent-yellow: #f59e0b;
             --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
             --font-mono: 'Courier New', Courier, monospace;
         }
 
@@ -36,7 +38,7 @@
 
         .container {
             width: 100%;
-            max-width: 850px;
+            max-width: 1000px;
         }
 
         header {
@@ -56,7 +58,7 @@
         }
 
         h1 {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             color: var(--accent-cyan);
             margin-top: 0.4rem;
         }
@@ -70,7 +72,55 @@
             border-radius: 4px;
         }
 
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 850px) {
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        li {
+            margin-bottom: 0.6rem;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: var(--text-main);
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+        }
+
+        .control-panel {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 6px;
@@ -78,15 +128,8 @@
             margin-bottom: 1.5rem;
         }
 
-        .card-title {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-            letter-spacing: 1px;
-        }
-
         .input-group {
-            margin-bottom: 1.2rem;
+            margin-bottom: 1rem;
         }
 
         label {
@@ -96,7 +139,7 @@
             color: var(--text-muted);
         }
 
-        select, textarea {
+        select {
             width: 100%;
             background: var(--bg-color);
             border: 1px solid var(--border-color);
@@ -107,14 +150,9 @@
             font-size: 0.9rem;
         }
 
-        select:focus, textarea:focus {
+        select:focus {
             outline: none;
             border-color: var(--accent-cyan);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
         }
 
         button {
@@ -136,41 +174,14 @@
             opacity: 0.9;
         }
 
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .metric-box {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 1rem;
-            border-radius: 6px;
-        }
-
-        .metric-title {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 0.4rem;
-        }
-
-        .metric-content {
-            font-size: 0.9rem;
-            color: var(--accent-green);
-            line-height: 1.4;
-        }
-
         .terminal-output {
             background: #06090d;
             border: 1px solid var(--border-color);
             padding: 1rem;
             border-radius: 4px;
             font-size: 0.85rem;
-            min-height: 140px;
-            max-height: 220px;
+            min-height: 130px;
+            max-height: 200px;
             overflow-y: auto;
             color: var(--accent-green);
             line-height: 1.6;
@@ -193,93 +204,99 @@
         <header>
             <div>
                 <span class="system-id">STR // STEJ CLOUD WIKI PROTOCOL</span>
-                <h1>MODUL VERIFIKASI EMPIRIS ILMIAH</h1>
+                <h1>SINTESIS VERIFIKASI EMPIRIS & METODOLOGI RISET</h1>
             </div>
-            <div class="status-badge">ACTIVE METHODOLOGY</div>
+            <div class="status-badge">ZERO-TRUST FRAMEWORK</div>
         </header>
 
-        <!-- Panel Konfigurasi Pendekatan -->
-        <div class="card">
-            <div class="card-title">> PILIH PENDEKATAN VERIFIKASI EMPIRIS</div>
+        <!-- 3 Pilar Utama: Ciri, Pendekatan, Antitesa -->
+        <div class="grid-3">
+            <!-- 1. Ciri Verifikasi -->
+            <div class="card" style="margin-bottom:0;">
+                <div class="card-title" style="color: var(--accent-cyan);">1. Ciri Empiris</div>
+                <ul>
+                    <li style="--color: var(--accent-cyan);"><strong>Fakta Lapangan:</strong> Berdasar observasi panca indra, bukan intuisi murni.</li>
+                    <li style="--color: var(--accent-cyan);"><strong>Objektif:</strong> Dapat diuji kembali & direplikasi peneliti lain.</li>
+                    <li style="--color: var(--accent-cyan);"><strong>Sistematis:</strong> Mengikuti prosedur ilmiah baku.</li>
+                </ul>
+            </div>
+
+            <!-- 2. Pendekatan Riset -->
+            <div class="card" style="margin-bottom:0;">
+                <div class="card-title" style="color: var(--accent-purple);">2. Jalur Riset</div>
+                <ul>
+                    <li style="--color: var(--accent-purple);"><strong>Kuantitatif:</strong> Deduktif, angka, statistik, sampel besar, objektif.</li>
+                    <li style="--color: var(--accent-purple);"><strong>Kualitatif:</strong> Induktif, narasi, makna mendalam, human instrument.</li>
+                </ul>
+            </div>
+
+            <!-- 3. Antitesa -->
+            <div class="card" style="margin-bottom:0;">
+                <div class="card-title" style="color: var(--accent-yellow);">3. Antitesa</div>
+                <ul>
+                    <li style="--color: var(--accent-yellow);"><strong>Rasionalisme:</strong> Logika murni/apriorisme.</li>
+                    <li style="--color: var(--accent-yellow);"><strong>Falsifikasi:</strong> Uji celah salah ala Popper.</li>
+                    <li style="--color: var(--accent-yellow);"><strong>Dogmatisme:</strong> Ditolak (tanpa bukti).</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Panel Interaktif Simulator -->
+        <div class="control-panel">
+            <div class="card-title" style="color: var(--text-main); margin-bottom: 1rem;">> SIMULATOR EVALUASI KLAIM METODOLOGI</div>
             
             <div class="input-group">
-                <label for="approachSelect">Pendekatan Riset:</label>
-                <select id="approachSelect" onchange="updateParameters()">
-                    <option value="quantitative">Kuantitatif (Deduktif: Teori -> Hipotesis -> Angka/Statistik)</option>
-                    <option value="qualitative">Kualitatif (Induktif: Lapangan -> Makna/Narasi -> Pola Baru)</option>
+                <label for="testMode">Pilih Titik Pengujian Sistem:</label>
+                <select id="testMode">
+                    <option value="kuantitatif">Uji Pendekatan Kuantitatif (Deduktif - Statistik & Angka)</option>
+                    <option value="kualitatif">Uji Pendekatan Kualitatif (Induktif - Narasi & Makna)</option>
+                    <option value="falsifikasi">Uji Falsifikasi (Mencari Angsa Hitam / Celah Kesalahan)</option>
+                    <option value="dogma">Uji Dogmatisme / Fideisme (Klaim Tanpa Bukti Empiris)</option>
                 </select>
             </div>
 
-            <div class="input-group">
-                <label id="inputLabel" for="fieldData">Instrumen & Data Lapangan:</label>
-                <textarea id="fieldData" placeholder="Masukkan data atau parameter pengamatan...">Sampel acak besar n=500, kuesioner baku terstruktur, uji statistik regresi.</textarea>
-            </div>
-
-            <button onclick="executeEmpiricalVerification()">Proses Verifikasi Empiris</button>
+            <button onclick="runProtocol()">Jalankan Evaluasi Protokol</button>
         </div>
 
-        <!-- Panel Karakteristik Sistem -->
-        <div class="grid-2">
-            <div class="metric-box">
-                <div class="metric-title">Sifat Analisis & Instrumen</div>
-                <div id="resMethod" class="metric-content">-</div>
-            </div>
-            <div class="metric-box">
-                <div class="metric-title">Fokus & Ukuran Sampel</div>
-                <div id="resFocus" class="metric-content">-</div>
-            </div>
-        </div>
-
-        <!-- Terminal Log Hasil Analisis -->
+        <!-- Terminal Log -->
         <div class="card">
-            <div class="card-title">> LOG HASIL ANALISIS EMPIRIS</div>
+            <div class="card-title" style="color: var(--text-muted);">> TERMINAL LOG ANALISIS</div>
             <div id="terminalLog" class="terminal-output">
-                > Menunggu parameter masukan...<br>
-                > Pilih pendekatan kuantitatif atau kualitatif untuk menjalankan verifikasi.
+                > Sistem siap menerima parameter pengujian epistemologi...<br>
+                > Pilih modul di atas untuk melakukan verifikasi silang data.
             </div>
         </div>
     </div>
 
     <footer>
-        [ STRAT DE RUUM DOME ] — Empirical Root Reference Framework.
+        [ STRAT DE RUUM DOME ] — Root Reference Architecture. Focus on what's alive.
     </footer>
 
     <script>
-        function updateParameters() {
-            const approach = document.getElementById('approachSelect').value;
-            const fieldData = document.getElementById('fieldData');
-            
-            if (approach === 'quantitative') {
-                fieldData.value = "Sampel acak besar (random sampling), kuesioner tertutup baku, instrumen uji laboratorium/statistik.";
-            } else {
-                fieldData.value = "Sampel purposive kecil, human instrument (wawancara mendalam & observasi partisipatif).";
-            }
-        }
+        // Mengatur warna bullet dinamis sesuai inline style
+        document.querySelectorAll('li').forEach(li => {
+            const color = li.style.getPropertyValue('--color') || 'var(--accent-cyan)';
+            li.style.cssText += `--bullet-color: ${color};`;
+        });
 
-        function executeEmpiricalVerification() {
-            const approach = document.getElementById('approachSelect').value;
-            const dataVal = document.getElementById('fieldData').value;
-            const resMethod = document.getElementById('resMethod');
-            const resFocus = document.getElementById('resFocus');
+        function runProtocol() {
+            const mode = document.getElementById('testMode').value;
             const terminal = document.getElementById('terminalLog');
 
-            terminal.innerHTML = "> Menginisialisasi protokol verifikasi empiris...<br>";
+            terminal.innerHTML = "> Memproses evaluasi metodologi empiris...<br>";
 
             setTimeout(() => {
-                if (approach === 'quantitative') {
-                    resMethod.innerHTML = "<strong>Deduktif:</strong> Alat ukur baku, angka, skor, grafik & rumus statistik.";
-                    resFocus.innerHTML = "<strong>Objektif & Bebas Nilai:</strong> Menguji hipotesis dan mencari generalisasi populasi luas.";
-                    terminal.innerHTML += `> [KUANTITATIF TERVERIFIKASI]<br>> Memproses data numerik: "${dataVal}"<br><span style="color: var(--accent-cyan);">> Status: Korelasi & sebab-akibat terbukti secara statistik objektif.</span>`;
+                if (mode === 'kuantitatif') {
+                    terminal.innerHTML += `<span style="color: var(--accent-cyan);">> [VALIDASI KUANTITATIF]: Berhasil. Menguji hipotesis, instrumen baku, dan data statistik objektif terukur secara deduktif.</span>`;
+                } else if (mode === 'kualitatif') {
+                    terminal.innerHTML += `<span style="color: var(--accent-purple);">> [VALIDASI KUALITATIF]: Berhasil. Human instrument menangkap narasi, makna mendalam, dan konteks sosial secara induktif.</span>`;
+                } else if (mode === 'falsifikasi') {
+                    terminal.innerHTML += `<span style="color: var(--accent-yellow);">> [UJI FALSIFIKASI POPPER]: Diterapkan. Sistem aktif mencari "angsa hitam" atau potensi anomali untuk menguji ketahanan teori dari klaim kebenaran mutlak.</span>`;
                 } else {
-                    resMethod.innerHTML = "<strong>Induktif:</strong> Human instrument, narasi, hasil wawancara & catatan lapangan.";
-                    resFocus.innerHTML = "<strong>Context-Bound:</strong> Memahami makna subjektif, budaya, & pengalaman mendalam.";
-                    terminal.innerHTML += `> [KUALITATIF TERVERIFIKASI]<br>> Memproses data naratif: "${dataVal}"<br><span style="color: var(--accent-purple);">> Status: Pola makna mendalam dan konteks sosial tervalidasi.</span>`;
+                    terminal.innerHTML += `<span style="color: var(--accent-red);">> [TOLAK // DOGMATISME]: Gagal total. Klaim bersandar pada otoritas mutlak/iman tanpa verifikasi fakta lapangan. Otomatis diblokir sistem root reference.</span>`;
                 }
             }, 500);
         }
-
-        // Jalankan inisialisasi awal
-        updateParameters();
     </script>
 </body>
 </html>
