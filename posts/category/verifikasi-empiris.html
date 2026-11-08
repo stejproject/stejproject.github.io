@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STR/STEJ — Modul Verifikasi Empiris</title>
+    <style>
+        :root {
+            --bg-color: #0b0f12;
+            --card-bg: #131920;
+            --border-color: #263544;
+            --text-main: #e2e8f0;
+            --text-muted: #8899a6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-cyan: #06b6d4;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        header {
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .system-id {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--accent-cyan);
+            margin-top: 0.5rem;
+        }
+
+        .status-badge {
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        select, input {
+            width: 100%;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.75rem;
+            font-family: var(--font-mono);
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        button {
+            background: var(--accent-cyan);
+            color: var(--bg-color);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            transition: opacity 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .terminal-output {
+            background: #06090d;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            min-height: 120px;
+            max-height: 200px;
+            overflow-y: auto;
+            color: var(--accent-green);
+            line-height: 1.5;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-box {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 0.25rem;
+        }
+
+        .valid { color: var(--accent-green); }
+        .invalid { color: var(--accent-red); }
+
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: auto;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 1rem;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div>
+                <span class="system-id">STR // STEJ CLOUD WIKI PROTOCOL</span>
+                <h1>MODUL VERIFIKASI EMPIRIS</h1>
+            </div>
+            <div class="status-badge">ONLINE // SECURE</div>
+        </header>
+
+        <!-- Panel Kontrol Input -->
+        <div class="card">
+            <div class="card-title">> PILIH PARAMETER PENGUJIAN DATA</div>
+            
+            <div class="input-group">
+                <label for="claimType">Pilih Kasus / Klaim Narasi Publik:</label>
+                <select id="claimType">
+                    <option value="pencitraan">Klaim Sukses Instansi Lewat Seremonial & Anggaran Besar</option>
+                    <option value="kardus">Kelayakan Operasional Sistem Manual/Kardus saat Krisis</option>
+                    <option value="almamater">Validitas Kapasitas Personal Berdasarkan Stempel Almamater</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="observationalData">Masukkan Variabel Pengamatan Langsung (Empiris):</label>
+                <input type="text" id="observationalData" placeholder="Contoh: Logika mekanis berfungsi, tanpa listrik, data valid." value="Fungsi mekanis mandiri teruji, tanpa ketergantungan luar.">
+            </div>
+
+            <button onclick="runVerification()">Jalankan Verifikasi Zero-Trust</button>
+        </div>
+
+        <!-- Metrik Hasil -->
+        <div class="metric-grid">
+            <div class="metric-box">
+                <label>Status Kebenaran Data</label>
+                <div id="truthStatus" class="metric-value">-</div>
+            </div>
+            <div class="metric-box">
+                <label>Indeks Ketahanan Sistem</label>
+                <div id="resilienceIndex" class="metric-value">-</div>
+            </div>
+        </div>
+
+        <!-- Terminal Log -->
+        <div class="card">
+            <div class="card-title">> TERMINAL OUTPUT LOG</div>
+            <div id="terminalLog" class="terminal-output">
+                > Sistem siap menerima parameter pengujian...<br>
+                > Ketik atau pilih parameter di atas, lalu jalankan verifikasi.
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        [ STRAT DE RUUM DOME ] — 600-Year Root Reference Architecture. Focus on what's alive.
+    </footer>
+
+    <script>
+        function runVerification() {
+            const claimType = document.getElementById('claimType').value;
+            const obsData = document.getElementById('observationalData').value;
+            const terminal = document.getElementById('terminalLog');
+            const truthStatus = document.getElementById('truthStatus');
+            const resilienceIndex = document.getElementById('resilienceIndex');
+
+            // Efek simulasi log terminal
+            terminal.innerHTML = "> Memproses verifikasi data empiris...<br>";
+            
+            setTimeout(() => {
+                terminal.innerHTML += `> Menganalisis klaim: [${claimType.toUpperCase()}...]<br>`;
+            }, 300);
+
+            setTimeout(() => {
+                terminal.innerHTML += `> Menguji variabel pengamatan: "${obsData}"<br>`;
+            }, 600);
+
+            setTimeout(() => {
+                if (claimType === 'pencitraan') {
+                    truthStatus.innerHTML = "GAGAL (BOHONG)";
+                    truthStatus.className = "metric-value invalid";
+                    resilienceIndex.innerHTML = "0%";
+                    terminal.innerHTML += `<span class="invalid">> [!] VERIFIKASI GAGAL: Klaim runtuh diuji substansi. Hanya berbasis retorika kosong dan kultus simbol.</span>`;
+                } else if (claimType === 'kardus') {
+                    truthStatus.innerHTML = "VALID OTENTIK";
+                    truthStatus.className = "metric-value valid";
+                    resilienceIndex.innerHTML = "100% (Offline-First)";
+                    terminal.innerHTML += `<span class="valid">> [OK] VERIFIKASI BERHASIL: Sistem mekanis berfungsi presisi tanpa server luar. Ketahanan mutlak teruji.</span>`;
+                } else {
+                    truthStatus.innerHTML = "TIDAK RELEVAN";
+                    truthStatus.className = "metric-value invalid";
+                    resilienceIndex.innerHTML = "25%";
+                    terminal.innerHTML += `<span class="invalid">> [!] VERIFIKASI GAGAL: Stempel seremonial/almamater tidak memiliki korelasi empiris dengan kapasitas kognitif nyata.</span>`;
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
