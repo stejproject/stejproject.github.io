@@ -581,6 +581,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
 .dot.ET{background:var(--et)}.dot.MT{background:var(--mt)}.dot.PT{background:var(--pt)}.dot.WIB{background:var(--dieng)}
 .legend{display:flex;gap:10px;font-size:.75rem;color:var(--muted);margin-top:10px;flex-wrap:wrap}
 .tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.authbar{margin:0 0 10px;padding:8px 10px;border-radius:10px;background:var(--soft);font-size:.8rem}
+body.ro #form > *:not(.conv){display:none}
+body.ro #btnSample,body.ro #btnClearAll{display:none}
 .note{font-size:.76rem;color:var(--muted);margin-top:8px}
 #toasts{position:fixed;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;z-index:50;max-width:calc(100vw - 24px)}
 .toast{background:#111827;color:#fff;padding:12px 14px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);width:320px;max-width:100%;border-left:5px solid var(--warn)}
@@ -608,6 +611,17 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
 <main>
   <section class="card" aria-label="Tambah rapat">
     <h2>➕ Tambah Rapat</h2>
+    <div id="authBar" class="authbar" style="display:none"></div>
+    <div id="loginBox" class="conv" style="display:none">
+      <b>🔐 Masuk admin</b>
+      <input type="email" id="admEmail" placeholder="Email admin" autocomplete="username">
+      <input type="password" id="admPass" placeholder="Kata sandi" autocomplete="current-password" style="margin-top:6px">
+      <div class="tools">
+        <button class="btn sm" id="btnDoLogin" type="button">Masuk</button>
+        <button class="btn ghost sm" id="btnCancelLogin" type="button">Batal</button>
+      </div>
+      <div class="note" id="loginMsg"></div>
+    </div>
     <form id="form" autocomplete="off">
       <label for="partner">Nama Mitra</label>
       <input id="partner" required maxlength="40" placeholder="mis. Mitra NY">
@@ -727,6 +741,92 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
   const DKEY  = "ring1_dieng_offset_v1";
   const REMINDERS = [30, 5];
 
+  // ===== Jadwal bersama via Firebase Realtime Database (REST, tanpa SDK) =====
+  // Isi dua nilai ini untuk mengaktifkan. Kosong = mode lokal (localStorage, seperti sebelumnya).
+  const FB = { databaseURL: "", apiKey: "" };
+  const SHARED = !!(FB.databaseURL && FB.apiKey);
+  const AKEY = "ring1_vc_auth";
+  let auth = SHARED ? load(AKEY, null) : null;
+  const isAdmin = () => !SHARED || !!(auth && auth.idToken);
+  const dbBase = () => FB.databaseURL.replace(/\/+$/, "") + "/ring1/events";
+  const persistLocal = () => { if(!SHARED) save(KEY, events); };
+
+  async function getToken(){
+    if(!auth) throw new Error("Belum masuk sebagai admin");
+    if(Date.now() > auth.exp - 60000){
+      const r = await fetch("https://securetoken.googleapis.com/v1/token?key=" + encodeURIComponent(FB.apiKey), {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(auth.refreshToken)
+      });
+      const j = await r.json();
+      if(!r.ok){ auth = null; save(AKEY, null); renderAuth(); render(); throw new Error("Sesi habis, silakan masuk lagi"); }
+      auth = { idToken: j.id_token, refreshToken: j.refresh_token, exp: Date.now() + (+j.expires_in) * 1000, email: auth.email };
+      save(AKEY, auth);
+    }
+    return auth.idToken;
+  }
+
+  async function dbReq(method, path, body){
+    const t = await getToken();
+    const r = await fetch(dbBase() + path + ".json?auth=" + encodeURIComponent(t), {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body)
+    });
+    if(!r.ok) throw new Error(r.status === 401 || r.status === 403 ? "Ditolak: akun ini bukan admin" : "Gagal menyimpan (" + r.status + ")");
+    return r.json();
+  }
+
+  async function pull(){
+    if(!SHARED) return;
+    try{
+      const r = await fetch(dbBase() + ".json", { cache: "no-store" });
+      if(!r.ok) return;
+      const o = await r.json();
+      events = Object.values(o || {}).filter(e => e && e.start && e.link).sort((a, b) => a.start - b.start);
+      render();
+    }catch(e){ /* tetap tampilkan data terakhir */ }
+  }
+
+  async function doLogin(){
+    const email = $("#admEmail").value.trim(), pass = $("#admPass").value;
+    $("#loginMsg").textContent = "Memeriksa…";
+    try{
+      const r = await fetch("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + encodeURIComponent(FB.apiKey), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: pass, returnSecureToken: true })
+      });
+      const j = await r.json();
+      if(!r.ok) throw new Error("Email atau kata sandi salah");
+      auth = { idToken: j.idToken, refreshToken: j.refreshToken, exp: Date.now() + (+j.expiresIn) * 1000, email: j.email };
+      save(AKEY, auth);
+      $("#admPass").value = "";
+      $("#loginMsg").textContent = "";
+      $("#loginBox").style.display = "none";
+      renderAuth(); render();
+      toast("Masuk", "Anda masuk sebagai admin.", null, true);
+    }catch(e){ $("#loginMsg").textContent = e.message; }
+  }
+
+  function logout(){ auth = null; save(AKEY, null); renderAuth(); render(); }
+
+  function renderAuth(){
+    const bar = $("#authBar");
+    document.body.classList.toggle("ro", SHARED && !isAdmin());
+    if(!SHARED){ bar.style.display = "none"; return; }
+    bar.style.display = "block";
+    bar.innerHTML = isAdmin()
+      ? `🔓 Admin: ${esc(auth.email || "")} · <button class="btn ghost sm" id="btnLogout" type="button">Keluar</button>`
+      : `👁 Jadwal bersama (mode lihat). Hanya admin yang bisa mengubah. <button class="btn ghost sm" id="btnLogin" type="button">Masuk admin</button>`;
+  }
+
+  document.addEventListener("click", ev => {
+    if(ev.target.closest("#btnLogin")) $("#loginBox").style.display = "block";
+    if(ev.target.closest("#btnLogout")) logout();
+  });
+
   const $   = s => document.querySelector(s);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const pad = n => String(n).padStart(2, "0");
@@ -734,7 +834,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
   function load(k, d){ try{ return JSON.parse(localStorage.getItem(k)) ?? d; }catch(e){ return d; } }
   function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 
-  let events = load(KEY, []);
+  let events = SHARED ? [] : load(KEY, []);
   let fired  = load(FIRED, {});
   let view   = "agenda";
   let cursor = new Date();
@@ -921,20 +1021,25 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
     $("#preview").innerHTML = h || "Isi formulir untuk melihat pratinjau.";
   }
 
-  function addEvent(e){
+  async function addEvent(e){
+    if(SHARED){
+      try{ await dbReq("PUT", "/" + e.id, e); }
+      catch(err){ toast("Gagal", err.message, null, false); return false; }
+    }
     events.push(e);
     events.sort((a, b) => a.start - b.start);
-    save(KEY, events);
+    persistLocal();
     render();
+    return true;
   }
 
-  $("#form").addEventListener("submit", ev => {
+  $("#form").addEventListener("submit", async ev => {
     ev.preventDefault();
     const link = safeUrl($("#link").value.trim());
     if(!/^https:\/\/meet\.jit\.si\/[\w.-]+\/?$/.test(link)){ alert("Tautan rapat harus Jitsi, contoh: https://meet.jit.si/stejproject.vrends"); return; }
     const z = $("#tz").value;
     const start = zonedToUtc($("#date").value, $("#time").value, z);
-    addEvent({
+    if(!(await addEvent({
       id: "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
       partner: $("#partner").value.trim(),
       tz: z,
@@ -943,7 +1048,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
       dur: +$("#dur").value,
       platform: $("#platform").value,
       link
-    });
+    }))) return;
     toast("Tersimpan", "Rapat ditambahkan ke kalender bersama.", null, true);
     $("#topic").value = "";
     updatePreview();
@@ -960,19 +1065,27 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
     }
   });
 
-  function del(id){
+  async function del(id){
     if(!confirm("Hapus jadwal ini?")) return;
+    if(SHARED){
+      try{ await dbReq("DELETE", "/" + id); }
+      catch(err){ toast("Gagal", err.message, null, false); return; }
+    }
     events = events.filter(e => e.id !== id);
-    save(KEY, events);
+    persistLocal();
     render();
   }
 
-  $("#btnClearAll").addEventListener("click", () => {
+  $("#btnClearAll").addEventListener("click", async () => {
     if(!events.length){ alert("Belum ada jadwal."); return; }
     if(!confirm("Hapus SEMUA jadwal? Tindakan ini tidak bisa dibatalkan.")) return;
+    if(SHARED){
+      try{ await dbReq("DELETE", ""); }
+      catch(err){ toast("Gagal", err.message, null, false); return; }
+    }
     events = [];
     fired = {};
-    save(KEY, events);
+    persistLocal();
     save(FIRED, fired);
     render();
     toast("Dikosongkan", "Semua jadwal telah dihapus.", null, true);
@@ -1006,7 +1119,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
           <a class="btn sm" href="${esc(e.link)}" target="_blank" rel="noopener noreferrer" ${jitsiRoom(e.link) ? 'data-jitsi="' + esc(jitsiRoom(e.link)) + '"' : ""}>Gabung</a>
           <button class="btn ghost sm" data-copy="${e.id}">Salin tautan</button>
           <button class="btn ghost sm" data-ics="${e.id}">.ics</button>
-          <button class="btn danger sm" data-del="${e.id}">Hapus</button>
+          ${isAdmin() ? `<button class="btn danger sm" data-del="${e.id}">Hapus</button>` : ""}
         </div>
       </div>
     </div>`;
@@ -1194,7 +1307,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
     });
   }
 
-  $("#btnSample").addEventListener("click", () => {
+  $("#btnSample").addEventListener("click", async () => {
     const base = dKey(Date.now());
     const mk = (add, hh, mm, p, z, t, link, plat) => {
       const [y, mo, d] = base.split("-").map(Number);
@@ -1207,14 +1320,19 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
         dur: 60, platform: plat, link
       };
     };
-    events.push(
+    const added = [
       mk(1, 9, 0, "Mitra NY", "ET", "Sinkronisasi Proyek", "https://meet.jit.si/stejproject.vrends", "Jitsi (STEJ)"),
       mk(2, 10, 30, "Mitra Denver", "MT", "Review Kontrak", "https://meet.jit.si/stejproject.vrends", "Jitsi (STEJ)"),
       mk(3, 8, 0, "Mitra LA", "PT", "Demo Produk", "https://meet.jit.si/stejproject.vrends", "Jitsi (STEJ)"),
       mk(0, 14, 0, "Tim Jakarta", "WIB", "Standup Harian", "https://meet.jit.si/stejproject.vrends", "Jitsi (STEJ)")
-    );
+    ];
+    if(SHARED){
+      try{ const body = {}; added.forEach(x => { body[x.id] = x; }); await dbReq("PATCH", "", body); }
+      catch(err){ toast("Gagal", err.message, null, false); return; }
+    }
+    events.push(...added);
     events.sort((a, b) => a.start - b.start);
-    save(KEY, events);
+    persistLocal();
     render();
     toast("Contoh data", "4 jadwal contoh ditambahkan.", null, true);
   });
@@ -1224,14 +1342,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
   updateNotifBtn();
   updatePreview();
   updateConv();
+  renderAuth();
+  $("#btnDoLogin").addEventListener("click", doLogin);
+  $("#btnCancelLogin").addEventListener("click", () => { $("#loginBox").style.display = "none"; });
+  $("#admPass").addEventListener("keydown", e => { if(e.key === "Enter") doLogin(); });
   tick();
   render();
+  pull();
+  if(SHARED) setInterval(pull, 15000);
   checkReminders();
   setInterval(tick, 1000);
   setInterval(checkReminders, 15000);
   setInterval(() => { if(view === "agenda") render(); }, 60000);
   window.addEventListener("storage", () => {
-    events = load(KEY, []);
+    if(!SHARED) events = load(KEY, []);
     fired = load(FIRED, {});
     render();
   });
