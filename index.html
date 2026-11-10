@@ -38,6 +38,30 @@
     // Register
     customElements.define('zero-md', ZeroMd)
   </script>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyCNWEZ5M06va6bWqlzAe42qNThxkpz9vn0",
+      authDomain: "stej-kalender.firebaseapp.com",
+      projectId: "stej-kalender",
+      storageBucket: "stej-kalender.firebasestorage.app",
+      messagingSenderId: "647733449774",
+      appId: "1:647733449774:web:cf6b0ea2557a6c06bb7bbf",
+      measurementId: "G-ETE4BTC2NQ"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    window.stejLog = (name, params) => logEvent(analytics, name, params);
+  </script>
 </head>
 
 <body>
@@ -734,7 +758,7 @@ body.ro #btnSample,body.ro #btnClearAll{display:none}
 
   // ===== Jadwal bersama via Firebase Realtime Database (REST, tanpa SDK) =====
   // Isi dua nilai ini untuk mengaktifkan. Kosong = mode lokal (localStorage, seperti sebelumnya).
-  const FB = { databaseURL: "", apiKey: "" };
+  const FB = {databaseURL: "https://stej-kalender-default-rtdb.asia-southeast1.firebasedatabase.app",apiKey: "AIzaSyCNWEZ5M06va6bWqlzAe42qNThxkpz9vn0"};
   const SHARED = !!(FB.databaseURL && FB.apiKey);
   const AKEY = "ring1_vc_auth";
   let auth = SHARED ? load(AKEY, null) : null;
