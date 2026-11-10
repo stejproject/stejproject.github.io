@@ -106,114 +106,105 @@
           </button>
           <h1 id="homeTitle" style="font-family: 'Marcellus'; font-size: 30px; margin: 24px 0 0; text-align: center;">STEJ Project</h1>
           <p id="homeHint" style="text-align: center; margin: 10px 0 0;">Ketuk logo untuk Menyapa Citra Bergerak</p>
-          <button type="button" id="calToggleHome" class="sub" style="margin: 14px auto 0;">📅 Kalender Rapat</button>
         </div>
 
-        <div id="meetBar" style="display: none; justify-content: center; align-items: center; gap: 8px; margin: 10px auto; flex-wrap: wrap;">
+        <div id="meetBar" style="display: none; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
           <button type="button" id="leaveMeet" class="sub" style="margin: 0;">Keluar</button>
-          <button type="button" id="calToggleMeet" class="sub" style="margin: 0;">📅 Kalender Rapat</button>
         </div>
         <div id="jaas-container" style="display: none; width: 100%; height: 75vh;">
           <iframe src="https://stejproject.github.io/search.github.io/" title="Results" name="lmp"></iframe>
         </div>
         <div id="calPanel" style="display: none; width: 100%; margin: 10px 0;">
-          <iframe id="calFrame" title="Kalender Video Conference" style="width: 100%; height: 85vh; border: 0; border-radius: 12px;"></iframe>
+          <iframe id="calFrame" title="Kalender Video Conference" style="width: 100%; height: 77vh; border: 0; border-radius: 12px;"></iframe>
         </div>
       </div>
       <script>
-        // Video Conference (JaaS / 8x8.vc). Script dan meeting baru dimuat saat
-        // logo diketuk, supaya kamera/mikrofon dan koneksi tidak jalan otomatis.
-        (function () {
-          // Sementara memakai Jitsi publik (meet.jit.si).
-          var DOMAIN = 'meet.jit.si';
-          var ROOM = 'stejproject.vrends';
-
-          // Untuk pindah ke JaaS nanti, ganti tiga baris di atas dengan:
-          // var DOMAIN = '8x8.vc';
-          // var APP_ID = 'vpaas-magic-cookie-0abcbf402b284e209b9cf5a5a9afa633';
-          // var ROOM = APP_ID + '/NamaRuangAnda';
-          // lalu ubah SCRIPT_URL di bawah menjadi 'https://8x8.vc/' + APP_ID + '/external_api.js'
-          var SCRIPT_URL = 'https://' + DOMAIN + '/external_api.js';
-
-          var join = document.getElementById('joinMeet');
-          var leave = document.getElementById('leaveMeet');
-          var bar = document.getElementById('meetBar');
-          var box = document.getElementById('jaas-container');
-          var home = document.getElementById('homeWrap');
-          var api = null;
-
-          function showMeeting() {
-            box.style.display = 'block';
-            bar.style.display = 'flex';
-            home.style.display = 'none';
+      (function () {
+        var DOMAIN = 'meet.jit.si';
+        var ROOM = 'stejproject.vrends';
+        var SCRIPT_URL = 'https://' + DOMAIN + '/external_api.js';
+      
+        var join = document.getElementById('joinMeet');
+        var leave = document.getElementById('leaveMeet');
+        var bar = document.getElementById('meetBar');
+        var box = document.getElementById('jaas-container');
+        var home = document.getElementById('homeWrap');
+        var calPanel = document.getElementById('calPanel');
+        var calFrame = document.getElementById('calFrame');
+        var api = null;
+        var mode = 'home'; // 'home' | 'cal' | 'meet'
+      
+        function setMode(m) {
+          mode = m;
+          home.style.display = m === 'home' ? 'flex' : 'none';
+          bar.style.display = m === 'home' ? 'none' : 'flex';
+          calPanel.style.display = m === 'cal' ? 'block' : 'none';
+          box.style.display = m === 'meet' ? 'block' : 'none';
+          leave.textContent = m === 'meet' ? '← Kembali ke Kalender' : 'Keluar';
+        }
+      
+        function disposeMeeting() {
+          if (api) { api.dispose(); api = null; }
+        }
+      
+        function showHome() {
+          disposeMeeting();
+          setMode('home');
+        }
+      
+        function showCalendar() {
+          disposeMeeting();
+          if (!calFrame.getAttribute('data-ready')) {
+            calFrame.srcdoc = document.getElementById('vcalSrc').textContent
+              .replace(/<\\\/script>/g, '<' + '/script>');
+            calFrame.setAttribute('data-ready', '1');
           }
-
-          function showHome() {
-            if (api) { api.dispose(); api = null; }
-            box.style.display = 'none';
-            bar.style.display = 'none';
-            home.style.display = 'flex';
-          }
-
-          function loadApi(done) {
-            if (window.JitsiMeetExternalAPI) { done(); return; }
-            var s = document.createElement('script');
-            s.src = SCRIPT_URL;
-            s.onload = done;
-            s.onerror = function () {
-              alert('Video Conference gagal dimuat. Coba lagi nanti.');
-              showHome();
-            };
-            document.head.appendChild(s);
-          }
-
-          function startMeeting(room) {
-            if (api) { api.dispose(); api = null; }
-            showMeeting();
-            loadApi(function () {
-              api = new JitsiMeetExternalAPI(DOMAIN, {
-                roomName: room || ROOM,
-                parentNode: box,
-                width: '100%',
-                height: '100%'
-                // jwt: sebaiknya dibuat di server dan berumur pendek, jangan ditulis di sini.
-              });
-              api.addListener('readyToClose', showHome);
+          setMode('cal');
+          calPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      
+        function loadApi(done) {
+          if (window.JitsiMeetExternalAPI) { done(); return; }
+          var s = document.createElement('script');
+          s.src = SCRIPT_URL;
+          s.onload = done;
+          s.onerror = function () {
+            alert('Video Conference gagal dimuat. Coba lagi nanti.');
+            showCalendar();
+          };
+          document.head.appendChild(s);
+        }
+      
+        function startMeeting(room) {
+          disposeMeeting();
+          setMode('meet');
+          loadApi(function () {
+            api = new JitsiMeetExternalAPI(DOMAIN, {
+              roomName: room || ROOM,
+              parentNode: box,
+              width: '100%',
+              height: '100%'
             });
-            box.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-
-          join.addEventListener('click', function () { startMeeting(); });
-
-          // Tombol "Gabung" di kalender untuk tautan Jitsi membuka ruangnya di halaman ini.
-          window.addEventListener('message', function (e) {
-            var calWin = document.getElementById('calFrame').contentWindow;
-            var d = e.data;
-            if (e.source !== calWin || !d || d.vc !== 'join') return;
-            if (typeof d.room === 'string' && /^[\w.-]+$/.test(d.room)) startMeeting(d.room);
+            api.addListener('readyToClose', showCalendar); // selesai rapat -> kembali ke kalender
           });
-
-          // Kalender rapat (dimuat sekali, saat pertama dibuka). Halaman kalender ada di
-          // <script type="text/x-vcal" id="vcalSrc"> di bawah, dipakai lewat iframe srcdoc
-          // supaya CSS/JS-nya terpisah dari CSS situs.
-          var calPanel = document.getElementById('calPanel');
-          var calFrame = document.getElementById('calFrame');
-          var calBtns = [document.getElementById('calToggleHome'), document.getElementById('calToggleMeet')];
-
-          function toggleCal() {
-            var open = calPanel.style.display === 'none';
-            if (open && !calFrame.getAttribute('data-ready')) {
-              calFrame.srcdoc = document.getElementById('vcalSrc').textContent.replace(/<\\\/script>/g, '<' + '/script>');
-              calFrame.setAttribute('data-ready', '1');
-            }
-            calPanel.style.display = open ? 'block' : 'none';
-            calBtns.forEach(function (b) { if (b) b.textContent = open ? '✕ Tutup Kalender' : '📅 Kalender Rapat'; });
-            if (open) calPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-          calBtns.forEach(function (b) { if (b) b.addEventListener('click', toggleCal); });
-
-          leave.addEventListener('click', showHome);
-        })();
+          box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      
+        // Logo -> buka kalender (bukan rapat)
+        join.addEventListener('click', showCalendar);
+      
+        // Rapat baru mulai saat "Gabung" di jadwal diklik
+        window.addEventListener('message', function (e) {
+          var d = e.data;
+          if (e.source !== calFrame.contentWindow || !d || d.vc !== 'join') return;
+          if (typeof d.room === 'string' && /^[\w.-]+$/.test(d.room)) startMeeting(d.room);
+        });
+      
+        // Tombol bar: di rapat -> kembali ke kalender; di kalender -> kembali ke beranda
+        leave.addEventListener('click', function () {
+          if (mode === 'meet') showCalendar(); else showHome();
+        });
+      })();
       </script>
 
       <div class="mySlides fade">
