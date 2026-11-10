@@ -41,7 +41,7 @@
   <script type="module">
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
+    import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
   
@@ -122,14 +122,14 @@
     <div class="slideshow-container">
       <div class="mySlides fade">
         <div id="homeWrap" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 80vh; min-height: 80dvh; padding: 0 16px; box-sizing: border-box;">
-          <button type="button" id="joinMeet" title="Gabung Menyapa Citra Bergerak" aria-label="Gabung Menyapa Citra Bergerak" style="display: block; background: none; border: 0; padding: 0; margin: 0; cursor: pointer;">
+          <button type="button" id="joinMeet" title="Buka Kalender Rapat" aria-label="Buka Kalender Rapat" style="display: block; background: none; border: 0; padding: 0; margin: 0; cursor: pointer;">
             <picture>
               <source srcset="./images/favicon-128.png 380w, ./images/favicon-128.png 1080w" sizes="100vw" type="image/png">
               <img src="./images/favicon-128.png" loading="lazy" alt="Stej-Logo" class="par con" style="pointer-events: none; display: block; margin: 0 auto; width: clamp(120px, 40vw, 280px); height: auto;">
             </picture>
           </button>
           <h1 id="homeTitle" style="font-family: 'Marcellus'; font-size: 30px; margin: 24px 0 0; text-align: center;">STEJ Project</h1>
-          <p id="homeHint" style="text-align: center; margin: 10px 0 0;">Ketuk logo untuk Menyapa Citra Bergerak</p>
+          <p id="homeHint" style="text-align: center; margin: 10px 0 0;">Ketuk logo untuk membuka Kalender Rapat</p>
         </div>
 
         <div id="meetBar" style="display: none; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
@@ -146,8 +146,13 @@
       (function () {
         var DOMAIN = 'meet.jit.si';
         var ROOM = 'stejproject.vrends';
+        // Untuk pindah ke JaaS nanti, ganti DOMAIN dan ROOM di atas dengan:
+        // var DOMAIN = '8x8.vc';
+        // var APP_ID = 'vpaas-magic-cookie-0abcbf402b284e209b9cf5a5a9afa633';
+        // var ROOM = APP_ID + '/NamaRuangAnda';
+        // lalu ubah SCRIPT_URL di bawah menjadi 'https://8x8.vc/' + APP_ID + '/external_api.js'
         var SCRIPT_URL = 'https://' + DOMAIN + '/external_api.js';
-      
+
         var join = document.getElementById('joinMeet');
         var leave = document.getElementById('leaveMeet');
         var bar = document.getElementById('meetBar');
@@ -157,7 +162,7 @@
         var calFrame = document.getElementById('calFrame');
         var api = null;
         var mode = 'home'; // 'home' | 'cal' | 'meet'
-      
+
         function setMode(m) {
           mode = m;
           home.style.display = m === 'home' ? 'flex' : 'none';
@@ -166,27 +171,28 @@
           box.style.display = m === 'meet' ? 'block' : 'none';
           leave.textContent = m === 'meet' ? '← Kembali ke Kalender' : 'Keluar';
         }
-      
+
         function disposeMeeting() {
           if (api) { api.dispose(); api = null; }
         }
-      
+
         function showHome() {
           disposeMeeting();
           setMode('home');
         }
-      
+
         function showCalendar() {
           disposeMeeting();
           if (!calFrame.getAttribute('data-ready')) {
             calFrame.srcdoc = document.getElementById('vcalSrc').textContent
               .replace(/<\\\/script>/g, '<' + '/script>');
             calFrame.setAttribute('data-ready', '1');
+            if (window.stejLog) stejLog('open_calendar');
           }
           setMode('cal');
           calPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      
+
         function loadApi(done) {
           if (window.JitsiMeetExternalAPI) { done(); return; }
           var s = document.createElement('script');
@@ -198,8 +204,9 @@
           };
           document.head.appendChild(s);
         }
-      
+
         function startMeeting(room) {
+          if (window.stejLog) stejLog('join_meeting', { room: room || ROOM });
           disposeMeeting();
           setMode('meet');
           loadApi(function () {
@@ -213,17 +220,17 @@
           });
           box.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      
+
         // Logo -> buka kalender (bukan rapat)
         join.addEventListener('click', showCalendar);
-      
-        // Rapat baru mulai saat "Gabung" di jadwal diklik
+
+        // Rapat baru mulai saat "Gabung" di jadwal diklik (dan tautan diketik ulang dengan benar)
         window.addEventListener('message', function (e) {
           var d = e.data;
           if (e.source !== calFrame.contentWindow || !d || d.vc !== 'join') return;
           if (typeof d.room === 'string' && /^[\w.-]+$/.test(d.room)) startMeeting(d.room);
         });
-      
+
         // Tombol bar: di rapat -> kembali ke kalender; di kalender -> kembali ke beranda
         leave.addEventListener('click', function () {
           if (mode === 'meet') showCalendar(); else showHome();
@@ -927,6 +934,8 @@ body.ro #btnSample,body.ro #btnClearAll{display:none}
   }).format(new Date(ms)).replace(".", ":");
   const makeTitle = (p, z, t) => `[${p} - ${z}] ${t}`;
   const safeUrl = u => { try{ const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : ""; }catch(e){ return ""; } };
+  // Normalisasi tautan untuk perbandingan saat "ketik ulang tautan"
+  const norm = u => String(u).trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/+$/, "");
 
   const WORLD = [
     { n: "Dieng",    z: "Asia/Jakarta",        note: "Jawa Tengah (fokus)", abbr: "Waktu Dieng", custom: true },
@@ -1128,13 +1137,13 @@ body.ro #btnSample,body.ro #btnClearAll{display:none}
           ${soon ? '<span class="badge soon">SEGERA</span>' : ""}
           ${srcTime(e.start, e.tz)} ${e.tz} (${ZNAME[e.tz]}) · ${e.dur} mnt · ${esc(e.platform)}
         </div>
-        <div class="meta">📍 ${esc(e.link)}</div>
+        <div class="meta">${isAdmin() ? "📍 " + esc(e.link) : "🔒 Tautan disembunyikan. Ketik ulang tautan untuk bergabung."}</div>
         <div class="wl">🌍 ${esc(worldLine(e.start))}</div>
         <div class="actions">
-          <a class="btn sm" href="${esc(e.link)}" target="_blank" rel="noopener noreferrer" ${jitsiRoom(e.link) ? 'data-jitsi="' + esc(jitsiRoom(e.link)) + '"' : ""}>Gabung</a>
-          <button class="btn ghost sm" data-copy="${e.id}">Salin tautan</button>
+          <button class="btn sm" data-join="${e.id}">Gabung</button>
           <button class="btn ghost sm" data-ics="${e.id}">.ics</button>
-          ${isAdmin() ? `<button class="btn danger sm" data-del="${e.id}">Hapus</button>` : ""}
+          ${isAdmin() ? `<button class="btn ghost sm" data-copy="${e.id}">Salin tautan</button>
+          <button class="btn danger sm" data-del="${e.id}">Hapus</button>` : ""}
         </div>
       </div>
     </div>`;
@@ -1192,13 +1201,24 @@ body.ro #btnSample,body.ro #btnClearAll{display:none}
   );
   $("#showPast").addEventListener("change", render);
 
-  $("#view").addEventListener("click", ev => {
-    const jl = ev.target.closest("a[data-jitsi]");
-    if(jl){
-      ev.preventDefault();
-      window.parent.postMessage({ vc: "join", room: jl.dataset.jitsi }, window.location.origin === "null" ? "*" : window.location.origin);
+  // Gabung rapat: pengguna harus mengetik ulang tautan yang dibagikan admin
+  function joinEvent(id){
+    const e = events.find(x => x.id === id);
+    if(!e) return;
+    const typed = prompt("Ketik ulang tautan rapat untuk bergabung:", "");
+    if(typed === null) return;
+    if(norm(typed) !== norm(e.link)){
+      toast("Tautan salah", "Tautan yang diketik tidak sama. Minta tautan yang benar dari admin.", null, false);
       return;
     }
+    const room = jitsiRoom(e.link);
+    if(room) window.parent.postMessage({ vc: "join", room }, window.location.origin === "null" ? "*" : window.location.origin);
+    else window.open(e.link, "_blank", "noopener");
+  }
+
+  $("#view").addEventListener("click", ev => {
+    const jb = ev.target.closest("[data-join]");
+    if(jb){ joinEvent(jb.dataset.join); return; }
     const t = ev.target.closest("button, .cell");
     if(!t) return;
     if(t.dataset.del) del(t.dataset.del);
@@ -1242,7 +1262,7 @@ body.ro #btnSample,body.ro #btnClearAll{display:none}
       s += "DTSTART:" + icsDate(e.start) + "\r\n";
       s += "DTEND:" + icsDate(e.start + e.dur * 60000) + "\r\n";
       s += "SUMMARY:" + icsEsc(makeTitle(e.partner, e.tz, e.topic)) + "\r\n";
-      s += "LOCATION:" + icsEsc(e.link) + "\r\nURL:" + e.link + "\r\n";
+      // Tautan sengaja tidak dimasukkan ke .ics (disembunyikan dari pengguna)
       s += "DESCRIPTION:" + icsEsc(e.platform + " · " + srcTime(e.start, e.tz) + " " + e.tz + " · tampil " + dTime(e.start) + " Dieng") + "\r\n";
       REMINDERS.forEach(m => {
         s += "BEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:Rapat " + m + " menit lagi\r\nTRIGGER:-PT" + m + "M\r\nEND:VALARM\r\n";
@@ -1309,12 +1329,12 @@ body.ro #btnSample,body.ro #btnClearAll{display:none}
           save(FIRED, fired);
           const title = m === 30 ? "⏰ 30 menit lagi — persiapan" : "🚪 5 menit lagi — masuk waiting room";
           const body = makeTitle(e.partner, e.tz, e.topic) + " · " + dTime(e.start) + " Dieng";
-          toast(title, body, e.link, m === 5);
+          toast(title, body, null, m === 5);
           beep();
           if("Notification" in window && Notification.permission === "granted"){
             try{
               const n = new Notification(title, { body, tag: k });
-              n.onclick = () => { window.open(e.link, "_blank", "noopener"); };
+              n.onclick = () => { window.focus(); };
             }catch(x){}
           }
         }
