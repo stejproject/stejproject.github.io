@@ -639,18 +639,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
           </select>
         </div>
         <div><label for="platform">Platform</label>
-          <select id="platform">
-            <option>Zoom</option>
-            <option>Jitsi (STEJ)</option>
-            <option>Google Meet</option>
-            <option>Microsoft Teams</option>
-            <option>Lainnya</option>
-          </select>
+          <select id="platform"><option>Jitsi (STEJ)</option></select>
         </div>
       </div>
 
-      <label for="link">Tautan Rapat (masuk ke kolom Lokasi)</label>
-      <input id="link" type="url" required placeholder="https://zoom.us/j/...">
+      <label for="link">Tautan Rapat Jitsi (masuk ke kolom Lokasi)</label>
+      <input id="link" type="url" required value="https://meet.jit.si/stejproject.vrends" placeholder="https://meet.jit.si/NamaRuang">
 
       <div class="conv">
         <b>🔁 Konversi cepat → Waktu Dieng (WIB)</b>
@@ -937,7 +931,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
   $("#form").addEventListener("submit", ev => {
     ev.preventDefault();
     const link = safeUrl($("#link").value.trim());
-    if(!link){ alert("Tautan harus diawali http:// atau https://"); return; }
+    if(!/^https:\/\/meet\.jit\.si\/[\w.-]+\/?$/.test(link)){ alert("Tautan rapat harus Jitsi, contoh: https://meet.jit.si/stejproject.vrends"); return; }
     const z = $("#tz").value;
     const start = zonedToUtc($("#date").value, $("#time").value, z);
     addEvent({
@@ -1214,10 +1208,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
       };
     };
     events.push(
-      mk(1, 9, 0, "Mitra NY", "ET", "Sinkronisasi Proyek", "https://zoom.us/j/1234567890", "Zoom"),
-      mk(2, 10, 30, "Mitra Denver", "MT", "Review Kontrak", "https://meet.google.com/abc-defg-hij", "Google Meet"),
-      mk(3, 8, 0, "Mitra LA", "PT", "Demo Produk", "https://teams.microsoft.com/l/meetup-join/contoh", "Microsoft Teams"),
-      mk(0, 14, 0, "Tim Jakarta", "WIB", "Standup Harian", "https://zoom.us/j/111222333", "Zoom")
+      mk(1, 9, 0, "Mitra NY", "ET", "Sinkronisasi Proyek", "https://meet.jit.si/stejproject.vrends", "Jitsi (STEJ)"),
+      mk(2, 10, 30, "Mitra Denver", "MT", "Review Kontrak", "https://meet.jit.si/stejproject.vrends", "Jitsi (STEJ)"),
+      mk(3, 8, 0, "Mitra LA", "PT", "Demo Produk", "https://meet.jit.si/stejproject.vrends", "Jitsi (STEJ)"),
+      mk(0, 14, 0, "Tim Jakarta", "WIB", "Standup Harian", "https://meet.jit.si/stejproject.vrends", "Jitsi (STEJ)")
     );
     events.sort((a, b) => a.start - b.start);
     save(KEY, events);
