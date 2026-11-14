@@ -4,6 +4,6 @@
      "branch": "main",
      "contentDir": "content",
      "mainPage": "Halaman_Utama",
-     "contentBase": "https://raw.githubusercontent.com/stejproject/wikis/main/"
+     "contentBase": "/wikis/"
      "adminBase": "/wikis/admin/"
 }
