@@ -147,7 +147,7 @@
     tpl.innerHTML = DOMPurify.sanitize(dirty);
     const root = tpl.content;
     // Gambar unggahan CMS (uploads/...) tersimpan di situs artikel, bukan di situs mesin wiki
-    root.querySelectorAll('img[src^="uploads/"]').forEach(im => im.setAttribute('src', cfg.contentBase + im.getAttribute('src')));
+    root.querySelectorAll('img[src^="uploads/"], img[src^="/uploads/"]').forEach(im => {im.setAttribute('src', cfg.contentBase + im.getAttribute('src').replace(/^\//, ''));});
     const hs = [...root.querySelectorAll('h2,h3,h4')];
     const used = new Set();
     hs.forEach(h => {
