@@ -157,15 +157,30 @@
     });
     if (hs.length >= 3) {
       const toc = document.createElement('div'); toc.className = 'toc';
-      let html = '', depth = 1;
+      // Dibangun dengan DOM API (bukan innerHTML) agar teks heading tidak pernah dibaca ulang sebagai HTML
+      const tocTitle = document.createElement('div');
+      tocTitle.className = 'toc-title';
+      tocTitle.textContent = 'Daftar isi';
+      const rootOl = document.createElement('ol');
+      const stack = [rootOl];
+      let depth = 1;
       hs.forEach(h => {
         const d = +h.tagName[1] - 1; // 1..3
-        while (depth < d) { html += '<ol>'; depth++; }
-        while (depth > d) { html += '</ol>'; depth--; }
-        html += `<li><a href="#" data-goto="${h.id}">${esc(h.textContent)}</a></li>`;
+        while (depth < d) {
+          const ol = document.createElement('ol');
+          stack[stack.length - 1].appendChild(ol);
+          stack.push(ol); depth++;
+        }
+        while (depth > d) { stack.pop(); depth--; }
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.dataset.goto = h.id;
+        a.textContent = h.textContent;
+        li.appendChild(a);
+        stack[stack.length - 1].appendChild(li);
       });
-      while (depth > 1) { html += '</ol>'; depth--; }
-      toc.innerHTML = '<div class="toc-title">Daftar isi</div><ol>' + html + '</ol>';
+      toc.append(tocTitle, rootOl);
       toc.addEventListener('click', e => {
         const a = e.target.closest('a[data-goto]'); if (!a) return;
         e.preventDefault(); document.getElementById(a.dataset.goto)?.scrollIntoView({ behavior: 'smooth' });
