@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#FCFBFA">
+  <meta name="description" content="STEJ Project – Secure WebRTC Calendar">
+  <title>STEJ Project – Secure WebRTC</title>
+
+  <!-- Basic CSP -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' https:;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com https://*.googleapis.com;
+    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+    img-src 'self' data: https: blob:;
+    media-src 'self' blob:;
+    connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebaseio.com;
+    frame-src 'self';
+    object-src 'none';
+    base-uri 'self';
+  ">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f4f6fb; --card: #fff; --ink: #16202e; --muted: #667085;
+      --brand: #0d9488; --brand-d: #0f766e; --danger: #dc2626; --ok: #16a34a;
+      --radius: 14px; --shadow: 0 2px 12px rgba(16,24,40,.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#0e141d; --card:#161e2b; --ink:#e8edf5; --muted:#93a0b4; }
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, sans-serif; background:var(--bg); color:var(--ink); line-height:1.45; }
+    header { background: linear-gradient(135deg,#0f766e,#0d9488); color:#fff; padding:18px 16px; }
+    .wrap { max-width:1100px; margin:0 auto; }
+    h1 { margin:0; font-size:1.3rem; font-family:'Marcellus', serif; }
+    main { max-width:1100px; margin:20px auto; padding:0 12px 60px; display:grid; grid-template-columns:340px 1fr; gap:20px; }
+    @media(max-width:900px){ main{grid-template-columns:1fr} }
+    .card { background:var(--card); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); border:1px solid #e3e8f0; }
+    label { display:block; font-size:.78rem; font-weight:600; color:var(--muted); margin:12px 0 4px; }
+    input, select, button, textarea { font:inherit; }
+    input, select, textarea { width:100%; padding:10px 12px; border:1px solid #e3e8f0; border-radius:10px; background:var(--bg); color:var(--ink); }
+    .btn { border:0; background:var(--brand); color:#fff; padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:600; }
+    .btn:hover { background:var(--brand-d); }
+    .btn.ghost { background:transparent; color:var(--brand); border:1px solid var(--brand); }
+    .btn.danger { background:var(--danger); }
+    .btn.sm { padding:6px 12px; font-size:.82rem; }
+    .btn.full { width:100%; margin-top:14px; }
+    .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .tabs { display:flex; gap:8px; margin-bottom:14px; }
+    .tab { padding:7px 14px; border-radius:999px; border:1px solid #e3e8f0; background:transparent; cursor:pointer; }
+    .tab.on { background:var(--brand); color:#fff; border-color:var(--brand); }
+    .ev { display:flex; gap:14px; padding:14px; border:1px solid #e3e8f0; border-left:5px solid var(--brand); border-radius:12px; margin-bottom:10px; }
+    .ev.live { outline:2px solid var(--ok); }
+    .time b { font-size:1.1rem; display:block; }
+    .badge { display:inline-block; font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:999px; color:#fff; background:var(--brand); margin-right:4px; }
+    .badge.live { background:var(--ok); }
+    .actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .empty { text-align:center; color:var(--muted); padding:40px 10px; }
+    .note { font-size:.76rem; color:var(--muted); margin-top:8px; }
+    .authbar { margin-bottom:12px; padding:10px; border-radius:10px; background:#e0f2f1; font-size:.85rem; }
+    #toasts { position:fixed; right:16px; bottom:16px; z-index:100; display:flex; flex-direction:column; gap:10px; }
+    .toast { background:#111827; color:#fff; padding:14px 16px; border-radius:12px; width:300px; max-width:90vw; }
+    .toast.go { border-left:5px solid var(--ok); }
+
+    /* WebRTC Room UI */
+    #roomOverlay {
+      display:none; position:fixed; inset:0; background:#0f172a; z-index:200;
+      flex-direction:column; color:#fff;
+    }
+    #roomOverlay.active { display:flex; }
+    .room-header { padding:12px 16px; display:flex; justify-content:space-between; align-items:center; background:#1e293b; }
+    .room-videos { flex:1; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:12px; padding:16px; overflow:auto; }
+    .video-box { position:relative; background:#1e293b; border-radius:12px; overflow:hidden; aspect-ratio:16/9; }
+    .video-box video { width:100%; height:100%; object-fit:cover; background:#000; }
+    .video-label { position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,.6); padding:4px 10px; border-radius:6px; font-size:.8rem; }
+    .room-controls { padding:14px; display:flex; justify-content:center; gap:12px; background:#1e293b; }
+    .ctrl-btn { width:52px; height:52px; border-radius:50%; border:0; background:#334155; color:#fff; font-size:1.3rem; cursor:pointer; }
+    .ctrl-btn.off { background:#dc2626; }
+    .ctrl-btn.leave { background:#dc2626; width:auto; padding:0 20px; border-radius:26px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <h1>STEJ Project – Secure WebRTC Calendar</h1>
+      <p style="margin:4px 0 0;opacity:.85;font-size:.9rem;">Kalender + Video Conference peer-to-peer (tanpa Jitsi)</p>
+    </div>
+    <div id="clock" style="font-variant-numeric:tabular-nums;font-size:1.2rem;"></div>
+  </div>
+</header>
+
+<main>
+  <!-- FORM TAMBAH RAPAT -->
+  <section class="card">
+    <h2 style="margin:0 0 12px;font-size:1.1rem;">➕ Tambah Rapat (WebRTC)</h2>
+    <div id="authBar" class="authbar" style="display:none"></div>
+
+    <div id="loginBox" style="display:none;margin-bottom:16px;padding:12px;border:1px dashed #94a3b8;border-radius:10px;">
+      <b>🔐 Masuk Admin</b>
+      <input type="email" id="admEmail" placeholder="Email admin" style="margin-top:8px;">
+      <input type="password" id="admPass" placeholder="Kata sandi" style="margin-top:6px;">
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <button class="btn sm" id="btnDoLogin">Masuk</button>
+        <button class="btn ghost sm" id="btnCancelLogin">Batal</button>
+      </div>
+      <div class="note" id="loginMsg"></div>
+    </div>
+
+    <form id="form">
+      <label>Nama Mitra / Topik</label>
+      <input id="partner" required maxlength="50" placeholder="mis. Mitra NY – Review Sprint">
+
+      <label>Zona Waktu Asal</label>
+      <select id="tz">
+        <option value="WIB">WIB – Jakarta</option>
+        <option value="ET">ET – New York</option>
+        <option value="MT">MT – Denver</option>
+        <option value="PT">PT – Los Angeles</option>
+        <option value="GMT">GMT</option>
+      </select>
+
+      <div class="row2">
+        <div>
+          <label>Tanggal</label>
+          <input type="date" id="date" required>
+        </div>
+        <div>
+          <label>Jam</label>
+          <input type="time" id="time" required>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>Durasi (menit)</label>
+          <select id="dur">
+            <option value="30">30</option>
+            <option value="60" selected>60</option>
+            <option value="90">90</option>
+          </select>
+        </div>
+        <div>
+          <label>Password Room (wajib)</label>
+          <input type="text" id="roomPass" required minlength="4" maxlength="32" placeholder="min. 4 karakter">
+        </div>
+      </div>
+
+      <button class="btn full" type="submit">Simpan ke Kalender</button>
+    </form>
+
+    <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;">
+      <button class="btn ghost sm" id="btnSample">Contoh data</button>
+      <button class="btn ghost sm" id="btnClearAll">Hapus semua</button>
+    </div>
+    <p class="note">Room WebRTC dilindungi password. Maksimal 4 peserta (mesh P2P).</p>
+  </section>
+
+  <!-- AGENDA -->
+  <section class="card">
+    <div class="tabs">
+      <button class="tab on" data-view="agenda">Agenda</button>
+      <button class="tab" data-view="month">Bulan</button>
+      <label style="margin-left:auto;font-size:.85rem;display:flex;align-items:center;gap:6px;">
+        <input type="checkbox" id="showPast"> tampilkan yang lewat
+      </label>
+    </div>
+    <div id="view"></div>
+  </section>
+</main>
+
+<div id="toasts"></div>
+
+<!-- ===================== WEBRTC ROOM OVERLAY ===================== -->
+<div id="roomOverlay">
+  <div class="room-header">
+    <div>
+      <strong id="roomTitle">Room</strong>
+      <div style="font-size:.8rem;opacity:.7;" id="roomInfo"></div>
+    </div>
+    <div id="participantCount">1 peserta</div>
+  </div>
+  <div class="room-videos" id="videos"></div>
+  <div class="room-controls">
+    <button class="ctrl-btn" id="btnMute" title="Mute"><i class="bi bi-mic-fill"></i></button>
+    <button class="ctrl-btn" id="btnCam" title="Kamera"><i class="bi bi-camera-video-fill"></i></button>
+    <button class="ctrl-btn leave" id="btnLeave">Keluar</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue, push, remove, update, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+  // ===== FIREBASE CONFIG =====
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNWEZ5M06va6bWqlzAe42qNThxkpz9vn0",
+    authDomain: "stej-kalender.firebaseapp.com",
+    databaseURL: "https://stej-kalender-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "stej-kalender",
+    storageBucket: "stej-kalender.firebasestorage.app",
+    messagingSenderId: "647733449774",
+    appId: "1:647733449774:web:cf6b0ea2557a6c06bb7bbf"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  // ===== KONSTANTA KEAMANAN =====
+  const MAX_PEERS = 4;
+  const ICE_SERVERS = [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" }
+    // Untuk production tambahkan TURN server berbayar (Twilio, Metered, dll)
+  ];
+
+  // ===== STATE =====
+  let events = [];
+  let currentUser = null;
+  let view = "agenda";
+  let localStream = null;
+  let peers = new Map();          // peerId → RTCPeerConnection
+  let roomId = null;
+  let myPeerId = null;
+  let isMuted = false;
+  let isCamOff = false;
+
+  // ===== UTIL =====
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+    ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+  function toast(title, msg, ok = false) {
+    const d = document.createElement("div");
+    d.className = "toast" + (ok ? " go" : "");
+    d.innerHTML = `<b>\( {esc(title)}</b><div> \){esc(msg)}</div>`;
+    $("#toasts").appendChild(d);
+    setTimeout(() => d.remove(), 4500);
+  }
+
+  function simpleHash(str) {
+    // Bukan bcrypt, tapi cukup untuk obfuscation client-side
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) - h) + str.charCodeAt(i) | 0;
+    return "h" + Math.abs(h).toString(36);
+  }
+
+  // ===== AUTH =====
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
+    renderAuth();
+    loadEvents();
+  });
+
+  function renderAuth() {
+    const bar = $("#authBar");
+    bar.style.display = "block";
+    if (currentUser) {
+      bar.innerHTML = `🔓 Admin: ${esc(currentUser.email)} 
+        <button class="btn ghost sm" id="btnLogout" style="margin-left:8px;">Keluar</button>`;
+      $("#btnLogout").onclick = () => signOut(auth);
+      document.body.classList.remove("ro");
+    } else {
+      bar.innerHTML = `👁 Mode lihat. Hanya admin yang bisa menambah/mengubah. 
+        <button class="btn ghost sm" id="btnLogin">Masuk admin</button>`;
+      $("#btnLogin").onclick = () => $("#loginBox").style.display = "block";
+      document.body.classList.add("ro");
+    }
+  }
+
+  $("#btnDoLogin").onclick = async () => {
+    const email = $("#admEmail").value.trim();
+    const pass = $("#admPass").value;
+    $("#loginMsg").textContent = "Memeriksa…";
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      $("#loginBox").style.display = "none";
+      $("#admPass").value = "";
+      toast("Berhasil", "Anda masuk sebagai admin", true);
+    } catch (e) {
+      $("#loginMsg").textContent = "Email atau kata sandi salah";
+    }
+  };
+  $("#btnCancelLogin").onclick = () => $("#loginBox").style.display = "none";
+
+  // ===== EVENTS (Calendar) =====
+  async function loadEvents() {
+    const snap = await get(ref(db, "ring1/events"));
+    events = [];
+    if (snap.exists()) {
+      snap.forEach(c => {
+        const e = c.val();
+        if (e && e.start) events.push({ id: c.key, ...e });
+      });
+      events.sort((a, b) => a.start - b.start);
+    }
+    render();
+  }
+
+  // Realtime update
+  onValue(ref(db, "ring1/events"), snap => {
+    events = [];
+    if (snap.exists()) {
+      snap.forEach(c => {
+        const e = c.val();
+        if (e && e.start) events.push({ id: c.key, ...e });
+      });
+      events.sort((a, b) => a.start - b.start);
+    }
+    render();
+  });
+
+  // ===== FORM SUBMIT =====
+  $("#form").onsubmit = async (ev) => {
+    ev.preventDefault();
+    if (!currentUser) {
+      toast("Ditolak", "Hanya admin yang bisa menambah jadwal");
+      return;
+    }
+
+    const partner = $("#partner").value.trim().slice(0, 50);
+    const tz = $("#tz").value;
+    const date = $("#date").value;
+    const time = $("#time").value;
+    const dur = +$("#dur").value;
+    const pass = $("#roomPass").value.trim();
+
+    if (pass.length < 4) {
+      alert("Password room minimal 4 karakter");
+      return;
+    }
+
+    // Convert to UTC timestamp (simplified – asumsikan input sudah sesuai zona)
+    const start = new Date(`\( {date}T \){time}:00`).getTime();
+    const roomId = "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+    const event = {
+      partner,
+      tz,
+      topic: partner,
+      start,
+      dur,
+      roomId,
+      passHash: simpleHash(pass),
+      createdBy: currentUser.email,
+      createdAt: Date.now()
+    };
+
+    try {
+      await set(ref(db, `ring1/events/${roomId}`), event);
+      // Buat room signaling kosong
+      await set(ref(db, `ring1/rooms/${roomId}`), {
+        createdAt: Date.now(),
+        maxPeers: MAX_PEERS,
+        passHash: simpleHash(pass)
+      });
+      toast("Tersimpan", "Jadwal + room WebRTC berhasil dibuat", true);
+      $("#partner").value = "";
+      $("#roomPass").value = "";
+    } catch (e) {
+      toast("Gagal", e.message);
+    }
+  };
+
+  // ===== RENDER AGENDA =====
+  function render() {
+    const now = Date.now();
+    const showPast = $("#showPast").checked;
+    let list = events.filter(e => showPast || (e.start + e.dur * 60000 > now));
+
+    if (!list.length) {
+      $("#view").innerHTML = `<div class="empty">Belum ada jadwal.<br>Tambahkan lewat formulir (login admin dulu).</div>`;
+      return;
+    }
+
+    let html = "";
+    list.forEach(e => {
+      const end = e.start + e.dur * 60000;
+      const live = now >= e.start && now < end;
+      const past = now >= end;
+      const timeStr = new Date(e.start).toLocaleString("id-ID", { 
+        weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" 
+      });
+
+      html += `
+        <div class="ev ${live ? "live" : ""} ${past ? "past" : ""}">
+          <div class="time">
+            <b>${timeStr}</b>
+            <small>${e.dur} mnt</small>
+          </div>
+          <div class="body">
+            <div style="font-weight:700;">${esc(e.partner)}</div>
+            <div class="meta" style="font-size:.8rem;color:var(--muted);margin-top:2px;">
+              ${live ? '<span class="badge live">SEDANG BERLANGSUNG</span>' : ""}
+              Room: ${esc(e.roomId)} · ${esc(e.tz)}
+            </div>
+            <div class="actions">
+              <button class="btn sm" data-join="${e.id}">Gabung WebRTC</button>
+              \( {currentUser ? `<button class="btn ghost sm danger" data-del=" \){e.id}">Hapus</button>` : ""}
+            </div>
+          </div>
+        </div>`;
+    });
+    $("#view").innerHTML = html;
+  }
+
+  $("#view").onclick = async (ev) => {
+    const joinBtn = ev.target.closest("[data-join]");
+    const delBtn = ev.target.closest("[data-del]");
+
+    if (joinBtn) {
+      const id = joinBtn.dataset.join;
+      const e = events.find(x => x.id === id);
+      if (e) joinRoom(e);
+    }
+    if (delBtn && currentUser) {
+      if (!confirm("Hapus jadwal + room ini?")) return;
+      const id = delBtn.dataset.del;
+      await remove(ref(db, `ring1/events/${id}`));
+      await remove(ref(db, `ring1/rooms/${id}`));
+      toast("Dihapus", "Jadwal berhasil dihapus", true);
+    }
+  };
+
+  $("#showPast").onchange = render;
+  document.querySelectorAll(".tab").forEach(t => {
+    t.onclick = () => {
+      document.querySelectorAll(".tab").forEach(x => x.classList.remove("on"));
+      t.classList.add("on");
+      view = t.dataset.view;
+      render();
+    };
+  });
+
+  // ===== WEBRTC CORE =====
+  async function joinRoom(event) {
+    const pass = prompt("Masukkan password room:");
+    if (pass === null) return;
+
+    if (simpleHash(pass) !== event.passHash) {
+      toast("Salah", "Password room tidak cocok");
+      return;
+    }
+
+    roomId = event.roomId;
+    myPeerId = "p" + Math.random().toString(36).slice(2, 10);
+
+    // Cek jumlah peserta
+    const roomSnap = await get(ref(db, `ring1/rooms/${roomId}/peers`));
+    const peerCount = roomSnap.exists() ? Object.keys(roomSnap.val()).length : 0;
+    if (peerCount >= MAX_PEERS) {
+      toast("Penuh", `Room sudah mencapai batas ${MAX_PEERS} peserta`);
+      return;
+    }
+
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" }
+      });
+    } catch (err) {
+      toast("Gagal", "Tidak bisa mengakses kamera/mikrofon. Izinkan permission.");
+      return;
+    }
+
+    // Tampilkan UI room
+    $("#roomTitle").textContent = event.partner;
+    $("#roomInfo").textContent = `Room ID: ${roomId}`;
+    $("#roomOverlay").classList.add("active");
+
+    // Tambah local video
+    addVideo(myPeerId, localStream, true);
+
+    // Daftarkan diri di room
+    await set(ref(db, `ring1/rooms/\( {roomId}/peers/ \){myPeerId}`), {
+      joinedAt: Date.now(),
+      name: currentUser ? currentUser.email.split("@")[0] : "Tamu"
+    });
+
+    // Listen peer baru
+    onChildAdded(ref(db, `ring1/rooms/${roomId}/peers`), async (snap) => {
+      const peerId = snap.key;
+      if (peerId === myPeerId) return;
+      if (peers.has(peerId)) return;
+      if (peers.size >= MAX_PEERS - 1) return;
+
+      // Kita yang offer ke peer baru
+      createPeerConnection(peerId, true);
+    });
+
+    // Listen peer keluar
+    onChildRemoved(ref(db, `ring1/rooms/${roomId}/peers`), (snap) => {
+      const peerId = snap.key;
+      closePeer(peerId);
+    });
+
+    // Signaling: offer / answer / ice
+    onChildAdded(ref(db, `ring1/rooms/\( {roomId}/signal/ \){myPeerId}`), async (snap) => {
+      const data = snap.val();
+      if (!data || !data.from) return;
+
+      const from = data.from;
+      if (data.type === "offer") {
+        await createPeerConnection(from, false);
+        const pc = peers.get(from);
+        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        await push(ref(db, `ring1/rooms/\( {roomId}/signal/ \){from}`), {
+          type: "answer",
+          from: myPeerId,
+          sdp: answer
+        });
+      } else if (data.type === "answer") {
+        const pc = peers.get(from);
+        if (pc) await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+      } else if (data.type === "ice") {
+        const pc = peers.get(from);
+        if (pc && data.candidate) {
+          try { await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); }
+          catch (e) {}
+        }
+      }
+      // Hapus sinyal setelah diproses (optional cleanup)
+      remove(snap.ref);
+    });
+
+    updateParticipantCount();
+  }
+
+  function createPeerConnection(peerId, isOfferer) {
+    if (peers.has(peerId)) return;
+
+    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+    peers.set(peerId, pc);
+
+    // Tambah local tracks
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+    // Remote track
+    pc.ontrack = (ev) => {
+      const stream = ev.streams[0];
+      addVideo(peerId, stream, false);
+    };
+
+    // ICE
+    pc.onicecandidate = async (ev) => {
+      if (ev.candidate) {
+        // Filter candidate yang terlalu sensitif (opsional)
+        await push(ref(db, `ring1/rooms/\( {roomId}/signal/ \){peerId}`), {
+          type: "ice",
+          from: myPeerId,
+          candidate: ev.candidate.toJSON()
+        });
+      }
+    };
+
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === "failed" || pc.connectionState === "closed" || pc.connectionState === "disconnected") {
+        closePeer(peerId);
+      }
+      updateParticipantCount();
+    };
+
+    if (isOfferer) {
+      pc.createOffer()
+        .then(offer => pc.setLocalDescription(offer))
+        .then(() => {
+          push(ref(db, `ring1/rooms/\( {roomId}/signal/ \){peerId}`), {
+            type: "offer",
+            from: myPeerId,
+            sdp: pc.localDescription
+          });
+        });
+    }
+  }
+
+  function addVideo(id, stream, isLocal) {
+    if (\( (`#vid- \){id}`)) return;
+    const box = document.createElement("div");
+    box.className = "video-box";
+    box.id = `vid-${id}`;
+    box.innerHTML = `
+      <video autoplay playsinline ${isLocal ? "muted" : ""}></video>
+      <div class="video-label">${isLocal ? "Kamu" : id.slice(0, 6)}</div>
+    `;
+    box.querySelector("video").srcObject = stream;
+    $("#videos").appendChild(box);
+    updateParticipantCount();
+  }
+
+  function closePeer(peerId) {
+    const pc = peers.get(peerId);
+    if (pc) {
+      pc.close();
+      peers.delete(peerId);
+    }
+    const el = \( (`#vid- \){peerId}`);
+    if (el) el.remove();
+    updateParticipantCount();
+  }
+
+  function updateParticipantCount() {
+    const total = peers.size + 1;
+    \( ("#participantCount").textContent = ` \){total} peserta`;
+  }
+
+  // Controls
+  $("#btnMute").onclick = () => {
+    isMuted = !isMuted;
+    localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+    $("#btnMute").classList.toggle("off", isMuted);
+    $("#btnMute").innerHTML = isMuted ? '<i class="bi bi-mic-mute-fill"></i>' : '<i class="bi bi-mic-fill"></i>';
+  };
+
+  $("#btnCam").onclick = () => {
+    isCamOff = !isCamOff;
+    localStream.getVideoTracks().forEach(t => t.enabled = !isCamOff);
+    $("#btnCam").classList.toggle("off", isCamOff);
+    $("#btnCam").innerHTML = isCamOff ? '<i class="bi bi-camera-video-off-fill"></i>' : '<i class="bi bi-camera-video-fill"></i>';
+  };
+
+  $("#btnLeave").onclick = async () => {
+    // Cleanup
+    peers.forEach(pc => pc.close());
+    peers.clear();
+    if (localStream) {
+      localStream.getTracks().forEach(t => t.stop());
+      localStream = null;
+    }
+    if (roomId && myPeerId) {
+      await remove(ref(db, `ring1/rooms/\( {roomId}/peers/ \){myPeerId}`));
+    }
+    $("#videos").innerHTML = "";
+    $("#roomOverlay").classList.remove("active");
+    roomId = null;
+    myPeerId = null;
+  };
+
+  // Sample & Clear
+  $("#btnSample").onclick = async () => {
+    if (!currentUser) return toast("Ditolak", "Login admin dulu");
+    const now = Date.now();
+    const samples = [
+      { partner: "Standup Harian", start: now + 3600000, dur: 30, roomId: "sample1", passHash: simpleHash("1234") },
+      { partner: "Review dengan Mitra", start: now + 7200000, dur: 60, roomId: "sample2", passHash: simpleHash("demo") }
+    ];
+    for (const s of samples) {
+      await set(ref(db, `ring1/events/${s.roomId}`), { ...s, tz: "WIB", createdBy: currentUser.email });
+      await set(ref(db, `ring1/rooms/${s.roomId}`), { passHash: s.passHash, maxPeers: MAX_PEERS });
+    }
+    toast("Contoh", "2 jadwal contoh ditambahkan (password: 1234 & demo)", true);
+  };
+
+  $("#btnClearAll").onclick = async () => {
+    if (!currentUser || !confirm("Hapus SEMUA jadwal?")) return;
+    await remove(ref(db, "ring1/events"));
+    await remove(ref(db, "ring1/rooms"));
+    toast("Dikosongkan", "Semua data dihapus", true);
+  };
+
+  // Clock
+  setInterval(() => {
+    $("#clock").textContent = new Date().toLocaleTimeString("id-ID", { hour12: false });
+  }, 1000);
+
+  // Set default date
+  $("#date").value = new Date().toISOString().slice(0, 10);
+</script>
+</body>
+</html>
