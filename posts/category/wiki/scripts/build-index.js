@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-// Membuat index.json dari content/system/*.md dan content/articles/*.md (tanpa dependensi).
-// Jalankan: node scripts/build-index.js
 const fs = require('fs'), path = require('path'), cp = require('child_process');
 const root = path.join(__dirname, '..');
 const dir = path.join(root, 'content');
@@ -62,10 +60,8 @@ for (const sub of SUBDIRS) {
   }
 }
 
-// Riwayat perubahan dari git log (bila tersedia).
-// --relative: path dibaca relatif terhadap folder wiki, jadi tetap benar walau wiki ada di subfolder repo.
 const changes = [];
-const log = git(['log', '-n', '200', '--relative', '--name-status', '--format=@@%H|%an|%cI|%s', '--', 'content']);
+const log = git(['log', '-n', '200', '--name-status', '--format=@@%H|%an|%cI|%s', '--', 'content']);
 for (const block of log.split('@@').slice(1)) {
   const [head, ...rest] = block.split('\n');
   const [hash, author, date, ...msg] = head.split('|');
@@ -75,19 +71,8 @@ for (const block of log.split('@@').slice(1)) {
   }
 }
 
-// Buang riwayat halaman yang sudah dihapus / diganti nama / bukan halaman wiki,
-// supaya "Perubahan terbaru" tidak menampilkan entri hantu (mis. "postingan").
-// Hanya halaman di content/articles/ yang ditampilkan (halaman sistem seperti Bantuan tidak ikut),
-// dan tiap halaman cukup satu baris (suntingan terbarunya) supaya satu halaman tidak memenuhi daftar.
-const articleSlugs = new Set(pages.filter(p => !p.system).map(p => p.slug.toLowerCase()));
-const seenSlug = new Set();
-const shown = changes.filter(c => {
-  const k = c.slug.toLowerCase();
-  if (c.type === 'D' || !articleSlugs.has(k)) return false;
-  if (seenSlug.has(k)) return false;
-  seenSlug.add(k);
-  return true;
-});
+const known = new Set(pages.map(p => p.slug.toLowerCase()));
+const shown = changes.filter(c => c.type !== 'D' && known.has(c.slug.toLowerCase()));
 
 fs.writeFileSync(path.join(root, 'index.json'), JSON.stringify({ generated: new Date().toISOString(), pages, changes: shown }, null, 1));
 console.log(`index.json: ${pages.length} halaman, ${shown.length} perubahan`);
