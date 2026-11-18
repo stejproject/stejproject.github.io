@@ -6,13 +6,7 @@
   const key = s => norm(s).toLowerCase();
   const fmtDate = d => new Date(d).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' });
 
-  // contentBase = awalan alamat untuk index.json, content/ dan uploads/ (relatif terhadap halaman ini)
-  // adminBase   = alamat CMS (Decap)
-  // repoDir     = folder wiki di dalam repo GitHub (kosong jika wiki ada di root repo)
-  let cfg = {
-    title: 'Wiki', repo: '', branch: 'main', contentDir: 'content', mainPage: 'Halaman_Utama',
-    contentBase: './', adminBase: 'admin/', repoDir: ''
-  };
+  let cfg = { title: 'Wiki', repo: '', branch: 'main', contentDir: 'content', mainPage: 'Halaman_Utama' };
   let idx = { pages: [], changes: [] };
   const byKey = new Map();
 
@@ -25,25 +19,18 @@
   }
   const lookup = name => byKey.get(key(name));
 
-  // Path file relatif terhadap folder wiki: content/<dir>/<slug>.md (dir = 'system' | 'articles'; kosong untuk index.json lama)
-  const contentPath = p => `${cfg.contentDir}/${p.dir ? p.dir + '/' : ''}${encodeURIComponent(p.slug)}.md`;
-  // Path file di repo GitHub (untuk tautan Riwayat) = repoDir + contentPath
-  const repoPrefix = () => cfg.repoDir ? cfg.repoDir.replace(/^\/+|\/+$/g, '') + '/' : '';
-  const repoFile = p => repoPrefix() + contentPath(p);
-  // Alamat file di situs (untuk fetch)
-  const urlOf = p => cfg.contentBase + contentPath(p);
+  // Lokasi file .md: content/<dir>/<slug>.md (dir = 'system' | 'articles'; kosong untuk index.json lama)
+  const fileOf = p => `${cfg.contentDir}/${p.dir ? p.dir + '/' : ''}${encodeURIComponent(p.slug)}.md`;
   const collOf = p => (p && p.dir === 'system') ? 'system' : 'pages';
 
-  function adminUrl(path, coll = 'pages') { return cfg.adminBase + '#/collections/' + coll + '/' + path; }
+  function adminUrl(path, coll = 'pages') { return 'admin/#/collections/' + coll + '/' + path; }
 
   async function init() {
     try { cfg = { ...cfg, ...(await (await fetch('config.json', { cache: 'no-cache' })).json()) }; } catch (e) {}
-    cfg.contentBase = cfg.contentBase.replace(/\/*$/, '/');
-    cfg.adminBase = cfg.adminBase.replace(/\/*$/, '/');
     try {
-      idx = await (await fetch(cfg.contentBase + 'index.json', { cache: 'no-cache' })).json();
+      idx = await (await fetch('index.json', { cache: 'no-cache' })).json();
     } catch (e) {
-      $('page-body').innerHTML = '<div class="notice">index.json belum bisa dimuat dari <code>' + esc(cfg.contentBase) + '</code>. Jalankan workflow pembuat index atau tunggu sampai selesai.</div>';
+      $('page-body').innerHTML = '<div class="notice">index.json belum ada. Jalankan <code>node scripts/build-index.js</code> (atau tunggu GitHub Action selesai).</div>';
     }
     idx.pages.forEach(p => { byKey.set(key(p.slug), p); byKey.set(key(p.title), p); });
     $('site-title').textContent = cfg.title;
@@ -65,7 +52,7 @@
     if (!p) { edit.parentElement.hidden = hist.parentElement.hidden = true; return; }
     edit.parentElement.hidden = hist.parentElement.hidden = false;
     edit.href = adminUrl('entries/' + encodeURIComponent(p.slug), collOf(p));
-    hist.href = repo ? `https://github.com/${repo}/commits/${cfg.branch}/${repoFile(p)}` : '#';
+    hist.href = repo ? `https://github.com/${repo}/commits/${cfg.branch}/${fileOf(p)}` : '#';
   }
 
   function render(title, html, opts = {}) {
@@ -118,7 +105,7 @@
     $('page-body').textContent = 'Memuat…';
     let md;
     try {
-      const r = await fetch(urlOf(p), { cache: 'no-cache' });
+      const r = await fetch(fileOf(p), { cache: 'no-cache' });
       if (!r.ok) throw 0;
       md = await r.text();
     } catch (e) { return render(p.title, '<div class="notice">Gagal memuat halaman.</div>', { page: p }); }
@@ -146,8 +133,6 @@
     const tpl = document.createElement('template');
     tpl.innerHTML = DOMPurify.sanitize(dirty);
     const root = tpl.content;
-    // Gambar unggahan CMS (uploads/...) tersimpan di situs artikel, bukan di situs mesin wiki
-    root.querySelectorAll('img[src^="uploads/"]').forEach(im => im.setAttribute('src', cfg.contentBase + im.getAttribute('src')));
     const hs = [...root.querySelectorAll('h2,h3,h4')];
     const used = new Set();
     hs.forEach(h => {
@@ -210,7 +195,7 @@
     if (idx.changes && idx.changes.length) {
       items = idx.changes.slice(0, 100).map((c, i) => {
         const p = lookup(c.slug), name = p ? p.title : c.slug.replace(/_/g, ' ');
-        const histPath = p ? repoFile(p) : `${repoPrefix()}${cfg.contentDir}/${encodeURIComponent(c.slug)}.md`;
+        const histPath = p ? fileOf(p) : `${cfg.contentDir}/${encodeURIComponent(c.slug)}.md`;
         const links = [
           p ? `<a href="#/${encodeURIComponent(p.slug)}">Buka halaman</a>` : '',
           repo ? `<a href="https://github.com/${repo}/commits/${cfg.branch}/${histPath}" target="_blank" rel="noopener">Riwayat</a>` : '',
@@ -235,7 +220,7 @@
     });
   }
 
-function search(q) {
+  function search(q) {
     $('search-input').value = q;
     const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
     const res = idx.pages.map(p => {
@@ -249,15 +234,9 @@ function search(q) {
       return { p, s };
     }).filter(r => r.s > 0 && terms.every(w => (r.p.title + ' ' + r.p.text + ' ' + r.p.categories.join(' ')).toLowerCase().includes(w)))
       .sort((a, b) => b.s - a.s);
-    
     const exact = lookup(q);
     let html = exact ? `<p>Ada halaman berjudul “${link(exact)}”.</p>` : (q ? `<p>Tidak ada halaman berjudul “${esc(q)}”. <a href="${adminUrl('new') + '?title=' + encodeURIComponent(q)}">Buat halaman ini</a>.</p>` : '');
-    if (res.length) {
-      html += res.map(({ p }) => `<div class="result">${link(p)}<div class="snip">${esc(p.excerpt)}…</div></div>`).join('');
-    } else {
-      const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
-      html += `<p>Tidak ada hasil. <a href="${googleUrl}" target="_blank" rel="noopener noreferrer">Cari langsung di Google</a>.</p>`;
-    }
+    html += res.length ? res.map(({ p }) => `<div class="result">${link(p)}<div class="snip">${esc(p.excerpt)}…</div></div>`).join('') : '<p>Tidak ada hasil.</p>';
     render('Hasil pencarian', html, { special: true });
   }
 
