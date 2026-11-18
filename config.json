@@ -1,9 +1,9 @@
 {
      "title": "Katalog",
-     "repo": "stejproject/wikis",
+     "repo": "stejproject",
      "branch": "main",
      "contentDir": "content",
      "mainPage": "Halaman_Utama",
-     "contentBase": "https://stejproject.github.io/wikis/",
+     "contentBase": "/wikis/",
      "adminBase": "/wikis/admin/"
 }
