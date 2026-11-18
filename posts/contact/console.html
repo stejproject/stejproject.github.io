@@ -1,122 +1,184 @@
+live-editor-eruda
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Teks Editor dengan Eruda</title>
+  <title>Live HTML Editor & Eruda Inspector</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, sans-serif;
       margin: 0;
-      padding: 1rem;
-      background-color: #f8fafc;
-      color: #1e293b;
+      padding: 0;
       display: flex;
       flex-direction: column;
-      height: 95vh;
-      box-sizing: border-box;
+      height: 100vh;
+      background: #1e293b;
+      color: #f8fafc;
     }
-    h2 {
-      margin-top: 0;
-      font-size: 1.25rem;
-      color: #0f172a;
-    }
-    .editor-container {
+    header {
+      padding: 0.6rem 1rem;
+      background: #0f172a;
       display: flex;
-      flex-direction: column;
-      flex: 1;
-      gap: 0.75rem;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
     }
-    textarea {
-      flex: 1;
-      width: 100%;
-      padding: 0.75rem;
+    header h1 {
+      margin: 0;
       font-size: 1rem;
-      font-family: monospace;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      resize: none;
-      box-sizing: border-box;
-      background: #ffffff;
+      font-weight: 600;
     }
-    textarea:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    }
-    .toolbar {
+    .actions {
       display: flex;
       gap: 0.5rem;
     }
     button {
-      background-color: #2563eb;
+      background: #2563eb;
       color: #fff;
       border: none;
-      padding: 0.6rem 1.2rem;
+      padding: 0.45rem 0.9rem;
       border-radius: 6px;
-      font-size: 0.95rem;
-      cursor: pointer;
+      font-size: 0.85rem;
       font-weight: 500;
+      cursor: pointer;
     }
-    button:active {
-      background-color: #1d4ed8;
+    button:active { background: #1d4ed8; }
+    button.btn-clear { background: #475569; }
+    .workspace {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
     }
-    button.secondary {
-      background-color: #64748b;
+    .editor-pane {
+      height: 45%;
+      display: flex;
+      flex-direction: column;
+      border-bottom: 2px solid #334155;
+    }
+    .pane-label {
+      background: #334155;
+      color: #cbd5e1;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    textarea {
+      flex: 1;
+      width: 100%;
+      background: #0f172a;
+      color: #e2e8f0;
+      border: none;
+      padding: 0.75rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      resize: none;
+      outline: none;
+    }
+    .preview-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+    }
+    iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: #ffffff;
     }
   </style>
 </head>
 <body>
 
-  <h2>Teks Editor Sederhana</h2>
-  
-  <div class="editor-container">
-    <textarea id="myEditor" placeholder="Ketik catatan atau kode di sini..."></textarea>
-    
-    <div class="toolbar">
-      <button onclick="simpanTeks()">Simpan Teks</button>
-      <button class="secondary" onclick="muatTeks()">Muat Ulang</button>
-      <button class="secondary" onclick="hapusTeks()">Bersihkan</button>
+  <header>
+    <h1>Live Editor + Eruda</h1>
+    <div class="actions">
+      <button onclick="jalankanKode()">▶ Jalankan</button>
+      <button class="btn-clear" onclick="bersihkan()">Reset</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <div class="editor-pane">
+      <div class="pane-label">Kode HTML / JS / CSS</div>
+      <textarea id="codeEditor" spellcheck="false" placeholder="Tulis kode HTML, CSS, atau JavaScript di sini..."><!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; color: #222; }
+    .box { padding: 1rem; background: #e0f2fe; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Halo dari dalam Editor!</h2>
+    <p>Ketuk ikon Eruda di pojok kanan bawah untuk mengecek elemen &amp; console khusus isi halaman ini.</p>
+    <button onclick="console.log('Log dari hasil editor!'); tesError();">Tes Log &amp; Error</button>
+  </div>
+
+  <script>
+    console.info('Halaman preview berhasil dimuat.');
+    function tesError() {
+      console.error('Contoh error dari kode di dalam teks editor!');
+    }
+  </script>
+</body>
+</html></textarea>
+    </div>
+
+    <div class="preview-pane">
+      <div class="pane-label">Hasil &amp; Source Terisolasi (Eruda Aktif di Sini)</div>
+      <iframe id="previewFrame" title="Preview Output"></iframe>
     </div>
   </div>
 
-  <!-- Memuat Eruda DevTools dari CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
   <script>
-    // Inisialisasi Eruda agar tombol melayang muncul di layar HP
-    eruda.init();
+    const editor = document.getElementById('codeEditor');
+    const frame = document.getElementById('previewFrame');
 
-    const editor = document.getElementById('myEditor');
+    function jalankanKode() {
+      let userCode = editor.value;
 
-    // Fungsi menyimpan teks ke localStorage dan mencatat log ke Eruda
-    function simpanTeks() {
-      const teks = editor.value;
-      localStorage.setItem('savedText', teks);
-      console.log('Berhasil menyimpan teks:', teks.substring(0, 30) + (teks.length > 30 ? '...' : ''));
-      alert('Teks berhasil disimpan!');
+      // Skrip injeksi Eruda agar berjalan di dalam konteks iframe (bukan parent)
+      const erudaSnippet = `
+        <script src="https://cdn.jsdelivr.net/npm/eruda"><\/script>
+        <script>
+          window.addEventListener('DOMContentLoaded', () => {
+            if (window.eruda) {
+              eruda.init();
+            }
+          });
+          if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            if (window.eruda) eruda.init();
+          }
+        <\/script>
+      `;
+
+      // Sisipkan Eruda sebelum </body> jika ada, atau di akhir dokumen
+      if (/<\/body>/i.test(userCode)) {
+        userCode = userCode.replace(/<\/body>/i, erudaSnippet + '
+</body>');
+      } else {
+        userCode += erudaSnippet;
+      }
+
+      // Render ke dalam iframe terisolasi sehingga Source & Console Eruda hanya membaca isi editor
+      frame.srcdoc = userCode;
     }
 
-    // Fungsi memuat teks dari localStorage
-    function muatTeks() {
-      const saved = localStorage.getItem('savedText') || '';
-      editor.value = saved;
-      console.info('Teks dimuat ulang dari localStorage. Panjang karakter:', saved.length);
-    }
-
-    // Fungsi membersihkan editor
-    function hapusTeks() {
-      if (confirm('Yakin ingin menghapus semua teks?')) {
+    function bersihkan() {
+      if (confirm('Hapus isi editor?')) {
         editor.value = '';
-        localStorage.removeItem('savedText');
-        console.warn('Editor dibersihkan dan memori penyimpanan dikosongkan.');
+        frame.srcdoc = '';
       }
     }
 
-    // Muat otomatis saat halaman dibuka
-    window.onload = function() {
-      muatTeks();
-      console.log('Aplikasi Teks Editor dan Eruda siap digunakan.');
-    };
+    // Jalankan otomatis saat pertama kali dibuka
+    window.addEventListener('DOMContentLoaded', jalankanKode);
   </script>
 
 </body>
