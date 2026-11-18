@@ -1,18 +1,52 @@
-uji-eruda
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Uji Coba Eruda DevTools</title>
+  <title>Teks Editor dengan Eruda</title>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      line-height: 1.6;
-      max-width: 600px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-      color: #222;
+      margin: 0;
+      padding: 1rem;
+      background-color: #f8fafc;
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      height: 95vh;
+      box-sizing: border-box;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: #0f172a;
+    }
+    .editor-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 0.75rem;
+    }
+    textarea {
+      flex: 1;
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      font-family: monospace;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      resize: none;
+      box-sizing: border-box;
+      background: #ffffff;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+    .toolbar {
+      display: flex;
+      gap: 0.5rem;
     }
     button {
       background-color: #2563eb;
@@ -20,36 +54,70 @@ uji-eruda
       border: none;
       padding: 0.6rem 1.2rem;
       border-radius: 6px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
-      margin-right: 0.5rem;
-      margin-bottom: 0.5rem;
+      font-weight: 500;
     }
-    button.error-btn {
-      background-color: #dc2626;
+    button:active {
+      background-color: #1d4ed8;
+    }
+    button.secondary {
+      background-color: #64748b;
     }
   </style>
 </head>
 <body>
-  <h1>Halaman Uji Coba Eruda</h1>
-  <p>Ketuk ikon tombol gerigi kecil di pojok kanan bawah layar HP untuk membuka panel <strong>Eruda DevTools</strong>.</p>
+
+  <h2>Teks Editor Sederhana</h2>
   
-  <div>
-    <button onclick="console.log('Tes log berhasil pada ' + new Date().toLocaleTimeString())">Kirim Console Log</button>
-    <button class="error-btn" onclick="tesError()">Picu Contoh Error</button>
+  <div class="editor-container">
+    <textarea id="myEditor" placeholder="Ketik catatan atau kode di sini..."></textarea>
+    
+    <div class="toolbar">
+      <button onclick="simpanTeks()">Simpan Teks</button>
+      <button class="secondary" onclick="muatTeks()">Muat Ulang</button>
+      <button class="secondary" onclick="hapusTeks()">Bersihkan</button>
+    </div>
   </div>
 
-  <!-- Memuat Eruda dari CDN -->
+  <!-- Memuat Eruda DevTools dari CDN -->
   <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
   <script>
-    // Inisialisasi Eruda
+    // Inisialisasi Eruda agar tombol melayang muncul di layar HP
     eruda.init();
 
-    // Fungsi contoh untuk memicu error di tab Console
-    function tesError() {
-      console.error('Ini adalah contoh pesan error untuk pengujian!');
-      variabelTidakTerdefinisi.panggilFungsi();
+    const editor = document.getElementById('myEditor');
+
+    // Fungsi menyimpan teks ke localStorage dan mencatat log ke Eruda
+    function simpanTeks() {
+      const teks = editor.value;
+      localStorage.setItem('savedText', teks);
+      console.log('Berhasil menyimpan teks:', teks.substring(0, 30) + (teks.length > 30 ? '...' : ''));
+      alert('Teks berhasil disimpan!');
     }
+
+    // Fungsi memuat teks dari localStorage
+    function muatTeks() {
+      const saved = localStorage.getItem('savedText') || '';
+      editor.value = saved;
+      console.info('Teks dimuat ulang dari localStorage. Panjang karakter:', saved.length);
+    }
+
+    // Fungsi membersihkan editor
+    function hapusTeks() {
+      if (confirm('Yakin ingin menghapus semua teks?')) {
+        editor.value = '';
+        localStorage.removeItem('savedText');
+        console.warn('Editor dibersihkan dan memori penyimpanan dikosongkan.');
+      }
+    }
+
+    // Muat otomatis saat halaman dibuka
+    window.onload = function() {
+      muatTeks();
+      console.log('Aplikasi Teks Editor dan Eruda siap digunakan.');
+    };
   </script>
+
 </body>
 </html>
