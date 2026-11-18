@@ -96,8 +96,8 @@
   <header>
     <h1>Live Editor + Eruda</h1>
     <div class="actions">
-      <button onclick="jalankanKode()">▶ Jalankan</button>
-      <button class="btn-clear" onclick="bersihkan()">Reset</button>
+      <button type="button" id="btnRun">▶ Jalankan</button>
+      <button type="button" class="btn-clear" id="btnClear">Reset</button>
     </div>
   </header>
 
@@ -138,34 +138,27 @@
   <script>
     const editor = document.getElementById('codeEditor');
     const frame = document.getElementById('previewFrame');
+    const btnRun = document.getElementById('btnRun');
+    const btnClear = document.getElementById('btnClear');
 
     function jalankanKode() {
       let userCode = editor.value;
 
-      // Skrip injeksi Eruda agar berjalan di dalam konteks iframe (bukan parent)
-      const erudaSnippet = `
-        <script src="https://cdn.jsdelivr.net/npm/eruda"><\/script>
-        <script>
-          window.addEventListener('DOMContentLoaded', () => {
-            if (window.eruda) {
-              eruda.init();
-            }
-          });
-          if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            if (window.eruda) eruda.init();
-          }
-        <\/script>
-      `;
+      // Menggunakan concatenation biasa agar tidak memicu syntax error newline/closing tag
+      const erudaSnippet = 
+        '<' + 'script src="https://cdn.jsdelivr.net/npm/eruda"><' + '/script>' +
+        '<' + 'script>' +
+        'function initErudaSafe() { if (window.eruda && !window.eruda._isInit) { eruda.init(); } }' +
+        'window.addEventListener("load", initErudaSafe);' +
+        'initErudaSafe();' +
+        '<' + '/script>';
 
-      // Sisipkan Eruda sebelum </body> jika ada, atau di akhir dokumen
       if (/<\/body>/i.test(userCode)) {
-        userCode = userCode.replace(/<\/body>/i, erudaSnippet + '
-</body>');
+        userCode = userCode.replace(/<\/body>/i, erudaSnippet + '\n</body>');
       } else {
         userCode += erudaSnippet;
       }
 
-      // Render ke dalam iframe terisolasi sehingga Source & Console Eruda hanya membaca isi editor
       frame.srcdoc = userCode;
     }
 
@@ -176,7 +169,9 @@
       }
     }
 
-    // Jalankan otomatis saat pertama kali dibuka
+    btnRun.addEventListener('click', jalankanKode);
+    btnClear.addEventListener('click', bersihkan);
+
     window.addEventListener('DOMContentLoaded', jalankanKode);
   </script>
 
