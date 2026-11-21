@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tanya Wiki</title>
+<style>
+  :root {
+    --bg: #ffffff; --side: #f6f8fc; --ink: #1f1f1f; --muted: #5f6368; --line: #dadce0;
+    --card: #ffffff; --chip: #eef1f8; --accent: #1a56c4; --accent-bg: #e8f0fe; --mark: #fff1a8;
+    --shadow: 0 1px 6px rgba(32,33,36,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131314; --side: #1b1c1f; --ink: #e8eaed; --muted: #9aa0a6; --line: #3c4043;
+      --card: #1e1f22; --chip: #2a2c31; --accent: #8ab4f8; --accent-bg: #263451; --mark: #5c4d00;
+      --shadow: 0 1px 6px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131314; --side: #1b1c1f; --ink: #e8eaed; --muted: #9aa0a6; --line: #3c4043;
+    --card: #1e1f22; --chip: #2a2c31; --accent: #8ab4f8; --accent-bg: #263451; --mark: #5c4d00;
+    --shadow: 0 1px 6px rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; display: flex; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .side { width: 64px; background: var(--side); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 8px; flex: none; }
+  .side .sp { flex: 1; }
+  .icon-btn { width: 40px; height: 40px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); display: grid; place-items: center; cursor: pointer; }
+  .icon-btn:hover { background: var(--chip); color: var(--ink); }
+  .icon-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100%; }
+  .top { display: flex; align-items: center; gap: 24px; padding: 16px 32px; font-size: 14px; }
+  .top .brand { font-weight: 600; color: var(--ink); }
+  .top a { color: var(--muted); }
+  .top .grow { flex: 1; }
+
+  .stage { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 0 16px; }
+  .col { width: 100%; max-width: 750px; }
+
+  .hello { margin: 12vh 0 28px; text-align: center; font-size: clamp(24px, 4vw, 32px); font-weight: 400; }
+  body.chatting .hello, body.chatting .suggest { display: none; }
+
+  .box { background: var(--card); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--shadow); padding: 14px 16px 10px 20px; }
+  .box:focus-within { box-shadow: 0 2px 10px rgba(32,33,36,.28); }
+  .box textarea { width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: inherit; font: inherit; max-height: 160px; padding: 4px 0; }
+  .box .row { display: flex; justify-content: flex-end; align-items: center; min-height: 36px; }
+  .send { width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; cursor: pointer; }
+  .send[disabled] { background: var(--chip); color: var(--muted); cursor: default; }
+  .send svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .suggest { list-style: none; margin: 20px 0 0; padding: 0; }
+  .suggest button { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; border: 0; background: transparent; color: var(--muted); font: inherit; padding: 10px 14px; border-radius: 12px; cursor: pointer; }
+  .suggest button:hover { background: var(--chip); color: var(--ink); }
+  .suggest svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  .msgs { padding: 8px 0 24px; }
+  .q { margin: 20px 0 8px auto; width: fit-content; max-width: 85%; background: var(--chip); padding: 10px 16px; border-radius: 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .a { margin: 8px 0 24px; }
+  .a .lead { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+  .hit { border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin: 0 0 12px; background: var(--card); }
+  .hit p { margin: 0 0 8px; overflow-wrap: anywhere; }
+  .hit mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 2px; }
+  .src { display: inline-block; font-size: 13px; background: var(--accent-bg); border-radius: 999px; padding: 3px 12px; }
+  .none { margin: 0; }
+
+  .dock { padding: 8px 16px 16px; display: flex; justify-content: center; }
+  body:not(.chatting) .dock { display: none; }
+  .dock .col { max-width: 750px; }
+  .foot { text-align: center; font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+
+  @media (max-width: 640px) {
+    .side { display: none; }
+    .top { padding: 12px 16px; gap: 16px; }
+    .hello { margin-top: 8vh; }
+  }
+</style>
+</head>
+<body>
+<nav class="side" aria-label="Menu">
+  <button class="icon-btn" id="newChat" title="Percakapan baru" aria-label="Percakapan baru">
+    <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+  </button>
+  <a class="icon-btn" id="homeLink" href="./" title="Kembali ke wiki" aria-label="Kembali ke wiki">
+    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5Z"/><path d="M6.5 17H20v4H6.5A2.5 2.5 0 0 1 4 18.5"/></svg>
+  </a>
+  <div class="sp"></div>
+  <button class="icon-btn" id="theme" title="Ganti tema" aria-label="Ganti tema">
+    <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+  </button>
+</nav>
+
+<div class="main">
+  <header class="top">
+    <span class="brand" id="brand">Tanya Wiki</span>
+    <a href="./">Wiki</a>
+    <a href="./#/Khusus:Semua_halaman">Semua halaman</a>
+    <span class="grow"></span>
+    <span id="status" style="color:var(--muted)">Memuat artikel…</span>
+  </header>
+
+  <div class="stage" id="stage">
+    <div class="col">
+      <h1 class="hello">Halo, apa yang ingin Anda ketahui?</h1>
+      <form class="box" id="form" autocomplete="off">
+        <textarea id="input" rows="1" placeholder="Tanyakan apa saja tentang isi wiki" aria-label="Pertanyaan"></textarea>
+        <div class="row">
+          <button class="send" id="send" type="submit" disabled aria-label="Kirim">
+            <svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+          </button>
+        </div>
+      </form>
+      <ul class="suggest" id="suggest"></ul>
+      <div class="msgs" id="msgs" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="dock" id="dock">
+    <div class="col">
+      <form class="box" id="form2" autocomplete="off">
+        <textarea id="input2" rows="1" placeholder="Tanyakan hal lain" aria-label="Pertanyaan lanjutan"></textarea>
+        <div class="row">
+          <button class="send" id="send2" type="submit" disabled aria-label="Kirim">
+            <svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+          </button>
+        </div>
+      </form>
+      <p class="foot">Jawaban dikutip langsung dari artikel wiki, tanpa layanan AI eksternal. Periksa artikel sumbernya.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  let cfg = { title: 'Wiki', contentBase: './' };
+  let pages = [], chunks = [], df = new Map(), avgLen = 1, ready = false;
+
+  // ---------- Teks & pencarian (semua di browser) ----------
+  const STOP = new Set(('yang dan di ke dari untuk pada dengan adalah itu ini atau juga akan dapat bisa ada tidak ' +
+    'sebagai oleh dalam karena agar saat sudah telah lebih para sebuah suatu apa siapa kapan dimana mana bagaimana ' +
+    'kenapa mengapa berapa apakah jelaskan jelasin tolong saya aku kita kami anda dia mereka sih dong nih tuh ' +
+    'cara tentang soal mengenai artinya arti maksud pengertian definisi').split(' '));
+  const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const stem = w => {
+    if (w.length <= 4) return w;
+    w = w.replace(/(nya|lah|kah|pun)$/, '');
+    w = w.replace(/^(meng|meny|mem|men|me|peng|peny|pem|pen|pe|ber|ter|di|ke|se)(?=.{4,})/, '');
+    w = w.replace(/(kan|an|i)$/, '');
+    return w;
+  };
+  const tokens = s => (norm(s).match(/[a-z0-9]+/g) || []).filter(w => !STOP.has(w)).map(stem).filter(w => w.length > 1);
+
+  function buildIndex() {
+    chunks = [];
+    for (const p of pages) {
+      if (p.system) continue;
+      const sents = String(p.text || '').split(/(?<=[.!?])\s+/).filter(Boolean);
+      let cur = '';
+      const flush = () => { if (cur.trim()) chunks.push({ p, text: cur.trim() }); cur = ''; };
+      for (const s of sents) {
+        if (cur && (cur + ' ' + s).length > 320) flush();
+        cur += (cur ? ' ' : '') + s;
+      }
+      flush();
+    }
+    let total = 0;
+    for (const c of chunks) {
+      c.tok = tokens(c.text);
+      c.tf = new Map();
+      for (const t of c.tok) c.tf.set(t, (c.tf.get(t) || 0) + 1);
+      c.title = new Set(tokens(c.p.title + ' ' + (c.p.categories || []).join(' ')));
+      total += c.tok.length;
+      for (const t of c.tf.keys()) df.set(t, (df.get(t) || 0) + 1);
+    }
+    avgLen = chunks.length ? total / chunks.length : 1;
+  }
+
+  function search(q) {
+    const qt = [...new Set(tokens(q))];
+    if (!qt.length) return { qt, hits: [] };
+    const N = chunks.length, k1 = 1.4, b = 0.75;
+    const scored = [];
+    for (const c of chunks) {
+      let s = 0, matched = 0;
+      for (const t of qt) {
+        const f = c.tf.get(t) || 0, inTitle = c.title.has(t);
+        if (!f && !inTitle) continue;
+        matched++;
+        const n = df.get(t) || 0, idf = Math.log(1 + (N - n + 0.5) / (n + 0.5));
+        s += idf * ((f * (k1 + 1)) / (f + k1 * (1 - b + b * c.tok.length / avgLen)));
+        if (inTitle) s += 1.5;
+      }
+      if (matched && matched / qt.length >= (qt.length > 2 ? 0.5 : 1)) scored.push({ c, s });
+    }
+    scored.sort((a, b) => b.s - a.s);
+    const hits = [], perPage = new Map();
+    for (const { c, s } of scored) {
+      if (s < 1.2) break;
+      const n = perPage.get(c.p.slug) || 0;
+      if (n >= 2) continue;
+      perPage.set(c.p.slug, n + 1);
+      hits.push(c);
+      if (hits.length >= 3) break;
+    }
+    return { qt, hits };
+  }
+
+  // ---------- Tampilan (DOM API, tanpa innerHTML) ----------
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  function highlighted(text, qset) {
+    const p = el('p');
+    for (const part of text.split(/(\p{L}[\p{L}\p{N}_-]*)/u)) {
+      if (!part) continue;
+      const hit = /^\p{L}/u.test(part) && qset.has(stem(norm(part)));
+      if (hit) p.appendChild(el('mark', null, part)); else p.appendChild(document.createTextNode(part));
+    }
+    return p;
+  }
+
+  function wikiHref(slug) { return './#/' + encodeURIComponent(slug); }
+
+  function addAnswer(question) {
+    const msgs = $('msgs');
+    msgs.appendChild(el('div', 'q', question));
+    const a = el('div', 'a');
+    const { qt, hits } = search(question);
+    if (!hits.length) {
+      a.appendChild(el('p', 'none', 'Saya tidak menemukan jawaban untuk itu di artikel wiki. Coba kata kunci lain, atau lihat '));
+      const l = el('a', null, 'daftar semua halaman'); l.href = './#/Khusus:Semua_halaman';
+      a.lastChild.appendChild(l); a.lastChild.appendChild(document.createTextNode('.'));
+    } else {
+      const titles = [...new Set(hits.map(h => h.p.title))];
+      a.appendChild(el('p', 'lead', 'Ditemukan di ' + titles.length + ' artikel. Kutipan berikut diambil langsung dari wiki:'));
+      const qset = new Set(qt);
+      for (const h of hits) {
+        const card = el('div', 'hit');
+        card.appendChild(highlighted(h.text, qset));
+        const src = el('a', 'src', h.p.title); src.href = wikiHref(h.p.slug);
+        card.appendChild(src);
+        a.appendChild(card);
+      }
+    }
+    msgs.appendChild(a);
+    $('stage').scrollTop = $('stage').scrollHeight;
+  }
+
+  function ask(q) {
+    q = q.trim();
+    if (!q || !ready) return;
+    document.body.classList.add('chatting');
+    addAnswer(q);
+    for (const id of ['input', 'input2']) { $(id).value = ''; autosize($(id)); }
+    syncButtons();
+    $('input2').focus();
+  }
+
+  function autosize(t) { t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 160) + 'px'; }
+  function syncButtons() {
+    $('send').disabled = !ready || !$('input').value.trim();
+    $('send2').disabled = !ready || !$('input2').value.trim();
+  }
+
+  function setupSuggestions() {
+    const ul = $('suggest');
+    const arts = pages.filter(p => !p.system && p.categories !== undefined).sort(() => Math.random() - 0.5).slice(0, 3);
+    for (const p of arts) {
+      const li = el('li'), b = el('button'); b.type = 'button';
+      b.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+      b.appendChild(document.createTextNode('Apa yang dibahas tentang ' + p.title + '?'));
+      b.addEventListener('click', () => ask(p.title));
+      li.appendChild(b); ul.appendChild(li);
+    }
+  }
+
+  // ---------- Muat data ----------
+  async function init() {
+    try { cfg = { ...cfg, ...(await (await fetch('config.json', { cache: 'no-cache' })).json()) }; } catch (e) {}
+    cfg.contentBase = String(cfg.contentBase || './').replace(/\/*$/, '/');
+    $('brand').textContent = 'Tanya ' + (cfg.title || 'Wiki');
+    document.title = 'Tanya ' + (cfg.title || 'Wiki');
+    try {
+      const idx = await (await fetch(cfg.contentBase + 'index.json', { cache: 'no-cache' })).json();
+      pages = idx.pages || [];
+      buildIndex();
+      ready = true;
+      $('status').textContent = chunks.length ? pages.filter(p => !p.system).length + ' artikel siap' : 'Belum ada artikel';
+      setupSuggestions();
+    } catch (e) {
+      $('status').textContent = 'Gagal memuat artikel';
+    }
+    syncButtons();
+  }
+
+  // ---------- Peristiwa ----------
+  for (const [inp, form] of [['input', 'form'], ['input2', 'form2']]) {
+    $(inp).addEventListener('input', () => { autosize($(inp)); syncButtons(); });
+    $(inp).addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask($(inp).value); } });
+    $(form).addEventListener('submit', e => { e.preventDefault(); ask($(inp).value); });
+  }
+  $('newChat').addEventListener('click', () => {
+    $('msgs').replaceChildren();
+    document.body.classList.remove('chatting');
+    $('input').focus();
+  });
+  $('theme').addEventListener('click', () => {
+    const r = document.documentElement;
+    const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    r.dataset.theme = dark ? 'light' : 'dark';
+  });
+
+  init();
+  $('input').focus();
+})();
+</script>
+</body>
+</html>
