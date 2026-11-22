@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -44,7 +44,7 @@
   .col { width: 100%; max-width: 750px; }
 
   .hello { margin: 12vh 0 28px; text-align: center; font-size: clamp(24px, 4vw, 32px); font-weight: 400; }
-  body.chatting .hello, body.chatting .suggest { display: none; }
+  body.chatting .hello, body.chatting .suggest, body.chatting #form { display: none; }
 
   .box { background: var(--card); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--shadow); padding: 14px 16px 10px 20px; }
   .box:focus-within { box-shadow: 0 2px 10px rgba(32,33,36,.28); }
@@ -74,6 +74,13 @@
   .dock .col { max-width: 750px; }
   .foot { text-align: center; font-size: 12px; color: var(--muted); margin: 8px 0 0; }
 
+  /* Mode popup (dipanggil dari index.html lewat ?embed=1) */
+  body.embed .side, body.embed .top { display: none; }
+  body.embed .hello { margin: 6vh 0 20px; font-size: 22px; }
+  body.embed .stage { padding: 12px 12px 0; }
+  body.embed .dock { padding: 8px 12px 12px; }
+  body.embed .foot { font-size: 11px; }
+
   @media (max-width: 640px) {
     .side { display: none; }
     .top { padding: 12px 16px; gap: 16px; }
@@ -86,7 +93,7 @@
   <button class="icon-btn" id="newChat" title="Percakapan baru" aria-label="Percakapan baru">
     <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
   </button>
-  <a class="icon-btn" id="homeLink" href="./" title="Kembali ke wiki" aria-label="Kembali ke wiki">
+  <a class="icon-btn" id="homeLink" href="/" title="Kembali ke wiki" aria-label="Kembali ke wiki">
     <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5Z"/><path d="M6.5 17H20v4H6.5A2.5 2.5 0 0 1 4 18.5"/></svg>
   </a>
   <div class="sp"></div>
@@ -98,8 +105,8 @@
 <div class="main">
   <header class="top">
     <span class="brand" id="brand">Tanya Wiki</span>
-    <a href="./">Wiki</a>
-    <a href="./#/Khusus:Semua_halaman">Semua halaman</a>
+    <a href="/">Wiki</a>
+    <a href="/#/Khusus:Semua_halaman">Semua halaman</a>
     <span class="grow"></span>
     <span id="status" style="color:var(--muted)">Memuat artikel…</span>
   </header>
@@ -139,7 +146,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  let cfg = { title: 'Wiki', contentBase: './' };
+  let cfg = { title: 'Wiki', contentBase: '/wikis/' };
   let pages = [], chunks = [], df = new Map(), avgLen = 1, ready = false;
 
   // ---------- Teks & pencarian (semua di browser) ----------
@@ -162,8 +169,8 @@
     for (const p of pages) {
       if (p.system) continue;
       const sents = String(p.text || '').split(/(?<=[.!?])\s+/).filter(Boolean);
-      let cur = '';
-      const flush = () => { if (cur.trim()) chunks.push({ p, text: cur.trim() }); cur = ''; };
+      let cur = '', pc = 0;
+      const flush = () => { if (cur.trim()) chunks.push({ p, text: cur.trim(), pos: pc++ }); cur = ''; };
       for (const s of sents) {
         if (cur && (cur + ' ' + s).length > 320) flush();
         cur += (cur ? ' ' : '') + s;
@@ -176,6 +183,7 @@
       c.tf = new Map();
       for (const t of c.tok) c.tf.set(t, (c.tf.get(t) || 0) + 1);
       c.title = new Set(tokens(c.p.title + ' ' + (c.p.categories || []).join(' ')));
+      c.ttl = new Set(tokens(c.p.title));
       total += c.tok.length;
       for (const t of c.tf.keys()) df.set(t, (df.get(t) || 0) + 1);
     }
@@ -197,12 +205,19 @@
         s += idf * ((f * (k1 + 1)) / (f + k1 * (1 - b + b * c.tok.length / avgLen)));
         if (inTitle) s += 1.5;
       }
-      if (matched && matched / qt.length >= (qt.length > 2 ? 0.5 : 1)) scored.push({ c, s });
+      if (matched && matched / qt.length >= (qt.length > 2 ? 0.5 : 1)) {
+        // Pertanyaan yang hampir sama dengan judul artikel: utamakan artikel itu, mulai dari bagian awalnya
+        const inTtl = qt.filter(t => c.ttl.has(t)).length;
+        if (inTtl === qt.length) s += 8; else if (inTtl / qt.length >= 0.6) s += 3;
+        if (inTtl && c.pos < 2) s += 1.5 - 0.5 * c.pos;
+        scored.push({ c, s });
+      }
     }
     scored.sort((a, b) => b.s - a.s);
     const hits = [], perPage = new Map();
+    const top = scored.length ? scored[0].s : 0;
     for (const { c, s } of scored) {
-      if (s < 1.2) break;
+      if (s < 1.2 || s < top * 0.35) break; // buang hasil yang jauh di bawah yang terbaik
       const n = perPage.get(c.p.slug) || 0;
       if (n >= 2) continue;
       perPage.set(c.p.slug, n + 1);
@@ -225,16 +240,17 @@
     return p;
   }
 
-  function wikiHref(slug) { return './#/' + encodeURIComponent(slug); }
+  function wikiHref(slug) { return '/#/' + encodeURIComponent(slug); }
 
   function addAnswer(question) {
     const msgs = $('msgs');
-    msgs.appendChild(el('div', 'q', question));
+    const qEl = el('div', 'q', question);
+    msgs.appendChild(qEl);
     const a = el('div', 'a');
     const { qt, hits } = search(question);
     if (!hits.length) {
       a.appendChild(el('p', 'none', 'Saya tidak menemukan jawaban untuk itu di artikel wiki. Coba kata kunci lain, atau lihat '));
-      const l = el('a', null, 'daftar semua halaman'); l.href = './#/Khusus:Semua_halaman';
+      const l = el('a', null, 'daftar semua halaman'); l.href = '/#/Khusus:Semua_halaman';
       a.lastChild.appendChild(l); a.lastChild.appendChild(document.createTextNode('.'));
     } else {
       const titles = [...new Set(hits.map(h => h.p.title))];
@@ -249,7 +265,7 @@
       }
     }
     msgs.appendChild(a);
-    $('stage').scrollTop = $('stage').scrollHeight;
+    qEl.scrollIntoView({ block: 'start' }); // tampilkan pertanyaan di atas, jawaban di bawahnya
   }
 
   function ask(q) {
@@ -282,8 +298,8 @@
 
   // ---------- Muat data ----------
   async function init() {
-    try { cfg = { ...cfg, ...(await (await fetch('config.json', { cache: 'no-cache' })).json()) }; } catch (e) {}
-    cfg.contentBase = String(cfg.contentBase || './').replace(/\/*$/, '/');
+    try { cfg = { ...cfg, ...(await (await fetch('/config.json', { cache: 'no-cache' })).json()) }; } catch (e) {}
+    cfg.contentBase = String(cfg.contentBase || '/wikis/').replace(/\/*$/, '/');
     $('brand').textContent = 'Tanya ' + (cfg.title || 'Wiki');
     document.title = 'Tanya ' + (cfg.title || 'Wiki');
     try {
@@ -294,7 +310,7 @@
       $('status').textContent = chunks.length ? pages.filter(p => !p.system).length + ' artikel siap' : 'Belum ada artikel';
       setupSuggestions();
     } catch (e) {
-      $('status').textContent = 'Gagal memuat artikel';
+      $('status').textContent = 'Gagal memuat ' + cfg.contentBase + 'index.json';
     }
     syncButtons();
   }
@@ -314,6 +330,24 @@
     const r = document.documentElement;
     const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     r.dataset.theme = dark ? 'light' : 'dark';
+  });
+
+  // ---------- Mode popup ----------
+  const qs = new URLSearchParams(location.search);
+  if (qs.get('embed') === '1') document.body.classList.add('embed');
+  const setTheme = t => { if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; };
+  setTheme(qs.get('theme'));
+  addEventListener('message', e => {
+    if (e.origin !== location.origin || e.source !== parent) return;
+    if (e.data && e.data.type === 'ask-theme') setTheme(e.data.theme);
+  });
+  // Di dalam popup, tautan ke artikel dibuka di halaman induk (bukan di dalam popup)
+  document.addEventListener('click', e => {
+    if (!document.body.classList.contains('embed')) return;
+    const a = e.target.closest('a[href^="/#/"]');
+    if (!a) return;
+    e.preventDefault();
+    parent.postMessage({ type: 'ask-open', hash: a.getAttribute('href').slice(1) }, location.origin);
   });
 
   init();
