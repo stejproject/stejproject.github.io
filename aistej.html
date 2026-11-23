@@ -74,6 +74,20 @@
   .chips .lbl { width: 100%; font-size: 13px; color: var(--muted); }
   .chip { border: 1px solid var(--line); background: var(--card); color: var(--accent); font: inherit; font-size: 14px; padding: 6px 14px; border-radius: 999px; cursor: pointer; text-align: left; }
   .chip:hover { background: var(--accent-bg); }
+  .gen { margin: 0 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  details.srcs { margin: 0 0 12px; }
+  details.srcs summary { cursor: pointer; color: var(--muted); font-size: 14px; margin: 0 0 8px; }
+
+  .aibar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 32px 6px; font-size: 13px; }
+  .aibar[hidden] { display: none; }
+  .aibtn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--card); color: var(--muted); font: inherit; padding: 4px 12px; border-radius: 999px; cursor: pointer; }
+  .aibtn:hover { background: var(--chip); color: var(--ink); }
+  .aibtn .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+  .aibtn[data-state="on"] .dot { background: #1e8e3e; }
+  .aibtn[data-state="load"] .dot { background: #f9ab00; }
+  .aibtn[data-state="err"] .dot { background: #d93025; }
+  .aibtn .st { color: var(--ink); }
+  .ainote { color: var(--muted); }
 
   .dock { padding: 8px 16px 16px; display: flex; justify-content: center; }
   body:not(.chatting) .dock { display: none; }
@@ -90,6 +104,7 @@
   @media (max-width: 640px) {
     .side { display: none; }
     .top { padding: 12px 16px; gap: 16px; }
+    .aibar { padding: 0 16px 6px; }
     .hello { margin-top: 8vh; }
   }
 </style>
@@ -117,6 +132,12 @@
     <span id="status" style="color:var(--muted)">Memuat artikel…</span>
   </header>
 
+  <div class="aibar" id="aibar" hidden>
+    <button class="aibtn" id="btnEmb" type="button" data-state="off" title="Mencocokkan makna kalimat, bukan hanya kata. Unduhan pertama kali, lalu tersimpan di browser."><span class="dot"></span>Pencarian makna <span class="st">Aktifkan</span></button>
+    <button class="aibtn" id="btnGen" type="button" data-state="off" title="Model bahasa yang berjalan di browser Anda. Unduhan besar pertama kali, lalu tersimpan di browser."><span class="dot"></span>Mode obrolan <span class="st">Aktifkan</span></button>
+    <span class="ainote" id="ainote"></span>
+  </div>
+
   <div class="stage" id="stage">
     <div class="col">
       <h1 class="hello">Halo, apa yang ingin Anda ketahui?</h1>
@@ -143,7 +164,7 @@
           </button>
         </div>
       </form>
-      <p class="foot">Jawaban dikutip langsung dari artikel wiki dan diproses di browser Anda, tanpa layanan AI eksternal. Periksa artikel sumbernya.</p>
+      <p class="foot" id="foot">Jawaban dikutip langsung dari artikel wiki dan diproses di browser Anda, tanpa layanan AI eksternal. Periksa artikel sumbernya.</p>
     </div>
   </div>
 </div>
@@ -257,6 +278,7 @@
       for (const t of c.tf.keys()) df.set(t, (df.get(t) || 0) + 1);
     }
     avgLen = chunks.length ? total / chunks.length : 1;
+    chunks.forEach((c, i) => { c.i = i; });
     vocab = new Set(df.keys());
     for (const c of chunks) for (const t of c.title) vocab.add(t);
   }
@@ -279,7 +301,7 @@
 
   function search(q, boostSlug) {
     const qt = [...new Set(tokens(q))];
-    if (!qt.length) return { qt, groups: [], terms: new Set(), hits: [], related: [], loose: false };
+    if (!qt.length) return { qt, groups: [], terms: new Set(), hits: [], related: [], ranked: [], loose: false };
     const groups = qt.map(t => [{ term: t, w: 1 }, ...alts(t)]);
     const terms = new Set(groups.flat().map(x => x.term));
     const nq = norm(q);
@@ -325,6 +347,7 @@
       hits.push(x);
       if (hits.length >= 3) break;
     }
+    const ranked = scored.filter(x => x.s >= 0.8 && x.s >= top * 0.35);
     const seen = new Set(hits.map(h => h.c.p.slug));
     for (const x of scored) {
       if (related.length >= 3) break;
@@ -332,7 +355,189 @@
       seen.add(x.c.p.slug); related.push(x.c.p);
     }
     const loose = groups.some(g => !vocab.has(g[0].term) && g.length > 1) || (hits.length > 0 && hits[0].cov < 1);
-    return { qt, groups, terms, hits, related, loose };
+    return { qt, groups, terms, hits, related, ranked, loose };
+  }
+
+  // ---------- AI lokal (opsional): pencarian makna + model bahasa ----------
+  // Semua file (pustaka, WASM, model) dilayani dari server wiki sendiri; lihat setup-ai.mjs.
+  const AI_DEF = {
+    lib: '/vendor/transformers/transformers.min.js',
+    wasmDir: '/vendor/transformers/',
+    modelsPath: '/models/',
+    embed: 'Xenova/multilingual-e5-small', embedDtype: 'q8', minSim: 0.8,
+    llm: 'onnx-community/Qwen2.5-0.5B-Instruct', llmDtype: 'q4', maxTokens: 300,
+    autoEmbed: false
+  };
+  const AI = { a: AI_DEF, lib: null, emb: null, vecs: null, dim: 0, useEmb: false, loadingEmb: false, gen: null, useGen: false, loadingGen: false };
+  let busy = false, history = [];
+  const SYSTEM = 'Kamu asisten untuk sebuah wiki. Jawab dalam bahasa Indonesia, singkat dan jelas (maksimal 4 kalimat). ' +
+    'Jawab hanya berdasarkan KONTEKS yang diberikan dan jangan mengarang. Jika KONTEKS tidak memuat jawabannya, katakan bahwa informasi itu tidak ada di wiki. ' +
+    'Jika pengguna hanya menyapa atau mengobrol ringan, balas dengan ramah dan singkat.';
+
+  const idb = (mode, fn) => new Promise((res, rej) => {
+    const r = indexedDB.open('tanya-wiki', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onerror = () => rej(r.error);
+    r.onsuccess = () => {
+      const tx = r.result.transaction('kv', mode), req = fn(tx.objectStore('kv'));
+      tx.oncomplete = () => res(req && req.result);
+      tx.onerror = () => rej(tx.error);
+    };
+  });
+  const idbGet = k => idb('readonly', s => s.get(k)).catch(() => null);
+  const idbSet = (k, v) => idb('readwrite', s => s.put(v, k)).catch(() => {});
+  function hashStr(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+
+  async function loadLib() {
+    if (AI.lib) return AI.lib;
+    const a = AI.a, abs = p => new URL(p, location.href).href;
+    const lib = window.tanyaAiLib || await import(abs(a.lib)); // window.tanyaAiLib: titik sambung untuk pengujian
+    const env = lib.env;
+    env.allowRemoteModels = false; // tidak ada unduhan dari luar server ini
+    env.allowLocalModels = true;
+    env.localModelPath = String(a.modelsPath).replace(/\/*$/, '/');
+    const safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const f = safari ? 'ort-wasm-simd-threaded' : 'ort-wasm-simd-threaded.asyncify';
+    const wasm = env.backends && env.backends.onnx && env.backends.onnx.wasm;
+    if (wasm) wasm.wasmPaths = { mjs: abs(a.wasmDir + f + '.mjs'), wasm: abs(a.wasmDir + f + '.wasm') };
+    AI.lib = lib;
+    return lib;
+  }
+
+  function setBtn(which, state, text) {
+    const b = $(which === 'emb' ? 'btnEmb' : 'btnGen');
+    b.dataset.state = state;
+    b.querySelector('.st').textContent = text || '';
+  }
+  const progressTo = (which, label) => {
+    const files = new Map();
+    return p => {
+      if (!p || p.status !== 'progress' || !p.total) return;
+      files.set(p.file, [p.loaded, p.total]);
+      let l = 0, t = 0;
+      for (const v of files.values()) { l += v[0]; t += v[1]; }
+      setBtn(which, 'load', label + ' ' + Math.round(100 * l / t) + '%');
+    };
+  };
+  function aiError(which, e) {
+    console.error(e);
+    setBtn(which, 'err', 'Gagal');
+    $('ainote').textContent = 'Gagal memuat ' + (which === 'emb' ? 'pencarian makna' : 'model obrolan') + ': ' +
+      String(e && e.message || e).slice(0, 140) + ' (periksa file di ' + AI.a.modelsPath + ' dan /vendor/, lihat setup-ai.mjs)';
+  }
+  function refreshAi() {
+    const upd = (which, loaded, use, loading) => {
+      const b = $(which === 'emb' ? 'btnEmb' : 'btnGen');
+      if (loading || b.dataset.state === 'err' && !loaded) return;
+      setBtn(which, loaded && use ? 'on' : 'off', loaded ? (use ? 'Aktif' : 'Dimatikan') : 'Aktifkan');
+    };
+    upd('emb', !!AI.emb, AI.useEmb, AI.loadingEmb);
+    upd('gen', !!AI.gen, AI.useGen, AI.loadingGen);
+    $('foot').textContent = AI.useGen
+      ? 'Mode obrolan memakai model bahasa yang berjalan di browser Anda, tanpa layanan eksternal. Jawabannya bisa keliru; periksa artikel sumbernya.'
+      : 'Jawaban dikutip langsung dari artikel wiki dan diproses di browser Anda, tanpa layanan AI eksternal. Periksa artikel sumbernya.';
+  }
+  function saveAi() { try { localStorage.setItem('tanya-ai', JSON.stringify({ emb: AI.useEmb, gen: AI.useGen })); } catch (e) {} }
+
+  async function enableEmb() {
+    if (AI.loadingEmb) return;
+    if (AI.emb) { AI.useEmb = !AI.useEmb; saveAi(); refreshAi(); return; }
+    AI.loadingEmb = true; $('ainote').textContent = '';
+    try {
+      setBtn('emb', 'load', 'Memuat 0%');
+      const lib = await loadLib(), a = AI.a;
+      const ext = await lib.pipeline('feature-extraction', a.embed, { dtype: a.embedDtype, progress_callback: progressTo('emb', 'Memuat') });
+      const texts = chunks.map(c => 'passage: ' + c.p.title + '. ' + c.text);
+      const key = 'emb:' + a.embed + ':' + a.embedDtype + ':' + hashStr(texts.join('\n'));
+      const cached = await idbGet(key);
+      if (cached && cached.buf && cached.n === texts.length) {
+        AI.vecs = new Float32Array(cached.buf); AI.dim = cached.dim;
+      } else {
+        let vecs = null, dim = 0;
+        for (let i = 0; i < texts.length; i += 8) {
+          const out = await ext(texts.slice(i, i + 8), { pooling: 'mean', normalize: true });
+          if (!vecs) { dim = out.dims[1]; vecs = new Float32Array(texts.length * dim); }
+          vecs.set(out.data, i * dim);
+          setBtn('emb', 'load', 'Mengindeks ' + Math.round(100 * Math.min(i + 8, texts.length) / texts.length) + '%');
+        }
+        AI.vecs = vecs; AI.dim = dim;
+        if (vecs) await idbSet(key, { buf: vecs.buffer, dim, n: texts.length });
+      }
+      AI.emb = ext; AI.useEmb = true;
+    } catch (e) { aiError('emb', e); }
+    AI.loadingEmb = false;
+    saveAi(); refreshAi();
+  }
+
+  async function enableGen() {
+    if (AI.loadingGen) return;
+    if (AI.gen) { AI.useGen = !AI.useGen; saveAi(); refreshAi(); return; }
+    AI.loadingGen = true; $('ainote').textContent = '';
+    try {
+      setBtn('gen', 'load', 'Memuat 0%');
+      const lib = await loadLib(), a = AI.a;
+      const mk = device => lib.pipeline('text-generation', a.llm, { dtype: a.llmDtype, device, progress_callback: progressTo('gen', 'Memuat') });
+      try { AI.gen = await mk(navigator.gpu ? 'webgpu' : 'wasm'); }
+      catch (e) { if (!navigator.gpu) throw e; console.warn('WebGPU gagal, memakai WASM', e); AI.gen = await mk('wasm'); }
+      AI.useGen = true;
+    } catch (e) { aiError('gen', e); }
+    AI.loadingGen = false;
+    saveAi(); refreshAi();
+  }
+
+  function aiSetup() {
+    if (cfg.ai === false) { $('aibar').hidden = true; return; }
+    AI.a = { ...AI_DEF, ...(cfg.ai || {}) };
+    $('aibar').hidden = false;
+    $('btnEmb').addEventListener('click', enableEmb);
+    $('btnGen').addEventListener('click', enableGen);
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem('tanya-ai') || '{}'); } catch (e) {}
+    refreshAi();
+    (async () => { // pilihan yang dulu diaktifkan dimuat otomatis (file sudah ada di cache browser)
+      if (saved.emb || AI.a.autoEmbed) await enableEmb();
+      if (saved.gen) await enableGen();
+    })();
+  }
+
+  // Gabungkan peringkat kata kunci (BM25) dengan kemiripan makna (embedding) lewat reciprocal rank fusion
+  async function hybrid(q, r, boostSlug) {
+    if (!AI.useEmb || !AI.emb || !AI.vecs || !chunks.length) return r;
+    const qo = await AI.emb('query: ' + (boostSlug && last ? last.title + '. ' + q : q), { pooling: 'mean', normalize: true });
+    const qv = qo.data, d = AI.dim, v = AI.vecs, n = chunks.length, sims = new Float32Array(n);
+    for (let i = 0; i < n; i++) { let x = 0; const o = i * d; for (let j = 0; j < d; j++) x += v[o + j] * qv[j]; sims[i] = x; }
+    const idx = Array.from(sims.keys()).sort((x, y) => sims[y] - sims[x]).slice(0, 12);
+    const topSim = sims[idx[0]], minSim = AI.a.minSim, K = 60, map = new Map();
+    const add = (c, w, cov) => { const e = map.get(c) || { c, s: 0, cov: 0, sim: sims[c.i] }; e.s += w; if (cov != null) e.cov = cov; map.set(c, e); };
+    r.ranked.slice(0, 15).forEach((x, i) => add(x.c, 1 / (K + i), x.cov));
+    idx.forEach((i, rank) => { if (sims[i] >= minSim && sims[i] >= topSim - 0.05) add(chunks[i], 1 / (K + rank)); });
+    if (boostSlug) for (const e of map.values()) if (e.c.p.slug === boostSlug) e.s += 0.008;
+    const list = [...map.values()].sort((x, y) => y.s - x.s);
+    const hits = [], per = new Map(), limit = AI.useGen ? 4 : 3;
+    for (const e of list) {
+      const k = per.get(e.c.p.slug) || 0;
+      if (k >= 2) continue;
+      per.set(e.c.p.slug, k + 1); hits.push(e);
+      if (hits.length >= limit) break;
+    }
+    const seen = new Set(hits.map(h => h.c.p.slug)), related = [];
+    for (const e of list) { if (related.length >= 3) break; if (!seen.has(e.c.p.slug)) { seen.add(e.c.p.slug); related.push(e.c.p); } }
+    return { ...r, hits, related, sem: true, loose: hits.length > 0 && !(hits[0].cov >= 1) };
+  }
+
+  async function generate(q, hits, onText) {
+    const ctx = hits.length ? hits.map((h, i) => '[' + (i + 1) + '] ' + h.c.p.title + ': ' + h.c.text).join('\n') : '(tidak ada kutipan wiki yang relevan)';
+    const messages = [{ role: 'system', content: SYSTEM }];
+    for (const t of history.slice(-2)) messages.push({ role: 'user', content: t.q }, { role: 'assistant', content: t.a.slice(0, 400) });
+    messages.push({ role: 'user', content: 'KONTEKS:\n' + ctx + '\n\nPERTANYAAN: ' + q });
+    let acc = '';
+    const streamer = new AI.lib.TextStreamer(AI.gen.tokenizer, {
+      skip_prompt: true, skip_special_tokens: true, callback_function: t => { acc += t; onText(acc); }
+    });
+    const out = await AI.gen(messages, { max_new_tokens: AI.a.maxTokens, do_sample: false, repetition_penalty: 1.1, streamer });
+    const msg = out && out[0] && out[0].generated_text;
+    const text = Array.isArray(msg) ? (msg[msg.length - 1].content || acc) : (acc || String(msg || ''));
+    return text.trim();
   }
 
   // ---------- Percakapan ----------
@@ -362,13 +567,13 @@
       return { p, s };
     }).filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 3).map(x => x.p);
     return {
-      say: ['Saya belum menemukan jawabannya di artikel wiki.',
-        tt.length ? 'Mungkin salah satu topik ini yang Anda maksud:' : 'Coba kata kunci lain, atau mulai dari salah satu topik ini:'],
+      say: ['Saya belum menemukan jawabannya di artikel wiki.'],
+      chipLabel: tt.length ? 'Mungkin maksud Anda:' : 'Coba salah satu topik ini:',
       chips: tt.length ? titleChips(tt) : someTopics(), allLink: true
     };
   }
 
-  function respond(raw) {
+  async function respond(raw) {
     const nq = norm(raw).replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
     if (last && /^(lanjut\w*|terus\w*|lagi|lebih (detail|lengkap|rinci)|selengkapnya|berikutnya|next|jelaskan lebih lanjut|ceritakan lebih (banyak|lanjut))$/.test(nq)) return more();
 
@@ -378,24 +583,32 @@
     if (bare.split(' ').length <= 4 && /^(terima ?kasih|makasih|thanks|thank you|thx|tengkyu|oke|ok|sip|mantap|siap)\b/.test(bare)) return { say: [pick(['Sama-sama!', 'Siap, silakan tanya lagi kapan saja.'])] };
     if (/^(sampai jumpa|dadah|bye|dah ya|udah cukup|sudah cukup)\b/.test(bare)) return { say: ['Sampai jumpa!'] };
     if (/^(kamu|anda|kau|km|lu) (itu )?(siapa|apa)\b|^siapa (kamu|anda|kau)\b/.test(bare)) {
-      return { say: ['Saya asisten pencari untuk wiki ini. Saya bukan AI generatif: saya mencari lalu mengutip bagian artikel yang paling cocok, semuanya diproses di browser Anda.'] };
+      return { say: [AI.useGen && AI.gen
+        ? 'Saya asisten untuk wiki ini, ditenagai model bahasa kecil yang berjalan di browser Anda dan menjawab dari kutipan artikel. Jawaban saya bisa keliru, jadi periksa sumbernya.'
+        : 'Saya asisten pencari untuk wiki ini. Saya bukan AI generatif: saya mencari lalu mengutip bagian artikel yang paling cocok, semuanya diproses di browser Anda.'] };
     }
     if (/\bbisa (apa|ngapain|bantu)|apa yang bisa|cara (pakai|pakainya|menggunakan)|^bantuan|^help$/.test(bare)) {
-      return { say: ['Tulis pertanyaan atau kata kunci dengan bahasa sehari-hari. Salah ketik dan sinonim sederhana tetap saya coba pahami. Setelah jawaban muncul, ketik “lanjut” untuk bagian berikutnya, atau tanya “kalau yang itu?” untuk menyambung topik tadi.'], chips: someTopics(), chipLabel: 'Contoh topik:' };
+      return { say: ['Tulis pertanyaan atau kata kunci dengan bahasa sehari-hari. Setelah jawaban muncul, ketik “lanjut” untuk bagian berikutnya, atau tanya “kalau yang itu?” untuk menyambung topik tadi. Tombol di bagian atas mengaktifkan pencarian makna dan mode obrolan (model bahasa lokal) bila file modelnya sudah dipasang.'], chips: someTopics(), chipLabel: 'Contoh topik:' };
     }
     if (bare.split(' ').length <= 5 && /\b(daftar|list)\b|apa saja (isi|artikel|yang (ada|dibahas))|isi wiki|ada artikel apa|ada apa saja|topik apa/.test(bare)) {
       return { say: ['Beberapa artikel di wiki ini:'], chips: titleChips(articles().slice(0, 8)), allLink: true };
     }
 
     const follow = !!last && (/\b(tadi|tersebut|dia|ia|kalau|lalu|terus)\b|(?<!apa |siapa )\bitu\b/.test(bare));
-    const r = search(bare, follow ? last.slug : null);
+    let r = search(bare, follow ? last.slug : null);
     if (!r.qt.length) {
       return {
         say: ['Bisa lebih spesifik? Tulis nama topik atau kata kuncinya.'],
         chips: last ? [{ label: 'Lanjutkan “' + last.title + '”', q: 'lanjut' }] : someTopics()
       };
     }
-    if (!r.hits.length) return noAnswer(r);
+    r = await hybrid(bare, r, follow ? last.slug : null);
+    const gen = AI.useGen && AI.gen;
+    if (!r.hits.length) {
+      const n = noAnswer(r);
+      if (gen) n.gen = { q: raw, hits: [] };
+      return n;
+    }
 
     const titles = [...new Set(r.hits.map(h => h.c.p.title))];
     const pg = r.hits[0].c.p;
@@ -404,10 +617,12 @@
     const chips = [];
     if ((pageChunks.get(pg.slug) || []).some(c => !last.shown.has(c.pos))) chips.push({ label: 'Lanjutkan membaca “' + pg.title + '”', q: 'lanjut' });
     for (const p of r.related) if (chips.length < 3) chips.push({ label: p.title, q: p.title });
-    return {
+    const res = {
       say: [titles.length === 1 ? 'Ini yang saya temukan di “' + titles[0] + '”:' : 'Ini yang saya temukan di ' + titles.length + ' artikel:'],
-      hits: r.hits, terms: r.terms, loose: r.loose, chips, chipLabel: 'Lanjut atau lihat terkait:'
+      hits: r.hits, terms: r.terms, loose: r.loose, sem: r.sem, chips, chipLabel: 'Lanjut atau lihat terkait:'
     };
+    if (gen) res.gen = { q: raw, hits: r.hits };
+    return res;
   }
 
   // ---------- Tampilan (DOM API, tanpa innerHTML untuk teks wiki) ----------
@@ -425,24 +640,27 @@
 
   function wikiHref(slug) { return '/#/' + encodeURIComponent(slug); }
 
-  function addAnswer(question) {
-    const msgs = $('msgs');
-    const qEl = el('div', 'q', question);
-    msgs.appendChild(qEl);
-    const a = el('div', 'a');
-    const r = respond(question);
+  function appendHits(box, hits, qset) {
+    for (const h of hits) {
+      const card = el('div', 'hit');
+      card.appendChild(highlighted(h.c.text, qset));
+      const src = el('a', 'src', h.c.p.title); src.href = wikiHref(h.c.p.slug);
+      card.appendChild(src);
+      box.appendChild(card);
+    }
+  }
+
+  function renderPlain(a, r) {
     for (const t of r.say || []) a.appendChild(el('p', 'say', t));
     if (r.hits && r.hits.length) {
-      if (r.loose) a.appendChild(el('p', 'note', 'Pertanyaan dicocokkan secara longgar (salah ketik, sinonim, atau sebagian kata), jadi periksa apakah kutipannya sesuai.'));
-      const qset = r.terms || new Set();
-      for (const h of r.hits) {
-        const card = el('div', 'hit');
-        card.appendChild(highlighted(h.c.text, qset));
-        const src = el('a', 'src', h.c.p.title); src.href = wikiHref(h.c.p.slug);
-        card.appendChild(src);
-        a.appendChild(card);
-      }
+      if (r.loose) a.appendChild(el('p', 'note', r.sem
+        ? 'Dicocokkan berdasarkan makna kalimat, bukan hanya kata yang sama, jadi periksa apakah kutipannya sesuai.'
+        : 'Pertanyaan dicocokkan secara longgar (salah ketik, sinonim, atau sebagian kata), jadi periksa apakah kutipannya sesuai.'));
+      appendHits(a, r.hits, r.terms || new Set());
     }
+  }
+
+  function renderTail(a, r) {
     if (r.chips && r.chips.length) {
       const box = el('div', 'chips');
       if (r.chipLabel) box.appendChild(el('span', 'lbl', r.chipLabel));
@@ -459,24 +677,68 @@
       p.appendChild(l); p.appendChild(document.createTextNode('.'));
       a.appendChild(p);
     }
+  }
+
+  async function renderGen(a, r, question) {
+    const g = el('p', 'gen', 'Menulis jawaban…');
+    a.appendChild(g);
+    try {
+      const text = await generate(r.gen.q, r.gen.hits, t => { g.textContent = t; });
+      if (!text) throw new Error('jawaban kosong');
+      g.textContent = text;
+      history.push({ q: question, a: text });
+      if (history.length > 6) history.shift();
+      a.appendChild(el('p', 'note', r.gen.hits.length
+        ? 'Dijawab model bahasa lokal berdasarkan kutipan wiki. Model kecil bisa keliru, jadi periksa kutipannya.'
+        : 'Tidak ada kutipan wiki yang cocok, jadi jawaban ini tidak bersumber dari wiki.'));
+      if (r.gen.hits.length) {
+        const d = el('details', 'srcs');
+        d.appendChild(el('summary', null, 'Kutipan sumber (' + r.gen.hits.length + ')'));
+        appendHits(d, r.gen.hits, r.terms || new Set());
+        a.appendChild(d);
+      }
+      return true;
+    } catch (e) {
+      console.error(e);
+      g.remove();
+      a.appendChild(el('p', 'note', 'Model obrolan gagal menjawab; menampilkan kutipan langsung.'));
+      return false;
+    }
+  }
+
+  async function addAnswer(question) {
+    const msgs = $('msgs');
+    const qEl = el('div', 'q', question);
+    msgs.appendChild(qEl);
+    const a = el('div', 'a');
     msgs.appendChild(a);
     qEl.scrollIntoView({ block: 'start' }); // tampilkan pertanyaan di atas, jawaban di bawahnya
+    const wait = el('p', 'note', 'Mencari…');
+    a.appendChild(wait);
+    let r;
+    try { r = await respond(question); }
+    catch (e) { console.error(e); r = { say: ['Maaf, terjadi kesalahan saat mencari. Coba lagi.'] }; }
+    wait.remove();
+    let done = false;
+    if (r.gen && AI.useGen && AI.gen) done = await renderGen(a, r, question);
+    if (!done) renderPlain(a, r);
+    renderTail(a, r);
   }
 
   function ask(q) {
     q = q.trim();
-    if (!q || !ready) return;
+    if (!q || !ready || busy) return;
+    busy = true;
     document.body.classList.add('chatting');
-    addAnswer(q);
     for (const id of ['input', 'input2']) { $(id).value = ''; autosize($(id)); }
     syncButtons();
-    $('input2').focus();
+    addAnswer(q).catch(console.error).finally(() => { busy = false; syncButtons(); $('input2').focus(); });
   }
 
   function autosize(t) { t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 160) + 'px'; }
   function syncButtons() {
-    $('send').disabled = !ready || !$('input').value.trim();
-    $('send2').disabled = !ready || !$('input2').value.trim();
+    $('send').disabled = !ready || busy || !$('input').value.trim();
+    $('send2').disabled = !ready || busy || !$('input2').value.trim();
   }
 
   function setupSuggestions() {
@@ -505,6 +767,7 @@
       ready = true;
       $('status').textContent = chunks.length ? pages.filter(p => !p.system).length + ' artikel siap' : 'Belum ada artikel';
       setupSuggestions();
+      aiSetup();
     } catch (e) {
       $('status').textContent = 'Gagal memuat ' + cfg.contentBase + 'index.json';
     }
@@ -519,7 +782,7 @@
   }
   $('newChat').addEventListener('click', () => {
     $('msgs').replaceChildren();
-    last = null;
+    last = null; history = [];
     document.body.classList.remove('chatting');
     $('input').focus();
   });
