@@ -64,7 +64,7 @@ collections:
     files:
       - name: daftar
         label: Daftar Video
-        file: content/data/youtube.json
+        file: content/youtube.json
         format: json
         fields:
           - label: Video
